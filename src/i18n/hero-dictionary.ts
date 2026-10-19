@@ -12,6 +12,21 @@ export interface DestinationCopy {
   imageAlt: string;
 }
 
+export interface FeaturedTripsTranslation {
+  eyebrow: string;
+  heading: string;
+  supportingText: string;
+  exploreAllCta: string;
+  cardCta: string;
+  durationPlaceholder: string;
+  quotePlaceholder: string;
+  prevJourneyLabel: string;
+  nextJourneyLabel: string;
+  goToJourneyPrefix: string;
+  moreDetailsLabel: string;
+  hideDetailsLabel: string;
+}
+
 export interface HeroTranslation {
   locale: SupportedLocale;
   languageName: string;
@@ -66,6 +81,7 @@ export interface HeroTranslation {
     searchReadySubtitle: string;
     closeSummaryLabel: string;
   };
+  featuredTrips: FeaturedTripsTranslation;
 }
 
 export const HERO_DICTIONARY: Record<SupportedLocale, HeroTranslation> = {
@@ -158,6 +174,20 @@ export const HERO_DICTIONARY: Record<SupportedLocale, HeroTranslation> = {
         "Your selected destination, travel window, and party size are structured and ready for itinerary matching.",
       closeSummaryLabel: "Dismiss",
     },
+    featuredTrips: {
+      eyebrow: "FEATURED TRIPS",
+      heading: "Find Your Next Journey",
+      supportingText: "Explore curated trips across Egypt, Dubai and Türkiye.",
+      exploreAllCta: "Explore All Trips",
+      cardCta: "Explore Journey",
+      durationPlaceholder: "Trip duration",
+      quotePlaceholder: "Request a quote",
+      prevJourneyLabel: "Previous journey card",
+      nextJourneyLabel: "Next journey card",
+      goToJourneyPrefix: "Show journey",
+      moreDetailsLabel: "Journey info",
+      hideDetailsLabel: "Hide info",
+    },
   },
   tr: {
     locale: "tr",
@@ -245,6 +275,20 @@ export const HERO_DICTIONARY: Record<SupportedLocale, HeroTranslation> = {
         "Seçtiğiniz destinasyon, tarih aralığı ve yolcu sayısı rota eşleştirmesi için hazırlandı.",
       closeSummaryLabel: "Kapat",
     },
+    featuredTrips: {
+      eyebrow: "FEATURED TRIPS",
+      heading: "Find Your Next Journey",
+      supportingText: "Explore curated trips across Egypt, Dubai and Türkiye.",
+      exploreAllCta: "Explore All Trips",
+      cardCta: "Explore Journey",
+      durationPlaceholder: "Trip duration",
+      quotePlaceholder: "Request a quote",
+      prevJourneyLabel: "Önceki yolculuk",
+      nextJourneyLabel: "Sonraki yolculuk",
+      goToJourneyPrefix: "Yolculuğu göster",
+      moreDetailsLabel: "Detaylar",
+      hideDetailsLabel: "Gizle",
+    },
   },
   es: {
     locale: "es",
@@ -331,6 +375,20 @@ export const HERO_DICTIONARY: Record<SupportedLocale, HeroTranslation> = {
       searchReadySubtitle:
         "Tu destino, fechas de viaje y número de viajeros están listos para la integración de rutas.",
       closeSummaryLabel: "Cerrar",
+    },
+    featuredTrips: {
+      eyebrow: "FEATURED TRIPS",
+      heading: "Find Your Next Journey",
+      supportingText: "Explore curated trips across Egypt, Dubai and Türkiye.",
+      exploreAllCta: "Explore All Trips",
+      cardCta: "Explore Journey",
+      durationPlaceholder: "Trip duration",
+      quotePlaceholder: "Request a quote",
+      prevJourneyLabel: "Viaje anterior",
+      nextJourneyLabel: "Siguiente viaje",
+      goToJourneyPrefix: "Mostrar viaje",
+      moreDetailsLabel: "Detalles",
+      hideDetailsLabel: "Ocultar",
     },
   },
 };

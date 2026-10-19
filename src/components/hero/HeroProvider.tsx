@@ -39,12 +39,14 @@ const HeroContext = createContext<HeroContextValue | null>(null);
 export function HeroProvider({
   children,
   initialLocale = "en",
-  initialTheme = "dark",
+  initialTheme = "light",
 }: {
   children: React.ReactNode;
   initialLocale?: SupportedLocale;
   initialTheme?: ThemeMode;
 }) {
+  const existingContext = useContext(HeroContext);
+
   const [locale, setLocale] = useState<SupportedLocale>(initialLocale);
   const [theme, setThemeState] = useState<ThemeMode>(initialTheme);
   const [hasHydrated, setHasHydrated] = useState(false);
@@ -62,6 +64,7 @@ export function HeroProvider({
 
   // Read persisted theme after hydration to prevent SSR/Client mismatch
   useEffect(() => {
+    if (existingContext) return;
     try {
       const saved = window.localStorage.getItem(THEME_STORAGE_KEY);
       if (saved === "light" || saved === "dark") {
@@ -71,10 +74,11 @@ export function HeroProvider({
       // Ignore storage access errors in restricted environments
     }
     setHasHydrated(true);
-  }, []);
+  }, [existingContext]);
 
   // Synchronize HTML class, data-theme attribute, and localStorage persistence
   useEffect(() => {
+    if (existingContext) return;
     const root = document.documentElement;
     if (theme === "dark") {
       root.classList.add("dark");
@@ -92,11 +96,12 @@ export function HeroProvider({
         // Ignore storage write errors
       }
     }
-  }, [theme, hasHydrated]);
+  }, [theme, hasHydrated, existingContext]);
 
   useEffect(() => {
+    if (existingContext) return;
     document.documentElement.lang = locale;
-  }, [locale]);
+  }, [locale, existingContext]);
 
   const setTheme = (nextTheme: ThemeMode) => {
     setThemeState(nextTheme);
@@ -140,6 +145,11 @@ export function HeroProvider({
     }),
     [locale, theme, activeDestination, booking, lastSubmittedQuery]
   );
+
+  // If a parent HeroProvider is already active in the tree, pass through without shadowing
+  if (existingContext) {
+    return <>{children}</>;
+  }
 
   return <HeroContext.Provider value={value}>{children}</HeroContext.Provider>;
 }

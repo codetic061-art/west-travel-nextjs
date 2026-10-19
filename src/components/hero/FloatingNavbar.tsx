@@ -60,6 +60,16 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
     }
   };
 
+  const handleScrollToJourneys = () => {
+    setMobileMenuOpen(false);
+    const el =
+      document.getElementById("featured-trips") ??
+      document.getElementById("hero-booking-bar");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
   /**
    * Tactile, pill-shaped mechanical Sun/Moon toggle switch.
    * - Displays a rounded glassmorphic track containing both Sun (left) and Moon (right) icons.
@@ -232,10 +242,10 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
           </a>
 
           <a
-            href="#hero-booking-bar"
+            href="#featured-trips"
             onClick={(e) => {
               e.preventDefault();
-              handleScrollToBooking();
+              handleScrollToJourneys();
             }}
             className={`rounded-full px-3 py-1.5 text-[13.5px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
               isLight
@@ -413,7 +423,7 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
           <div className="flex flex-wrap gap-2 border-t border-current/10 pt-3">
             {[
               { label: t.nav.experiences, target: "hero-destination-cards" },
-              { label: t.nav.ourJourneys, target: "hero-booking-bar" },
+              { label: t.nav.ourJourneys, target: "featured-trips" },
               { label: t.nav.about, target: "hero-copy" },
               { label: t.nav.contact, target: "hero-booking-bar" },
             ].map((item) => (

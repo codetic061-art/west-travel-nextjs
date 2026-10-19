@@ -28,8 +28,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${playfair.variable} ${jakarta.variable} dark`}>
-      <body className="font-sans antialiased bg-[#051320] text-white overflow-x-hidden">
+    <html lang="en" className={`${playfair.variable} ${jakarta.variable} light`} data-theme="light">
+      <body className="font-sans antialiased bg-[#FAF8F4] dark:bg-[#051320] text-[#081C2E] dark:text-white overflow-x-hidden transition-colors duration-300">
         {children}
       </body>
     </html>
