@@ -1,0 +1,98 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root,
+html.dark {
+  color-scheme: dark;
+  --west-glass-bg: rgba(7, 25, 40, 0.58);
+  --west-glass-bg-strong: rgba(6, 22, 36, 0.72);
+  --west-glass-popover: rgba(7, 26, 44, 0.90);
+  --west-glass-border: rgba(255, 255, 255, 0.18);
+  --west-glass-shadow: 0 20px 50px rgba(2, 10, 18, 0.58), inset 0 1px 1px rgba(255, 255, 255, 0.18);
+  --west-card-border: rgba(255, 255, 255, 0.28);
+  --west-card-shadow: 0 22px 48px rgba(2, 9, 17, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+}
+
+html.light {
+  color-scheme: light;
+  --west-glass-bg: rgba(255, 252, 247, 0.52);
+  --west-glass-bg-strong: rgba(255, 252, 247, 0.62);
+  --west-glass-popover: rgba(255, 253, 250, 0.84);
+  --west-glass-border: rgba(255, 255, 255, 0.72);
+  --west-glass-shadow: 0 18px 44px rgba(8, 28, 46, 0.20), inset 0 1px 1.5px rgba(255, 255, 255, 0.92);
+  --west-card-border: rgba(255, 255, 255, 0.78);
+  --west-card-shadow: 0 20px 44px rgba(10, 28, 46, 0.28), inset 0 1px 1.5px rgba(255, 255, 255, 0.9);
+}
+
+.west-glass-pill {
+  background: var(--west-glass-bg);
+  border: 1px solid var(--west-glass-border);
+  box-shadow: var(--west-glass-shadow);
+  backdrop-filter: blur(20px) saturate(165%);
+  -webkit-backdrop-filter: blur(20px) saturate(165%);
+}
+
+.west-glass-panel {
+  background: var(--west-glass-bg-strong);
+  border: 1px solid var(--west-glass-border);
+  box-shadow: var(--west-glass-shadow);
+  backdrop-filter: blur(24px) saturate(175%);
+  -webkit-backdrop-filter: blur(24px) saturate(175%);
+}
+
+.west-glass-popover {
+  background: var(--west-glass-popover);
+  border: 1px solid var(--west-glass-border);
+  box-shadow: 0 24px 60px rgba(4, 15, 26, 0.38), inset 0 1px 1px rgba(255, 255, 255, 0.45);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+.west-card-shell {
+  border: 1px solid var(--west-card-border);
+  box-shadow: var(--west-card-shadow);
+}
+
+/* Tactile mechanical theme switch transitions */
+.theme-switch-track {
+  transition:
+    background-color 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 340ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.theme-switch-thumb {
+  transition:
+    transform 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 340ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.theme-switch-icon {
+  transition:
+    transform 340ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 280ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Hide scrollbars on horizontal mobile card carousel */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
