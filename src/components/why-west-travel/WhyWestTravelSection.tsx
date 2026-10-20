@@ -7,7 +7,7 @@ import { ArrowRight, CalendarCheck, Globe2, Headphones, ShieldCheck } from "luci
 import { useHero } from "@/components/hero/HeroProvider";
 import { WHY_WEST_TRAVEL_FEATURES, WHY_WEST_TRAVEL_SECTION_CONFIG } from "@/config/why-west-travel";
 import { WHY_WEST_ASSET_COPY } from "@/i18n/why-west-travel-assets";
-import { EgyptianEdges, FlightRoute } from "./TravelArtwork";
+import { EgyptianEdges, MessageAccent, TravelMicrographics } from "./TravelArtwork";
 import styles from "./WhyWestTravelSection.module.css";
 
 const FEATURE_ICONS = {
@@ -84,6 +84,7 @@ export function WhyWestTravelSection() {
       <EgyptianEdges />
       <div className={styles.layout}>
         <div className={styles.message}>
+          <MessageAccent />
           <p className={styles.eyebrow} data-reveal="right">
             <span className={styles.eyebrowPrefix}>{copy.eyebrowPrefix}</span>{" "}<span>{copy.eyebrowHighlight}</span>
           </p>
@@ -101,7 +102,7 @@ export function WhyWestTravelSection() {
 
         <div className={styles.visual} data-reveal="up" data-delay="90" data-traveler-status={traveler} data-landmarks-status={landmarks}>
           <div className={styles.atmosphere} aria-hidden="true" />
-          <FlightRoute />
+          <TravelMicrographics showPins={landmarks === "ready"} />
           <div className={styles.landmarks}>
             {landmarks !== "failed" && (
               <Image

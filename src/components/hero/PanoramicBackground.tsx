@@ -104,14 +104,17 @@ export function PanoramicBackground() {
               : `translate3d(${pointerOffset.x * -0.4}px, ${pointerOffset.y * -0.3}px, 0) scale(1.03)`,
           }}
         >
-          {/* Narrow crops favor the pyramids and mosque rather than the far-right skyline. */}
+          {/* One continuous dusk scene: open dunes and calm sky on the left (copy side), then Giza,
+              Istanbul and Dubai on a shared low horizon (~69% of the image). Portrait crops centre on the
+              pyramids; tablet and desktop crops keep the horizon below the copy and above the search panel. */}
           <Image
-            src="/images/west-travel/hero-panorama.webp"
+            src="/images/west-travel/hero-cinematic-panorama.webp"
             alt=""
             fill
             priority
+            quality={82}
             sizes="100vw"
-            className="object-cover object-[30%_60%] md:object-[center_58%]"
+            className="object-cover object-[36%_50%] sm:object-[50%_50%]"
           />
         </div>
       </div>
@@ -165,18 +168,32 @@ export function PanoramicBackground() {
         </div>
       )}
 
-      {/* Localized scrims leave the shared sky and landmark band luminous. */}
+      {/* Light, localized scrims. The copy side of the image is open sky and dunes, so the desktop
+          copy gradient deepens the dusk there without covering any landmark. */}
       <div
         className="absolute inset-0 z-20 transition-colors duration-500"
-        style={{ background: `linear-gradient(90deg, rgba(4,17,29,${isLight ? 0.52 : 0.62}) 0%, rgba(4,17,29,0.18) 36%, transparent 58%)` }}
+        style={{ background: `linear-gradient(90deg, rgba(4,17,29,${isLight ? 0.36 : 0.46}) 0%, rgba(4,17,29,0.12) 38%, transparent 56%)` }}
+      />
+      {/* Desktop copy gradient, anchored to the copy column (container gutter + max-w-lg paragraph). */}
+      <div
+        className="absolute inset-0 z-20 hidden lg:block"
+        style={{
+          background:
+            "linear-gradient(90deg, rgba(4,17,29,0.40) 0%, rgba(4,17,29,0.38) calc(max(48px, calc((100% - 1344px) / 2)) + 460px), rgba(4,17,29,0.16) calc(max(48px, calc((100% - 1344px) / 2)) + 620px), transparent calc(max(48px, calc((100% - 1344px) / 2)) + 800px))",
+        }}
       />
       <div
-        className="absolute inset-x-0 top-0 z-20 h-[24%]"
-        style={{ background: `linear-gradient(to bottom, rgba(4,17,29,${isLight ? 0.28 : 0.36}), transparent)` }}
+        className="absolute inset-x-0 top-0 z-20 h-[18%]"
+        style={{ background: `linear-gradient(to bottom, rgba(4,17,29,${isLight ? 0.22 : 0.32}), transparent)` }}
+      />
+      {/* Narrow screens stack copy over the brightest sunset band, so they get a gentle vertical veil. */}
+      <div
+        className="absolute inset-0 z-20 lg:hidden"
+        style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(4,17,29,0.18) 35%, rgba(4,17,29,0.30) 62%, transparent 82%)" }}
       />
       <div
-        className="absolute inset-x-0 bottom-0 z-20 h-[30%]"
-        style={{ background: "linear-gradient(to bottom, transparent, #051320)" }}
+        className="absolute inset-x-0 bottom-0 z-20 h-[24%]"
+        style={{ background: "linear-gradient(to bottom, transparent, rgba(5,19,32,0.62) 58%, #051320)" }}
       />
     </div>
   );

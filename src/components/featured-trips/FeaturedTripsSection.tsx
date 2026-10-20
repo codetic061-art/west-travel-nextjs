@@ -167,7 +167,7 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
       aria-labelledby="featured-trips-heading"
       data-theme-mode={theme}
       data-entered={hasEntered ? "true" : "false"}
-      className={`relative w-full overflow-hidden py-16 sm:py-20 lg:py-24 transition-colors duration-500 [background:var(--west-surface-trips-transition)] ${
+      className={`relative w-full overflow-hidden py-16 sm:py-20 lg:py-24 transition-colors duration-500 [background:var(--west-surface-trips)] ${
         isLight
           ? "text-[#081C2E]"
           : "text-[#F8FAFC]"

@@ -19,6 +19,18 @@ export function HeroSection() {
         {/* Cohesive Panoramic Background & Interactive Video Stage */}
         <PanoramicBackground />
 
+        {/* Shallow curved hand-off into Featured Trips (above the image scrims, below all content): ivory in Light Mode, seamless navy with a teal hairline in Dark Mode */}
+        <svg
+          aria-hidden="true"
+          focusable="false"
+          viewBox="0 0 1440 44"
+          preserveAspectRatio="none"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-[clamp(18px,3vw,44px)] w-full"
+        >
+          <path className="west-hero-edge-fill" d="M0 44V30C240 11 480 1 720 1S1200 11 1440 30V44Z" />
+          <path className="west-hero-edge-line" d="M0 30C240 11 480 1 720 1S1200 11 1440 30" vectorEffect="non-scaling-stroke" />
+        </svg>
+
         {/* Top Header & Floating Glassmorphic Navbar */}
         <FloatingNavbar hasAccountRoute={false} />
 
@@ -35,7 +47,7 @@ export function HeroSection() {
         </div>
 
         {/* Bottom Translucent Glass Booking / Search Panel */}
-        <div className="relative z-20 mx-auto w-full max-w-[1440px] px-4 sm:px-8 lg:px-12 pb-6 sm:pb-8">
+        <div className="relative z-20 mx-auto w-full max-w-[1440px] px-4 sm:px-8 lg:px-12 pb-8 sm:pb-11 lg:pb-14">
           <BookingBar />
         </div>
       </section>

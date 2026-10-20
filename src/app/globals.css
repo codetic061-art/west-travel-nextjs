@@ -5,11 +5,13 @@
 :root,
 html.dark {
   color-scheme: dark;
-  --west-surface-trips: linear-gradient(180deg, #071a2b, #0a2236);
-  --west-surface-trips-transition: linear-gradient(180deg, #051320, transparent 60px), var(--west-surface-trips);
-  --west-surface-why: linear-gradient(180deg, #0b2433, #0e2c3b);
-  --west-surface-why-base: #0b2433;
-  --west-section-divider: rgba(95, 196, 201, 0.2);
+  /* Section surfaces: Hero ends on #051320, Featured Trips continues from it into navy, Why West Travel shifts to petrol. */
+  --west-hero-edge-fill: #051320;
+  --west-hero-edge-line: rgba(95, 196, 201, 0.24);
+  --west-surface-trips: radial-gradient(ellipse 70% 45% at 50% 0%, rgba(14, 124, 142, 0.12), transparent 70%), linear-gradient(180deg, #051320 0%, #071a2b 42%, #09203a 100%);
+  --west-surface-why: radial-gradient(ellipse 40% 48% at 50% 46%, rgba(95, 196, 201, 0.07), transparent 72%), linear-gradient(180deg, #0b2433 0%, #0d2a38 60%, #0a2230 100%);
+  --west-surface-why-base: #0c2735;
+  --west-section-divider: rgba(95, 196, 201, 0.28);
   --west-glass-bg: rgba(7, 25, 40, 0.58);
   --west-glass-bg-strong: rgba(6, 22, 36, 0.72);
   --west-glass-popover: rgba(7, 26, 44, 0.90);
@@ -21,11 +23,13 @@ html.dark {
 
 html.light {
   color-scheme: light;
-  --west-surface-trips: linear-gradient(180deg, #fbf8f2, #f6f1e7);
-  --west-surface-trips-transition: linear-gradient(180deg, #051320, transparent 60px), var(--west-surface-trips);
-  --west-surface-why: linear-gradient(180deg, #faf6ed, #f3eddf);
-  --west-surface-why-base: #f8f5ee;
-  --west-section-divider: rgba(215, 178, 122, 0.38);
+  /* Light sections stay light: warm ivory for Featured Trips, a brighter cream with a faint teal wash for Why West Travel. */
+  --west-hero-edge-fill: #fbf8f2;
+  --west-hero-edge-line: rgba(229, 169, 60, 0.55);
+  --west-surface-trips: radial-gradient(ellipse 70% 42% at 50% 0%, rgba(229, 169, 60, 0.07), transparent 70%), linear-gradient(180deg, #fbf8f2 0%, #f8f3ea 55%, #f3ecdf 100%);
+  --west-surface-why: radial-gradient(ellipse 38% 46% at 50% 46%, rgba(77, 170, 179, 0.08), transparent 72%), linear-gradient(180deg, #fdfbf6 0%, #f9f5ec 60%, #f4eee1 100%);
+  --west-surface-why-base: #faf7f0;
+  --west-section-divider: rgba(205, 170, 110, 0.55);
   --west-glass-bg: rgba(255, 252, 247, 0.52);
   --west-glass-bg-strong: rgba(255, 252, 247, 0.62);
   --west-glass-popover: rgba(255, 253, 250, 0.84);
@@ -57,6 +61,18 @@ html.light {
   box-shadow: 0 24px 60px rgba(4, 15, 26, 0.38), inset 0 1px 1px rgba(255, 255, 255, 0.45);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
+}
+
+/* Curved hand-off from the always-dark Hero into the next surface. */
+.west-hero-edge-fill {
+  fill: var(--west-hero-edge-fill);
+  transition: fill 300ms ease;
+}
+
+.west-hero-edge-line {
+  fill: none;
+  stroke: var(--west-hero-edge-line);
+  stroke-width: 1px;
 }
 
 .west-card-shell {

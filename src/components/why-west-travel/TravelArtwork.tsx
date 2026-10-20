@@ -33,29 +33,86 @@ export function EgyptianEdges() {
   );
 }
 
-/** One cubic route; the plane follows its exact position and derivative at t=.72. */
-export function FlightRoute() {
-  const t = 0.72;
-  const u = 1 - t;
-  const x = u ** 3 * 35 + 3 * u ** 2 * t * 137 + 3 * u * t ** 2 * 456 + t ** 3 * 565;
-  const y = u ** 3 * 153 + 3 * u ** 2 * t * 5 + 3 * u * t ** 2 * 3 + t ** 3 * 153;
-  const dx = 3 * u ** 2 * (137 - 35) + 6 * u * t * (456 - 137) + 3 * t ** 2 * (565 - 456);
-  const dy = 3 * u ** 2 * (5 - 153) + 6 * u * t * (3 - 5) + 3 * t ** 2 * (153 - 3);
-  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+/**
+ * Shared coordinate space of the `.visual` box (fixed 1 : 1.25 ratio). The landmark layer uses a fixed
+ * inset and cover crop inside that box, so these anchors stay on the Giza pyramid apex and the Burj
+ * Khalifa spire at every breakpoint without measuring the DOM.
+ */
+const VIEW_W = 620;
+const VIEW_H = 775;
+const ROUTE = [
+  [64, 336],
+  [40, 0],
+  [470, -95],
+  [549, 252],
+] as const;
+const PLANE_T = 0.7;
+const PINS = [
+  { id: "giza", x: 64, y: 372, tone: "gold" },
+  { id: "dubai", x: 549, y: 288, tone: "teal" },
+] as const;
 
+function bezierPoint(t: number) {
+  const u = 1 - t;
+  const [p0, p1, p2, p3] = ROUTE;
+  const at = (i: 0 | 1) => u ** 3 * p0[i] + 3 * u ** 2 * t * p1[i] + 3 * u * t ** 2 * p2[i] + t ** 3 * p3[i];
+  const slope = (i: 0 | 1) =>
+    3 * u ** 2 * (p1[i] - p0[i]) + 6 * u * t * (p2[i] - p1[i]) + 3 * t ** 2 * (p3[i] - p2[i]);
+  return { x: at(0), y: at(1), angle: (Math.atan2(slope(1), slope(0)) * 180) / Math.PI };
+}
+
+const ROUTE_D = `M${ROUTE[0].join(" ")}C${ROUTE.slice(1).map((p) => p.join(" ")).join(" ")}`;
+const PLANE = bezierPoint(PLANE_T);
+const PLANE_D =
+  "M13 0C13-1.3 11.9-2 10.6-2H4.2L-3.4-12.2H-6.6L-2.6-2H-8.8L-11.4-5.4H-13.6L-12.2 0L-13.6 5.4H-11.4L-8.8 2H-2.6L-6.6 12.2H-3.4L4.2 2H10.6C11.9 2 13 1.3 13 0Z";
+const PIN_D = "M0 0C-1.6-4.6-9-10.2-9-16.6a9 9 0 0 1 18 0C9-10.2 1.6-4.6 0 0Z";
+const CLOUD_D = "M-22 6H22a7 7 0 0 0 0-14a11 11 0 0 0-20.5-3.5A8 8 0 0 0-14-4a5 5 0 0 0-8 10Z";
+
+/** Flat travel micrographics: one dotted Giza → Dubai route, a tangent-aligned plane, two map pins and two outline clouds. */
+export function TravelMicrographics({ showPins }: { showPins: boolean }) {
   return (
-    <svg className={styles.route} viewBox="0 0 600 600" fill="none" aria-hidden="true" focusable="false">
-      <path d="M35 153C137 5 456 3 565 153" stroke="currentColor" strokeOpacity=".55" strokeWidth="1.6" strokeDasharray="1 7" strokeLinecap="round" />
-      <path transform={`translate(${x} ${y}) rotate(${angle}) scale(.36)`} d="M24 0L2-5L-10-22L-16-22L-10-4L-23-5L-29-12L-33-11L-28 0L-33 11L-29 12L-23 5L-10 4L-16 22L-10 22L2 5Z" fill="currentColor" opacity=".85" />
-      {([{ x: 95, y: 300, gold: true }, { x: 510, y: 240, gold: false }] as const).map(({ x: pinX, y: pinY, gold }) => (
-        <g key={pinX} transform={`translate(${pinX} ${pinY})`} className={gold ? styles.pinGold : styles.pinTeal}>
-          <path d="M0 0S-8-10-8-16a8 8 0 0 1 16 0C8-10 0 0 0 0Z" fill="currentColor" />
-          <circle cy="-16" r="3" fill="var(--surface)" />
-        </g>
-      ))}
-      <g className={styles.clouds} stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" opacity=".32">
-        <path d="M28 104H65C76 104 76 90 66 89C66 74 44 71 40 87C27 82 18 100 28 104Z" />
-        <path d="M498 165H539C550 165 550 151 540 150C540 134 518 132 514 147C501 142 489 160 498 165Z" />
+    <svg
+      className={styles.micro}
+      viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+      fill="none"
+      aria-hidden="true"
+      focusable="false"
+      data-why-micrographics=""
+    >
+      <g className={styles.clouds}>
+        <path d={CLOUD_D} transform="translate(150 215)" />
+        <path d={CLOUD_D} transform="translate(592 165) scale(.78)" />
+      </g>
+      <path className={styles.routePath} d={ROUTE_D} />
+      <path
+        className={styles.plane}
+        d={PLANE_D}
+        transform={`translate(${PLANE.x.toFixed(1)} ${PLANE.y.toFixed(1)}) rotate(${PLANE.angle.toFixed(1)})`}
+      />
+      {showPins &&
+        PINS.map((pin) => (
+          <g
+            key={pin.id}
+            transform={`translate(${pin.x} ${pin.y})`}
+            className={pin.tone === "gold" ? styles.pinGold : styles.pinTeal}
+            data-why-pin={pin.id}
+          >
+            <ellipse className={styles.pinPulse} cx="0" cy="1.5" rx="8" ry="2.6" />
+            <path d={PIN_D} />
+            <circle cy="-16.6" r="3.4" className={styles.pinCore} />
+          </g>
+        ))}
+    </svg>
+  );
+}
+
+/** Quiet balance for the empty space above the message column on wide screens. */
+export function MessageAccent() {
+  return (
+    <svg className={styles.messageAccent} viewBox="0 0 132 52" fill="none" aria-hidden="true" focusable="false">
+      <g className={styles.clouds}>
+        <path d={CLOUD_D} transform="translate(32 30)" />
+        <path d={CLOUD_D} transform="translate(104 20) scale(.62)" />
       </g>
     </svg>
   );

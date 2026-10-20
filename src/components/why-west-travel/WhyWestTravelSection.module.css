@@ -8,14 +8,29 @@
   --sand: #cdb17d;
   --wash: #e8ddca;
   --route: #4daab3;
-  --pin-gold: #d7b27a;
+  --pin-gold: #c9a161;
+  --pin-teal: #2f9ea8;
+  --plane: #12385a;
+  --cloud: #7fbcc1;
   position: relative;
   isolation: isolate;
   overflow: hidden;
   padding: clamp(3rem, 4.5vw, 5rem) 0 2rem;
   background: var(--west-surface-why, linear-gradient(#faf6ed, #f3eddf));
-  border-top: 1px solid var(--west-section-divider, #e4dac6);
   color: var(--heading);
+}
+/* Fine centred hairline instead of a full-width border: separates Featured Trips without a hard edge. */
+.section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 0;
+  width: min(1180px, 84%);
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, var(--west-section-divider, #e4dac6) 22%, var(--west-section-divider, #e4dac6) 78%, transparent);
+  pointer-events: none;
 }
 
 .section[data-theme-mode="dark"] {
@@ -29,6 +44,9 @@
   --wash: #18353d;
   --route: #5fc4c9;
   --pin-gold: #e2c48f;
+  --pin-teal: #6fd0d3;
+  --plane: #cfe9e6;
+  --cloud: #5fa9b0;
   background: var(--west-surface-why, linear-gradient(#0b2433, #0e2c3b));
 }
 
@@ -42,7 +60,7 @@
   width: min(100% - 2.5rem, 1600px);
   margin-inline: auto;
 }
-.message { grid-area: message; min-width: 0; }
+.message { position: relative; grid-area: message; min-width: 0; }
 .eyebrow {
   display: flex;
   align-items: center;
@@ -114,11 +132,25 @@
 .photo[data-loaded="true"] { opacity: 1; }
 .section[data-theme-mode="dark"] .landmarks { opacity: 0.68; }
 .section[data-theme-mode="dark"] .traveler { filter: brightness(0.88) saturate(0.85); }
-.route { position: absolute; z-index: 3; top: -1%; left: -9%; width: 118%; height: auto; color: var(--route); pointer-events: none; }
-.pinGold { color: var(--pin-gold); opacity: .8; }
-.pinTeal { color: var(--route); opacity: .8; }
-.clouds { color: var(--route); }
-.section[data-theme-mode="dark"] .route { opacity: .8; }
+/* Micrographics share the visual box's coordinates; strokes are set in CSS so they can thicken as the box shrinks. */
+.micro { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; overflow: visible; pointer-events: none; --micro-stroke: 1.5; }
+.routePath { stroke: var(--route); stroke-width: var(--micro-stroke); stroke-linecap: round; stroke-dasharray: 0.1 6.5; opacity: .78; }
+.plane { fill: var(--plane); opacity: .82; }
+.pinGold, .pinTeal { opacity: .92; }
+.pinGold { color: var(--pin-gold); }
+.pinTeal { color: var(--pin-teal); }
+.pinGold path, .pinTeal path { fill: currentColor; }
+.pinCore { fill: var(--surface); }
+.pinPulse { fill: none; stroke: currentColor; stroke-width: 1.1; opacity: .45; transform-box: fill-box; transform-origin: center; animation: pinPulse 3.6s ease-out infinite; }
+.pinTeal .pinPulse { animation-delay: 1.8s; }
+.clouds { fill: none; stroke: var(--cloud); stroke-width: calc(var(--micro-stroke, 1.5) * .85); stroke-linejoin: round; stroke-linecap: round; opacity: .5; }
+.messageAccent { position: absolute; top: -4.75rem; right: 4%; width: clamp(96px, 7.5vw, 132px); height: auto; display: none; pointer-events: none; }
+.section[data-theme-mode="dark"] .routePath { opacity: .62; }
+.section[data-theme-mode="dark"] .clouds { opacity: .38; }
+@keyframes pinPulse {
+  0% { transform: scale(.6); opacity: .5; }
+  70%, 100% { transform: scale(1.6); opacity: 0; }
+}
 .edge { position: absolute; top: 4%; height: 88%; width: 58px; color: var(--sand); opacity: 0.12; pointer-events: none; display: none; }
 .left { left: 0; }
 .right { right: 0; transform: rotate(180deg); }
@@ -130,13 +162,14 @@
 .section[data-theme-mode="dark"] .palm { opacity: .075; }
 .section[data-theme-mode="dark"] .dunes { opacity: .25; }
 
-@media (max-width: 1023px) {
-  .route { left: 0; width: 100%; }
-  .clouds { display: none; }
+@media (max-width: 1199px) {
+  .micro { --micro-stroke: 2.2; }
 }
 @media (max-width: 599px) {
   .section { padding-bottom: 3.5rem; }
   .visual { max-width: 330px; }
+  .micro { --micro-stroke: 2.6; }
+  .micro .clouds { display: none; }
   .eyebrow { letter-spacing: .12em; gap: .4rem; }
   .heading { font-size: clamp(2rem, 8.5vw, 3rem); }
 }
@@ -156,8 +189,10 @@
   .icon svg { width: 52%; height: 52%; }
   .supportLabel { font-size: 10px; }
   .message { padding-bottom: 3rem; }
+  .messageAccent { display: block; }
 }
 @media (prefers-reduced-motion: reduce) {
   .photo, .cta, .cta svg { transition: none; }
+  .pinPulse { animation: none; opacity: .35; }
   .cta:hover svg { transform: none; }
 }
