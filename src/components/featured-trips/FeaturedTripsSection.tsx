@@ -167,20 +167,16 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
       aria-labelledby="featured-trips-heading"
       data-theme-mode={theme}
       data-entered={hasEntered ? "true" : "false"}
-      className={`relative w-full overflow-hidden py-16 sm:py-20 lg:py-24 transition-colors duration-500 ${
+      className={`relative w-full overflow-hidden py-16 sm:py-20 lg:py-24 transition-colors duration-500 [background:var(--west-surface-trips-transition)] ${
         isLight
-          ? "bg-[#FAF8F4] text-[#081C2E]"
-          : "bg-[#061523] text-[#F8FAFC]"
+          ? "text-[#081C2E]"
+          : "text-[#F8FAFC]"
       }`}
     >
       {/* Subtle Theme-Specific Ambient Background Surface Layer */}
       <div
         aria-hidden="true"
-        className={`pointer-events-none absolute inset-0 transition-opacity duration-500 ${
-          isLight
-            ? "bg-[radial-gradient(ellipse_80%_60%_at_50%_0%,rgba(244,236,221,0.72),transparent_70%),linear-gradient(135deg,#FCFBF8_0%,#F7F4EC_52%,#FAF8F4_100%)] opacity-100"
-            : "bg-[radial-gradient(ellipse_75%_55%_at_50%_0%,rgba(14,124,142,0.14),transparent_70%),linear-gradient(180deg,#051320_0%,#071A2C_50%,#061523_100%)] opacity-100"
-        }`}
+        className="pointer-events-none absolute inset-0 bg-transparent"
       />
 
       {/* Main Content Container */}
