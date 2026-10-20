@@ -1,5 +1,6 @@
 import type { DestinationId } from "@/config/destinations";
 import type { WhyWestFeatureId } from "@/config/why-west-travel";
+import type { StoryId } from "@/config/traveler-stories";
 
 export type SupportedLocale = "en" | "tr" | "es";
 
@@ -43,6 +44,27 @@ export interface WhyWestTravelTranslation {
   primaryCta: string;
   travelerImageAlt: string;
   features: Record<WhyWestFeatureId, WhyWestFeatureTranslation>;
+}
+
+export interface TravelerStoryItemTranslation {
+  quote: string;
+  location: string;
+  imageAlt: string;
+}
+
+export interface TravelerStoriesTranslation {
+  eyebrow: string;
+  heading: string;
+  supportingText: string;
+  prevStoryLabel: string;
+  nextStoryLabel: string;
+  goToStoryPrefix: string;
+  carouselAriaLabel: string;
+  paginationAriaLabel: string;
+  starRatingLabel: string;
+  sampleDataNotice: string;
+  sampleBadgeLabel: string;
+  items: Record<StoryId, TravelerStoryItemTranslation>;
 }
 
 export interface HeroTranslation {
@@ -101,6 +123,7 @@ export interface HeroTranslation {
   };
   featuredTrips: FeaturedTripsTranslation;
   whyWestTravel: WhyWestTravelTranslation;
+  travelerStories: TravelerStoriesTranslation;
 }
 
 export const HERO_DICTIONARY: Record<SupportedLocale, HeroTranslation> = {
@@ -239,6 +262,58 @@ export const HERO_DICTIONARY: Record<SupportedLocale, HeroTranslation> = {
         },
       },
     },
+    travelerStories: {
+      eyebrow: "TRAVELER STORIES",
+      heading: "Our Latest Stories",
+      supportingText:
+        "Real traveler experiences, from unforgettable places to life-changing moments around the world.",
+      prevStoryLabel: "Previous traveler story",
+      nextStoryLabel: "Next traveler story",
+      goToStoryPrefix: "Show story starting with",
+      carouselAriaLabel: "Traveler stories Polaroid clothesline carousel",
+      paginationAriaLabel: "Traveler stories carousel pagination",
+      starRatingLabel: "out of 5 stars",
+      sampleDataNotice: "Sample preview cards — connect verified backend reviews before publication",
+      sampleBadgeLabel: "Sample",
+      items: {
+        "dubai-waterfront": {
+          quote: "Beautiful, breathtaking and so full of life!",
+          location: "Dubai, UAE",
+          imageAlt:
+            "Downtown Dubai skyline and Burj Khalifa glowing above the waterfront at sunset",
+        },
+        "luxor-colonnade": {
+          quote: "A truly magical place with so much history.",
+          location: "Luxor, Egypt",
+          imageAlt:
+            "Sunlit sandstone columns of an ancient Egyptian temple by the Nile with palm trees",
+        },
+        "giza-desert-palms": {
+          quote: "The desert was even more beautiful than we imagined.",
+          location: "Giza, Egypt",
+          imageAlt:
+            "Great Pyramids of Giza and the Sphinx rising beyond golden desert dunes and date palms",
+        },
+        "istanbul-sunset": {
+          quote: "Incredible culture, food and hospitality.",
+          location: "Istanbul, Türkiye",
+          imageAlt:
+            "Maiden's Tower and historic mosque silhouettes across the Bosphorus at golden sunset",
+        },
+        "bosphorus-twilight": {
+          quote: "Cruising the Bosphorus at twilight was unforgettable.",
+          location: "Bosphorus, Türkiye",
+          imageAlt:
+            "Illuminated passenger ferry gliding across the Bosphorus below Istanbul's mosque-lined skyline",
+        },
+        "nile-felucca": {
+          quote: "Sailing the Nile past ancient temples felt timeless.",
+          location: "Nile Valley, Egypt",
+          imageAlt:
+            "Traditional white felucca sailboat gliding along the calm Nile River at golden hour",
+        },
+      },
+    },
   },
   tr: {
     locale: "tr",
@@ -369,6 +444,58 @@ export const HERO_DICTIONARY: Record<SupportedLocale, HeroTranslation> = {
           title: "Esnek Rezervasyon",
           description:
             "Basit adımlar, hızlı onay, önemli anlar için daha fazla zaman.",
+        },
+      },
+    },
+    travelerStories: {
+      eyebrow: "GEZGİN HİKÂYELERİ",
+      heading: "En Son Hikâyelerimiz",
+      supportingText:
+        "Unutulmaz yerlerden dünyanın dört bir yanındaki hayat değiştiren anlara kadar gerçek gezgin deneyimleri.",
+      prevStoryLabel: "Önceki gezgin hikâyesi",
+      nextStoryLabel: "Sonraki gezgin hikâyesi",
+      goToStoryPrefix: "Hikâyeyi göster",
+      carouselAriaLabel: "Gezgin hikâyeleri Polaroid fotoğraf askısı karuseli",
+      paginationAriaLabel: "Gezgin hikâyeleri karusel sayfalaması",
+      starRatingLabel: "5 üzerinden yıldız",
+      sampleDataNotice: "Örnek önizleme kartları — yayın öncesi doğrulanmış müşteri yorumlarını bağlayın",
+      sampleBadgeLabel: "Örnek",
+      items: {
+        "dubai-waterfront": {
+          quote: "Muhteşem, nefes kesici ve hayat dolu!",
+          location: "Dubai, BAE",
+          imageAlt:
+            "Gün batımında su kıyısında ışıldayan Downtown Dubai silüeti ve Burj Khalifa",
+        },
+        "luxor-colonnade": {
+          quote: "Tarihle dolu, gerçekten büyüleyici bir yer.",
+          location: "Luksor, Mısır",
+          imageAlt:
+            "Nil kıyısında palmiye ağaçlarıyla çevrili güneşli antik Mısır tapınağı sütunları",
+        },
+        "giza-desert-palms": {
+          quote: "Çöl hayal ettiğimizden bile daha güzeldi.",
+          location: "Gize, Mısır",
+          imageAlt:
+            "Altın çöl kumulları ve hurma palmiyelerinin ardında yükselen Gize Piramitleri ve Sfenks",
+        },
+        "istanbul-sunset": {
+          quote: "İnanılmaz kültür, lezzetler ve misafirperverlik.",
+          location: "İstanbul, Türkiye",
+          imageAlt:
+            "Altın gün batımında Boğaz'da Kız Kulesi ve tarihi cami silüetleri",
+        },
+        "bosphorus-twilight": {
+          quote: "Alacakaranlıkta Boğaz'da süzülmek unutulmazdı.",
+          location: "Boğaziçi, Türkiye",
+          imageAlt:
+            "İstanbul'un camilerle bezeli silüeti altında Boğaz'da süzülen ışıklı vapur",
+        },
+        "nile-felucca": {
+          quote: "Antik tapınakların kıyısında Nil'de yelken açmak zamansızdı.",
+          location: "Nil Vadisi, Mısır",
+          imageAlt:
+            "Altın saatlerde sakin Nil Nehri'nde süzülen geleneksel beyaz feluka yelkenlisi",
         },
       },
     },
@@ -503,6 +630,58 @@ export const HERO_DICTIONARY: Record<SupportedLocale, HeroTranslation> = {
           title: "Reserva Flexible",
           description:
             "Pasos simples, confirmación rápida y más tiempo para lo que importa.",
+        },
+      },
+    },
+    travelerStories: {
+      eyebrow: "HISTORIAS DE VIAJEROS",
+      heading: "Nuestras Últimas Historias",
+      supportingText:
+        "Experiencias reales de viajeros, desde lugares inolvidables hasta momentos que cambian la vida alrededor del mundo.",
+      prevStoryLabel: "Historia de viajero anterior",
+      nextStoryLabel: "Siguiente historia de viajero",
+      goToStoryPrefix: "Mostrar historia",
+      carouselAriaLabel: "Carrusel de historias de viajeros en cuerda Polaroid",
+      paginationAriaLabel: "Paginación del carrusel de historias de viajeros",
+      starRatingLabel: "de 5 estrellas",
+      sampleDataNotice: "Tarjetas de muestra — conecte reseñas verificadas antes de publicar",
+      sampleBadgeLabel: "Muestra",
+      items: {
+        "dubai-waterfront": {
+          quote: "¡Hermoso, impresionante y tan lleno de vida!",
+          location: "Dubái, EAU",
+          imageAlt:
+            "Horizonte de Dubái y el Burj Khalifa brillando sobre el agua al atardecer",
+        },
+        "luxor-colonnade": {
+          quote: "Un lugar verdaderamente mágico y lleno de historia.",
+          location: "Luxor, Egipto",
+          imageAlt:
+            "Columnas de piedra arenisca iluminadas por el sol en un antiguo templo egipcio junto al Nilo",
+        },
+        "giza-desert-palms": {
+          quote: "El desierto fue aún más hermoso de lo que imaginábamos.",
+          location: "Guiza, Egipto",
+          imageAlt:
+            "Grandes Pirámides de Guiza y la Esfinge sobre dunas doradas y palmeras datileras",
+        },
+        "istanbul-sunset": {
+          quote: "Cultura, gastronomía y hospitalidad increíbles.",
+          location: "Estambul, Türkiye",
+          imageAlt:
+            "Torre de la Doncella y siluetas de mezquitas históricas en el Bósforo al atardecer",
+        },
+        "bosphorus-twilight": {
+          quote: "Navegar por el Bósforo al anochecer fue inolvidable.",
+          location: "Bósforo, Türkiye",
+          imageAlt:
+            "Ferry iluminado deslizándose por el Bósforo bajo el horizonte de mezquitas de Estambul",
+        },
+        "nile-felucca": {
+          quote: "Navegar por el Nilo frente a templos antiguos fue eterno.",
+          location: "Valle del Nilo, Egipto",
+          imageAlt:
+            "Faluca tradicional de vela blanca navegando por el tranquilo río Nilo al atardecer",
         },
       },
     },

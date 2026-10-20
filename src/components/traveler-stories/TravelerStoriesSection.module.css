@@ -1,0 +1,915 @@
+.section {
+  --stories-bg:
+    radial-gradient(ellipse 68% 54% at 50% 18%, rgba(255, 252, 245, 0.86), transparent 72%),
+    radial-gradient(ellipse 46% 42% at 15% 88%, rgba(212, 180, 125, 0.16), transparent 68%),
+    radial-gradient(ellipse 46% 42% at 86% 84%, rgba(212, 180, 125, 0.13), transparent 68%),
+    linear-gradient(180deg, #f4eee1 0%, #f7f1e4 38%, #f3ead8 100%);
+  --stories-heading: #0b2b4b;
+  --stories-subtitle: #4f6478;
+  --stories-eyebrow: #0e7c8e;
+  --stories-eyebrow-rule: #cdb17d;
+  --stories-divider: rgba(205, 170, 110, 0.52);
+
+  /* Physical clothesline rope tokens */
+  --rope-base: #c39b6a;
+  --rope-highlight: #e6cba3;
+  --rope-twist: #9b7243;
+  --rope-under: #7d582f;
+  --rope-shadow: rgba(28, 42, 58, 0.14);
+
+  /* Wooden clothespin tokens */
+  --clip-wood-top: #e5c296;
+  --clip-wood-mid: #cca06d;
+  --clip-wood-bottom: #ad7d49;
+  --clip-border: rgba(116, 77, 39, 0.46);
+  --clip-shadow: rgba(14, 29, 45, 0.22);
+
+  /* Polaroid paper card tokens */
+  --polaroid-paper: linear-gradient(180deg, #fdfcf8 0%, #f9f6ee 65%, #f4efe3 100%);
+  --polaroid-border: rgba(216, 204, 182, 0.78);
+  --polaroid-shadow:
+    0 18px 34px -10px rgba(12, 31, 50, 0.17),
+    0 6px 14px -4px rgba(12, 31, 50, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.96);
+  --polaroid-shadow-hover:
+    0 24px 42px -10px rgba(12, 31, 50, 0.23),
+    0 10px 20px -5px rgba(12, 31, 50, 0.13),
+    inset 0 1px 0 rgba(255, 255, 255, 0.98);
+  --photo-frame-border: rgba(15, 35, 55, 0.07);
+  --reviewer-name: #0b2b4b;
+  --review-quote: #42586c;
+  --review-location: #6b7f91;
+  --star-gold: #f2b027;
+  --star-empty: rgba(148, 163, 184, 0.38);
+
+  /* Decorative travel micrographics tokens */
+  --route-gold: #c79f62;
+  --micro-navy: #12385a;
+  --micro-badge-fill: rgba(248, 243, 232, 0.92);
+  --pyramid-lit: rgba(214, 184, 134, 0.62);
+  --pyramid-shade: rgba(182, 148, 96, 0.68);
+  --pyramid-stroke: rgba(156, 122, 72, 0.56);
+  --palm-fill: rgba(182, 150, 100, 0.52);
+  --palm-secondary: rgba(182, 150, 100, 0.38);
+  --dune-fill: rgba(204, 174, 124, 0.42);
+  --dune-stroke: rgba(168, 135, 84, 0.52);
+  --postmark-stroke: rgba(164, 134, 88, 0.26);
+
+  /* Controls & Pagination tokens */
+  --nav-btn-bg: rgba(253, 251, 246, 0.96);
+  --nav-btn-border: rgba(210, 196, 170, 0.85);
+  --nav-btn-text: #0b2b4b;
+  --nav-btn-shadow:
+    0 8px 20px -4px rgba(11, 43, 75, 0.14),
+    0 2px 6px rgba(11, 43, 75, 0.07);
+  --dot-active: #0b2b4b;
+  --dot-inactive: rgba(92, 112, 132, 0.38);
+  --dot-inactive-hover: rgba(11, 43, 75, 0.62);
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: 100%;
+  padding: clamp(2.5rem, 3.8vw, 3.75rem) 0 clamp(2.5rem, 3.8vw, 3.75rem);
+  background: var(--stories-bg);
+  color: var(--stories-heading);
+  transition: background 350ms ease, color 300ms ease;
+}
+
+/* Subtle top section hairline divider */
+.section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 1;
+  width: min(1180px, 84%);
+  height: 1px;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--stories-divider) 22%,
+    var(--stories-divider) 78%,
+    transparent
+  );
+  pointer-events: none;
+}
+
+/* Subtle warm parchment grain overlay */
+.section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: radial-gradient(rgba(165, 134, 85, 0.065) 1px, transparent 0);
+  background-size: 24px 24px;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* Intentional Dark Mode adaptation */
+.section[data-theme-mode="dark"] {
+  --stories-bg:
+    radial-gradient(ellipse 64% 50% at 50% 16%, rgba(18, 92, 108, 0.16), transparent 72%),
+    radial-gradient(ellipse 45% 40% at 14% 88%, rgba(201, 161, 97, 0.08), transparent 70%),
+    linear-gradient(180deg, #0a2230 0%, #081c29 48%, #051320 100%);
+  --stories-heading: #f4f3eb;
+  --stories-subtitle: #b2c4cd;
+  --stories-eyebrow: #5fc4c9;
+  --stories-eyebrow-rule: rgba(201, 161, 97, 0.65);
+  --stories-divider: rgba(95, 196, 201, 0.28);
+
+  --rope-base: #c8a271;
+  --rope-highlight: #ebd2ad;
+  --rope-twist: #966d3e;
+  --rope-under: #654622;
+  --rope-shadow: rgba(2, 8, 15, 0.55);
+
+  --clip-wood-top: #e3be92;
+  --clip-wood-mid: #c89b67;
+  --clip-wood-bottom: #a37440;
+  --clip-border: rgba(64, 39, 16, 0.68);
+  --clip-shadow: rgba(2, 9, 17, 0.56);
+
+  --polaroid-paper: linear-gradient(180deg, #132e41 0%, #0f2637 70%, #0c202f 100%);
+  --polaroid-border: rgba(244, 243, 235, 0.15);
+  --polaroid-shadow:
+    0 20px 38px -8px rgba(2, 8, 16, 0.68),
+    0 8px 18px -4px rgba(2, 8, 16, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --polaroid-shadow-hover:
+    0 26px 46px -8px rgba(2, 8, 16, 0.78),
+    0 10px 22px -4px rgba(14, 124, 142, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  --photo-frame-border: rgba(255, 255, 255, 0.1);
+  --reviewer-name: #f5f4ec;
+  --review-quote: #c7d6df;
+  --review-location: #8ba5b5;
+  --star-gold: #f5ba3b;
+  --star-empty: rgba(148, 163, 184, 0.28);
+
+  --route-gold: #d4b075;
+  --micro-navy: #cfe9e6;
+  --micro-badge-fill: rgba(11, 34, 49, 0.9);
+  --pyramid-lit: rgba(212, 180, 125, 0.24);
+  --pyramid-shade: rgba(176, 142, 90, 0.30);
+  --pyramid-stroke: rgba(218, 186, 132, 0.34);
+  --palm-fill: rgba(201, 168, 114, 0.24);
+  --palm-secondary: rgba(201, 168, 114, 0.18);
+  --dune-fill: rgba(196, 163, 110, 0.18);
+  --dune-stroke: rgba(212, 180, 125, 0.28);
+  --postmark-stroke: rgba(196, 163, 110, 0.16);
+
+  --nav-btn-bg: rgba(14, 38, 56, 0.94);
+  --nav-btn-border: rgba(255, 255, 255, 0.18);
+  --nav-btn-text: #f4f3eb;
+  --nav-btn-shadow:
+    0 10px 24px -4px rgba(2, 8, 16, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  --dot-active: #5fc4c9;
+  --dot-inactive: rgba(255, 255, 255, 0.26);
+  --dot-inactive-hover: rgba(255, 255, 255, 0.54);
+}
+
+/* Upper Flight Paths & Micrographics */
+.upperMicroWrap {
+  position: absolute;
+  top: clamp(0.4rem, 1.5vw, 1.25rem);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, 1680px);
+  height: clamp(135px, 13vw, 210px);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.upperMicroSvg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.dottedRoute {
+  stroke: var(--route-gold);
+  stroke-width: 1.75;
+  stroke-dasharray: 4.5 6.5;
+  stroke-linecap: round;
+  opacity: 0.78;
+}
+
+.routePinDot {
+  fill: var(--micro-navy);
+  opacity: 0.85;
+}
+
+.cameraIcon,
+.airplaneIcon {
+  color: var(--micro-navy);
+  opacity: 0.88;
+}
+
+/* Lower-Left Giza Pyramids & Palms Corner Artwork */
+.gizaCornerWrap {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+  width: clamp(230px, 25vw, 395px);
+  pointer-events: none;
+}
+
+.gizaCornerSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.palmSilhouette {
+  color: var(--palm-fill);
+}
+
+.palmSilhouetteSecondary {
+  color: var(--palm-secondary);
+}
+
+.pyramidLit {
+  fill: var(--pyramid-lit);
+}
+
+.pyramidShade {
+  fill: var(--pyramid-shade);
+}
+
+.pyramidStroke {
+  stroke: var(--pyramid-stroke);
+  stroke-width: 1.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.duneFill {
+  fill: var(--dune-fill);
+}
+
+.duneStroke {
+  stroke: var(--dune-stroke);
+  stroke-width: 1.25;
+  stroke-linecap: round;
+}
+
+/* Lower-Right Postmark Stamp */
+.postmarkWrap {
+  position: absolute;
+  bottom: clamp(0.85rem, 2vw, 1.75rem);
+  right: clamp(1rem, 2.8vw, 2.75rem);
+  z-index: 1;
+  width: clamp(115px, 10.5vw, 165px);
+  pointer-events: none;
+}
+
+.postmarkSvg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.postmarkStroke {
+  stroke: var(--postmark-stroke);
+}
+
+/* Section Container */
+.container {
+  position: relative;
+  z-index: 2;
+  width: min(100% - 2rem, 1520px);
+  margin-inline: auto;
+}
+
+/* Centered Section Header */
+.header {
+  max-width: 44rem;
+  margin-inline: auto;
+  text-align: center;
+  padding-inline: 1rem;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin: 0;
+  color: var(--stories-eyebrow);
+  font-size: clamp(0.6875rem, 0.92vw, 0.8rem);
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.eyebrowRule {
+  display: inline-block;
+  width: clamp(1.75rem, 3.2vw, 3.25rem);
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--stories-eyebrow-rule));
+}
+
+.eyebrowRuleRight {
+  display: inline-block;
+  width: clamp(1.75rem, 3.2vw, 3.25rem);
+  height: 1px;
+  background: linear-gradient(270deg, transparent, var(--stories-eyebrow-rule));
+}
+
+.heading {
+  margin: 0.55rem 0 0;
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: clamp(2rem, 3.4vw, 3.25rem);
+  font-weight: 600;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--stories-heading);
+  text-wrap: balance;
+}
+
+.subtitle {
+  margin: 0.7rem auto 0;
+  max-width: 52ch;
+  color: var(--stories-subtitle);
+  font-size: clamp(0.875rem, 1.05vw, 1rem);
+  line-height: 1.55;
+  text-wrap: balance;
+}
+
+/* Clothesline Stage — Sits cleanly below the introductory text */
+.clotheslineStage {
+  position: relative;
+  margin-top: clamp(1.15rem, 2vw, 1.75rem);
+  width: 100%;
+  padding-top: 2px;
+}
+
+/* Full-bleed curved clothesline rope */
+.ropeContainer {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: max(100vw, 100%);
+  max-width: 1920px;
+  height: 84px;
+  transform: translateX(-50%);
+  z-index: 3;
+  pointer-events: none;
+  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ropeContainer[data-rope-flex="true"] {
+  transform: translateX(-50%) translateY(2px);
+}
+
+.ropeSvg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.ropeShadowPath {
+  stroke: var(--rope-shadow);
+  stroke-width: 4.2;
+  stroke-linecap: round;
+}
+
+.ropeBasePath {
+  stroke: var(--rope-base);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+}
+
+.ropeHighlightPath {
+  stroke: var(--rope-highlight);
+  stroke-width: 1.15;
+  stroke-linecap: round;
+}
+
+.ropeTwistPath {
+  stroke: var(--rope-twist);
+  stroke-width: 3.1;
+  stroke-dasharray: 3.2 4.4;
+  stroke-linecap: round;
+}
+
+.ropeUnderPath {
+  stroke: var(--rope-under);
+  stroke-width: 0.9;
+  stroke-linecap: round;
+  opacity: 0.65;
+}
+
+/* Carousel Row Layout (Left Button + 4-Card Track + Right Button) */
+.carouselRow {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.75rem, 1.5vw, 1.4rem);
+  width: 100%;
+  max-width: 1460px;
+  margin-inline: auto;
+}
+
+/* Circular Previous / Next Navigation Buttons */
+.navButton {
+  position: relative;
+  z-index: 8;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: clamp(2.6rem, 3.1vw, 3rem);
+  height: clamp(2.6rem, 3.1vw, 3rem);
+  margin-top: 1.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--nav-btn-border);
+  background: var(--nav-btn-bg);
+  color: var(--nav-btn-text);
+  box-shadow: var(--nav-btn-shadow);
+  cursor: pointer;
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 220ms ease,
+    background-color 220ms ease,
+    box-shadow 220ms ease,
+    color 220ms ease;
+}
+
+.navButton:hover {
+  transform: scale(1.06);
+  border-color: var(--stories-eyebrow);
+  color: var(--stories-eyebrow);
+}
+
+.navButton:active {
+  transform: scale(0.97);
+}
+
+.navButton:focus-visible {
+  outline: 2px solid var(--stories-eyebrow);
+  outline-offset: 3px;
+}
+
+.navButton svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  stroke-width: 2.15;
+}
+
+/* Cards Viewport: Clips offscreen entering/exiting slots horizontally while preserving vertical room for clips & shadows */
+.cardsViewport {
+  --visible-count: 4;
+  --card-gap: clamp(1.15rem, 1.95vw, 1.75rem);
+  position: relative;
+  width: 100%;
+  max-width: 1280px;
+  min-height: 392px;
+  padding-top: 28px;
+  padding-bottom: 32px;
+  overflow: hidden;
+  perspective: 1200px;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+/* Outer Card Slot Wrapper — Controls horizontal one-by-one carousel slide & vertical rope catenary sag */
+.cardSlot {
+  position: absolute;
+  top: 28px;
+  left: 0;
+  width: calc(
+    (100% - (var(--visible-count) - 1) * var(--card-gap)) / var(--visible-count)
+  );
+  transform: translate3d(
+    calc(var(--slot-offset, 0) * (100% + var(--card-gap))),
+    var(--slot-sag-y, 0px),
+    0
+  );
+  transition:
+    transform 560ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 460ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform, opacity;
+  z-index: var(--slot-z, 2);
+}
+
+.cardSlot[data-slot-visible="false"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cardSlot[data-slot-visible="true"] {
+  opacity: 1;
+}
+
+/* Inner Pendulum Wrapper — Controls physical hanging tilt & settling swing around clothespin pinch point */
+.polaroidPendulum {
+  position: relative;
+  width: 100%;
+  max-width: 308px;
+  margin-inline: auto;
+  transform-origin: 50% -8px;
+  transform: rotate(var(--card-angle, 0deg));
+  transition: transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cardSlot[data-slot-visible="true"]:hover .polaroidPendulum {
+  transform: rotate(calc(var(--card-angle, 0deg) * 0.45)) translateY(-2px);
+}
+
+/* Settling swing animations for incoming and shifting cards */
+.polaroidPendulum[data-swing-state="enter-next"] {
+  animation: pendulumEnterNext 680ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.polaroidPendulum[data-swing-state="enter-prev"] {
+  animation: pendulumEnterPrev 680ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.polaroidPendulum[data-swing-state="shift-next"] {
+  animation: pendulumShiftNext 580ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.polaroidPendulum[data-swing-state="shift-prev"] {
+  animation: pendulumShiftPrev 580ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes pendulumEnterNext {
+  0% {
+    transform: rotate(calc(var(--card-angle, 0deg) + 6.2deg));
+  }
+  58% {
+    transform: rotate(calc(var(--card-angle, 0deg) - 2.1deg));
+  }
+  84% {
+    transform: rotate(calc(var(--card-angle, 0deg) + 0.75deg));
+  }
+  100% {
+    transform: rotate(var(--card-angle, 0deg));
+  }
+}
+
+@keyframes pendulumEnterPrev {
+  0% {
+    transform: rotate(calc(var(--card-angle, 0deg) - 6.2deg));
+  }
+  58% {
+    transform: rotate(calc(var(--card-angle, 0deg) + 2.1deg));
+  }
+  84% {
+    transform: rotate(calc(var(--card-angle, 0deg) - 0.75deg));
+  }
+  100% {
+    transform: rotate(var(--card-angle, 0deg));
+  }
+}
+
+@keyframes pendulumShiftNext {
+  0% {
+    transform: rotate(var(--card-angle, 0deg));
+  }
+  42% {
+    transform: rotate(calc(var(--card-angle, 0deg) + 2.1deg));
+  }
+  78% {
+    transform: rotate(calc(var(--card-angle, 0deg) - 0.65deg));
+  }
+  100% {
+    transform: rotate(var(--card-angle, 0deg));
+  }
+}
+
+@keyframes pendulumShiftPrev {
+  0% {
+    transform: rotate(var(--card-angle, 0deg));
+  }
+  42% {
+    transform: rotate(calc(var(--card-angle, 0deg) - 2.1deg));
+  }
+  78% {
+    transform: rotate(calc(var(--card-angle, 0deg) + 0.65deg));
+  }
+  100% {
+    transform: rotate(var(--card-angle, 0deg));
+  }
+}
+
+/* Wooden Clothespin — Anchored at top center of the Polaroid, visibly pinching the rope */
+.clothespin {
+  position: absolute;
+  top: -23px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 48px;
+  z-index: 6;
+  pointer-events: none;
+}
+
+.clothespinSvg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/*
+ * Compact Near-Square Polaroid Card
+ * - Desktop width: ~285–305px
+ * - Desktop height: ~316–334px
+ * - Overall aspect-ratio: ~0.92 : 1 (within 0.90:1 to 0.96:1 requirement)
+ * - Landscape photograph occupying top ~58–61% of the card
+ */
+.polaroidCard {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  aspect-ratio: 0.92 / 1;
+  min-height: 316px;
+  padding: 11px 11px 13px;
+  border-radius: 4px;
+  border: 1px solid var(--polaroid-border);
+  background: var(--polaroid-paper);
+  box-shadow: var(--polaroid-shadow);
+  transition: box-shadow 260ms ease, border-color 260ms ease;
+}
+
+.cardSlot[data-slot-visible="true"]:hover .polaroidCard {
+  box-shadow: var(--polaroid-shadow-hover);
+}
+
+/* Natural Landscape Photograph Area (occupies ~58–60% of the Polaroid height) */
+.photoFrame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.42 / 1;
+  flex-shrink: 0;
+  overflow: hidden;
+  border-radius: 2px;
+  border: 1px solid var(--photo-frame-border);
+  background: #d8ceb8;
+}
+
+.photo {
+  object-fit: cover;
+  object-position: center;
+  transition: transform 520ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cardSlot[data-slot-visible="true"]:hover .photo {
+  transform: scale(1.03);
+}
+
+/* Review Content Area Underneath Photograph (~102–114px height, zero clipping) */
+.reviewBody {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  flex: 1;
+  min-height: 102px;
+  padding: 8px 4px 0;
+  text-align: left;
+}
+
+/* 1. Star Rating */
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2.5px;
+}
+
+.starIcon {
+  width: 13px;
+  height: 13px;
+  color: var(--star-gold);
+  fill: var(--star-gold);
+  flex-shrink: 0;
+}
+
+.starIconEmpty {
+  width: 13px;
+  height: 13px;
+  color: var(--star-empty);
+  fill: var(--star-empty);
+  flex-shrink: 0;
+}
+
+/* 2. Reviewer Name */
+.reviewerName {
+  margin: 4px 0 0;
+  font-family: var(--font-playfair), Georgia, serif;
+  font-size: clamp(0.925rem, 1.04vw, 1.025rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--reviewer-name);
+}
+
+/* 3. Concise Review Excerpt */
+.reviewQuote {
+  margin: 3px 0 0;
+  color: var(--review-quote);
+  font-size: clamp(0.74rem, 0.82vw, 0.8125rem);
+  font-weight: 400;
+  line-height: 1.34;
+}
+
+/* 4. Destination or Location */
+.reviewLocation {
+  margin: auto 0 0;
+  padding-top: 4px;
+  color: var(--review-location);
+  font-size: 0.675rem;
+  font-weight: 600;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  line-height: 1.2;
+}
+
+/* Bottom Controls & Pagination Indicators */
+.footerControls {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+}
+
+.paginationRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.mobileNavButton {
+  display: none;
+}
+
+.dotsList {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.dotButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 999px;
+}
+
+.dotButton:focus-visible {
+  outline: 2px solid var(--stories-eyebrow);
+  outline-offset: 2px;
+}
+
+.dotIndicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--dot-inactive);
+  transition:
+    transform 240ms cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 240ms ease,
+    width 240ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dotButton:hover .dotIndicator {
+  background: var(--dot-inactive-hover);
+}
+
+.dotButton[aria-selected="true"] .dotIndicator {
+  width: 10px;
+  height: 10px;
+  background: var(--dot-active);
+  transform: scale(1.08);
+}
+
+/* Tablet Breakpoint (2 compact near-square Polaroids visible) */
+@media (max-width: 1023px) {
+  .cardsViewport {
+    --visible-count: 2;
+    --card-gap: 1.5rem;
+    max-width: 636px;
+    margin-inline: auto;
+    min-height: 382px;
+  }
+
+  .polaroidPendulum {
+    max-width: 296px;
+  }
+
+  .gizaCornerWrap {
+    width: clamp(180px, 24vw, 280px);
+    opacity: 0.82;
+  }
+
+  .postmarkWrap {
+    display: none;
+  }
+}
+
+/* Mobile Breakpoint (1 large near-square Polaroid visible + touch swipe + accessible controls) */
+@media (max-width: 639px) {
+  .section {
+    padding: 2.35rem 0 2.75rem;
+  }
+
+  .upperMicroWrap {
+    display: none;
+  }
+
+  .gizaCornerWrap {
+    width: 155px;
+    opacity: 0.52;
+  }
+
+  .carouselRow > .navButton {
+    display: none;
+  }
+
+  .cardsViewport {
+    --visible-count: 1;
+    --card-gap: 1.25rem;
+    max-width: 304px;
+    margin-inline: auto;
+    min-height: 374px;
+  }
+
+  .polaroidPendulum {
+    max-width: 292px;
+  }
+
+  .polaroidCard {
+    min-height: 312px;
+  }
+
+  .mobileNavButton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 999px;
+    border: 1px solid var(--nav-btn-border);
+    background: var(--nav-btn-bg);
+    color: var(--nav-btn-text);
+    box-shadow: var(--nav-btn-shadow);
+    cursor: pointer;
+  }
+
+  .mobileNavButton:focus-visible {
+    outline: 2px solid var(--stories-eyebrow);
+    outline-offset: 2px;
+  }
+
+  .mobileNavButton svg {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
+
+/* Respect prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .ropeContainer,
+  .cardSlot,
+  .polaroidPendulum,
+  .polaroidCard,
+  .photo,
+  .navButton,
+  .dotIndicator {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .polaroidPendulum,
+  .cardSlot[data-slot-visible="true"]:hover .polaroidPendulum {
+    transform: none !important;
+  }
+}
