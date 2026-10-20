@@ -7,7 +7,7 @@ import { ArrowRight, CalendarCheck, Globe2, Headphones, ShieldCheck } from "luci
 import { useHero } from "@/components/hero/HeroProvider";
 import { WHY_WEST_TRAVEL_FEATURES, WHY_WEST_TRAVEL_SECTION_CONFIG } from "@/config/why-west-travel";
 import { WHY_WEST_ASSET_COPY } from "@/i18n/why-west-travel-assets";
-import { EgyptianEdges, FlightRoute, LandmarkPins } from "./TravelArtwork";
+import { EgyptianEdges, FlightRoute } from "./TravelArtwork";
 import styles from "./WhyWestTravelSection.module.css";
 
 const FEATURE_ICONS = {
@@ -85,10 +85,10 @@ export function WhyWestTravelSection() {
       <div className={styles.layout}>
         <div className={styles.message}>
           <p className={styles.eyebrow} data-reveal="right">
-            {copy.eyebrowPrefix} {copy.eyebrowHighlight}
+            <span className={styles.eyebrowPrefix}>{copy.eyebrowPrefix}</span>{" "}<span>{copy.eyebrowHighlight}</span>
           </p>
           <h2 id="why-west-travel-heading" className={styles.heading} data-reveal="right" data-delay="70">
-            {copy.headingLine1}{" "}{copy.headingLine2}
+            <span>{copy.headingLine1}</span>{" "}<span>{copy.headingLine2}</span>
           </h2>
           <p className={styles.description} data-reveal="right" data-delay="140">{copy.supportingText}</p>
           <div className={styles.ctaWrap} data-reveal="right" data-delay="210">
@@ -108,7 +108,7 @@ export function WhyWestTravelSection() {
                 src={ASSETS.landmarks}
                 alt={assetCopy.landmarks}
                 fill
-                sizes="(max-width: 599px) 340px, (max-width: 1199px) 45vw, 530px"
+                sizes="(max-width: 599px) 390px, (max-width: 1199px) 55vw, 700px"
                 className={styles.photo}
                 data-loaded={landmarks === "ready"}
                 onLoad={() => setLandmarks("ready")}
@@ -122,7 +122,7 @@ export function WhyWestTravelSection() {
                 src={ASSETS.traveler}
                 alt={assetCopy.traveler}
                 fill
-                sizes="(max-width: 599px) 245px, (max-width: 1199px) 33vw, 390px"
+                sizes="(max-width: 599px) 320px, (max-width: 1199px) 45vw, 580px"
                 className={styles.photo}
                 data-loaded={traveler === "ready"}
                 onLoad={() => setTraveler("ready")}
@@ -130,7 +130,6 @@ export function WhyWestTravelSection() {
               />
             )}
           </div>
-          {landmarks === "ready" && <LandmarkPins />}
         </div>
 
         <ul className={styles.benefits}>
@@ -139,7 +138,7 @@ export function WhyWestTravelSection() {
             const localized = copy.features[feature.id];
             return (
               <li key={feature.id} className={styles.feature} data-reveal="left" data-delay={index * 65} data-why-feature={feature.id} data-verification-status={feature.verificationStatus}>
-                <span className={styles.icon}><Icon aria-hidden="true" /></span>
+                <span className={styles.icon}><Icon aria-hidden="true" />{feature.id === "support" && <span className={styles.supportLabel}>24/7</span>}</span>
                 <div className={styles.featureCopy}>
                   <h3>{localized.title}</h3>
                   <p>{localized.description}</p>
