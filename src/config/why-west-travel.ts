@@ -27,6 +27,8 @@ export interface WhyWestTravelSectionConfig {
   primaryCtaLabel: string;
   primaryCtaHref: string;
   travelerImageWebp: string;
+  /** Homepage "Why West Travel" center collage: same photo with an organic, feathered edge (no circular mask). */
+  travelerCollageImageWebp: string;
   travelerImagePng: string;
   travelerImageJpg: string;
   travelerImageAlt: string;
@@ -43,6 +45,7 @@ export const WHY_WEST_TRAVEL_SECTION_CONFIG: WhyWestTravelSectionConfig = {
   primaryCtaLabel: "Learn More",
   primaryCtaHref: "/about",
   travelerImageWebp: "/images/west-travel/why-west-traveler.webp",
+  travelerCollageImageWebp: "/images/west-travel/why-west-traveler-collage.webp",
   travelerImagePng: "/images/west-travel/why-west-traveler.png",
   travelerImageJpg: "/images/west-travel/why-west-traveler.jpg",
   travelerImageAlt:

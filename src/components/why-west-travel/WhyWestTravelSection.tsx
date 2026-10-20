@@ -323,8 +323,9 @@ function CornerPalmFrond({
  * - Left column: 4 compact service highlights with pale-mint circular icon badges, navy headings,
  *   muted blue-gray supporting copy, and thin warm-sand dividers.
  * - Center column: Photographic traveler & Egypt/Dubai landmark composition (Giza Pyramids, Sphinx,
- *   Burj Khalifa skyline, reflective waterfront) crowned by a delicate dashed flight arc, 2D airplane
- *   silhouette, and 3 location pins (no large world map).
+ *   Burj Khalifa skyline, reflective waterfront) blended through an organic, feathered collage edge
+ *   (baked into the image alpha), crowned by one dotted Giza → Dubai route, a small 2D airplane,
+ *   two matching location pins and two subtle clouds (no large world map).
  * - Right column: Uppercase eyebrow ("WHY WEST TRAVEL"), two-line editorial serif headline,
  *   concise supporting copy, and rounded teal "Learn More →" pill CTA linking to /about.
  */
@@ -465,22 +466,50 @@ export function WhyWestTravelSection() {
     );
   };
 
+  // Shared palette for the center micrographics (one color system, tuned per theme)
+  const micro = isLight
+    ? {
+        route: "#4F95A3",
+        routeOpacity: 0.62,
+        mark: "#0E7C8E",
+        pinCore: "#F8F5EC",
+        cloud: "#D3E7EE",
+        cloudOpacity: 0.75,
+      }
+    : {
+        route: "#2DD4BF",
+        routeOpacity: 0.5,
+        mark: "#2DD4BF",
+        pinCore: "#071A2C",
+        cloud: "#1E4963",
+        cloudOpacity: 0.55,
+      };
+
   const renderCenterComposition = () => (
     <div
       style={getEntranceStyle("up", 130)}
       className="relative mx-auto flex w-full max-w-[440px] sm:max-w-[470px] xl:max-w-[510px] flex-col items-center justify-center"
     >
-      {/* Soft Pale-Blue Atmospheric Halo Behind Traveler & Landmarks (No World Map) */}
-      <div
-        aria-hidden="true"
-        className={`pointer-events-none absolute inset-4 rounded-full blur-2xl transition-opacity duration-500 ${
-          isLight
-            ? "bg-[radial-gradient(circle_at_50%_46%,rgba(196,229,240,0.62)_0%,rgba(224,242,247,0.28)_55%,transparent_76%)] opacity-100"
-            : "bg-[radial-gradient(circle_at_50%_46%,rgba(14,124,142,0.26)_0%,rgba(45,212,191,0.08)_55%,transparent_76%)] opacity-100"
-        }`}
-      />
+      {/* Soft, non-geometric atmospheric wash: two offset, heavily blurred tints (no circular halo) */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <div
+          className={`absolute left-[8%] right-[14%] top-[16%] bottom-[30%] rounded-[58%_42%_55%_45%/48%_56%_44%_52%] blur-3xl transition-colors duration-500 ${
+            isLight ? "bg-[#D8ECF2]/55" : "bg-[#0E7C8E]/[0.14]"
+          }`}
+        />
+        <div
+          className={`absolute left-[20%] right-[6%] top-[40%] bottom-[12%] rounded-[45%_55%_40%_60%/55%_45%_55%_45%] blur-3xl transition-colors duration-500 ${
+            isLight ? "bg-[#F1E3C8]/45" : "bg-[#E5A93C]/[0.05]"
+          }`}
+        />
+      </div>
 
-      {/* Lightweight 2D SVG Micrographics: Curved Dashed Flight Arc, Airplane Silhouette & 3 Location Pins */}
+      {/*
+        Flat 2D travel micrographics (one coordinated set, drawn in the image's 500-unit space):
+        a single dotted Giza → Dubai route arcing above the traveler's hat, a small airplane riding
+        the route toward Dubai, one pin above the Great Pyramid and one above the Burj Khalifa spire,
+        and two understated clouds in the empty sky corners. Nothing crosses the face, hands or map.
+      */}
       <svg
         viewBox="0 0 500 500"
         fill="none"
@@ -490,73 +519,64 @@ export function WhyWestTravelSection() {
           hasEntered || reducedMotion ? "opacity-100" : "opacity-0"
         }`}
       >
-        {/* Main Dotted Flight Route Arc */}
-        <path
-          d="M 86 144 C 148 44, 352 44, 414 144"
-          stroke={isLight ? "#5B9AA8" : "#2DD4BF"}
-          strokeOpacity={isLight ? "0.52" : "0.42"}
-          strokeWidth="1.5"
-          strokeDasharray="4.5 5"
+        {/* Clouds: small, flat, low-contrast; placed only where the collage has dissolved into sky */}
+        <g opacity={micro.cloudOpacity} fill={micro.cloud}>
+          <g transform="translate(38 64)">
+            <rect x="0" y="9" width="34" height="7" rx="3.5" />
+            <circle cx="11" cy="9.5" r="5.5" />
+            <circle cx="20" cy="7" r="7" />
+            <circle cx="27.5" cy="10.5" r="4.5" />
+          </g>
+          <g transform="translate(420 86) scale(0.82)">
+            <rect x="0" y="9" width="34" height="7" rx="3.5" />
+            <circle cx="11" cy="9.5" r="5.5" />
+            <circle cx="20" cy="7" r="7" />
+            <circle cx="27.5" cy="10.5" r="4.5" />
+          </g>
+        </g>
+
+        {/* Dotted route: one smooth arc, interrupted only where the airplane sits on it */}
+        <g
+          stroke={micro.route}
+          strokeWidth="2"
           strokeLinecap="round"
-        />
+          strokeDasharray="0 6.5"
+          fill="none"
+        >
+          <path d="M116 115.6C127.9 59.4 214.9 25.1 302.3 28.3" strokeOpacity={micro.routeOpacity} />
+          {/* Remaining leg ahead of the airplane, slightly lighter */}
+          <path
+            d="M328.2 30.3C349.6 33 370.6 38 390 45.6"
+            strokeOpacity={micro.routeOpacity * 0.6}
+          />
+        </g>
 
-        {/* Secondary Small Loop Trail Behind Airplane */}
+        {/* Airplane: simple silhouette, nose aligned with the route tangent (heading to Dubai) */}
         <path
-          d="M 244 65 C 266 56, 274 78, 298 69"
-          stroke={isLight ? "#5B9AA8" : "#2DD4BF"}
-          strokeOpacity={isLight ? "0.45" : "0.38"}
-          strokeWidth="1.3"
-          strokeDasharray="3 3.5"
-          strokeLinecap="round"
+          transform="translate(315.3 29) rotate(94.5) scale(0.86) translate(-11.5 -12)"
+          d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"
+          fill={micro.mark}
         />
 
-        {/* Subtle Flat Cloud Wisp (Left) */}
-        <path
-          d="M150 86H174C177.5 86 180 83.5 180 80.5C180 77.8 177.8 75.5 175 75.3C174.1 71.2 170.4 68.2 166 68.2C162.1 68.2 158.8 70.6 157.4 74C156.6 73.7 155.7 73.5 154.8 73.5C151.1 73.5 148 76.4 148 80C148 83.3 148.9 86 150 86Z"
-          fill={isLight ? "#CFE6EE" : "#1E4963"}
-          fillOpacity={isLight ? "0.65" : "0.45"}
-        />
-
-        {/* Left Teardrop Location Pin (Teal) */}
-        <g transform="translate(105, 86)">
-          <path
-            d="M12 0C6.48 0 2 4.48 2 10C2 16.8 12 25.5 12 25.5C12 25.5 22 16.8 22 10C22 4.48 17.52 0 12 0Z"
-            fill={isLight ? "#2895A6" : "#2DD4BF"}
-          />
-          <circle cx="12" cy="9.8" r="3.8" fill={isLight ? "#F8F5EC" : "#071A2C"} />
-        </g>
-
-        {/* Top-Center Teardrop Location Pin (Warm Sand-Gold) */}
-        <g transform="translate(212, 41)">
-          <path
-            d="M12 0C6.48 0 2 4.48 2 10C2 16.8 12 25.5 12 25.5C12 25.5 22 16.8 22 10C22 4.48 17.52 0 12 0Z"
-            fill={isLight ? "#D7AA63" : "#F4C266"}
-          />
-          <circle cx="12" cy="9.8" r="3.8" fill={isLight ? "#F8F5EC" : "#071A2C"} />
-        </g>
-
-        {/* Flat 2D Airplane Silhouette Along Upper-Right Arc */}
-        <g transform="translate(298, 49) rotate(14)">
-          <path
-            d="M27.5 13.2L17.4 11.4L10.8 1.5C10.3 0.8 9.3 0.6 8.5 1L6.9 1.8L10.7 11.2L4.2 11.1L1.6 7.4L0 8.1L1.7 13.3L0.1 18.5L1.7 19.2L4.3 15.5L10.8 15.4L7 24.8L8.6 25.6C9.4 26 10.4 25.8 10.9 25.1L17.5 15.2L27.5 13.4C28.6 13.2 28.6 13.4 27.5 13.2Z"
-            fill={isLight ? "#107E91" : "#2DD4BF"}
-          />
-        </g>
-
-        {/* Right Teardrop Location Pin (Deep Slate-Teal) */}
-        <g transform="translate(366, 88)">
-          <path
-            d="M12 0C6.48 0 2 4.48 2 10C2 16.8 12 25.5 12 25.5C12 25.5 22 16.8 22 10C22 4.48 17.52 0 12 0Z"
-            fill={isLight ? "#2A677B" : "#38BDF8"}
-          />
-          <circle cx="12" cy="9.8" r="3.8" fill={isLight ? "#F8F5EC" : "#071A2C"} />
-        </g>
+        {/* Location pins: identical design and size; route endpoints (Giza → Dubai) */}
+        {[
+          { id: "giza", tipX: 116, tipY: 128 },
+          { id: "dubai", tipX: 390, tipY: 58 },
+        ].map((pin) => (
+          <g key={pin.id} transform={`translate(${pin.tipX - 9.6} ${pin.tipY - 20.4}) scale(0.8)`}>
+            <path
+              d="M12 0C6.48 0 2 4.48 2 10C2 16.8 12 25.5 12 25.5C12 25.5 22 16.8 22 10C22 4.48 17.52 0 12 0Z"
+              fill={micro.mark}
+            />
+            <circle cx="12" cy="9.8" r="3.6" fill={micro.pinCore} />
+          </g>
+        ))}
       </svg>
 
       {/* Central Traveler & Egypt/Dubai Landmark Composition */}
       <div className="relative z-10 w-full aspect-[760/752]">
         <Image
-          src={WHY_WEST_TRAVEL_SECTION_CONFIG.travelerImageWebp}
+          src={WHY_WEST_TRAVEL_SECTION_CONFIG.travelerCollageImageWebp}
           alt={copy.travelerImageAlt || WHY_WEST_TRAVEL_SECTION_CONFIG.travelerImageAlt}
           fill
           sizes="(max-width: 768px) 88vw, (max-width: 1200px) 44vw, 490px"
