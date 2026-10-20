@@ -5,6 +5,11 @@
 :root,
 html.dark {
   color-scheme: dark;
+  --west-surface-trips: linear-gradient(180deg, #071a2b, #0a2236);
+  --west-surface-trips-transition: linear-gradient(180deg, #051320, transparent 60px), var(--west-surface-trips);
+  --west-surface-why: linear-gradient(180deg, #0b2433, #0e2c3b);
+  --west-surface-why-base: #0b2433;
+  --west-section-divider: rgba(95, 196, 201, 0.2);
   --west-glass-bg: rgba(7, 25, 40, 0.58);
   --west-glass-bg-strong: rgba(6, 22, 36, 0.72);
   --west-glass-popover: rgba(7, 26, 44, 0.90);
@@ -16,6 +21,11 @@ html.dark {
 
 html.light {
   color-scheme: light;
+  --west-surface-trips: linear-gradient(180deg, #fbf8f2, #f6f1e7);
+  --west-surface-trips-transition: linear-gradient(180deg, #051320, transparent 60px), var(--west-surface-trips);
+  --west-surface-why: linear-gradient(180deg, #faf6ed, #f3eddf);
+  --west-surface-why-base: #f8f5ee;
+  --west-section-divider: rgba(215, 178, 122, 0.38);
   --west-glass-bg: rgba(255, 252, 247, 0.52);
   --west-glass-bg-strong: rgba(255, 252, 247, 0.62);
   --west-glass-popover: rgba(255, 253, 250, 0.84);
