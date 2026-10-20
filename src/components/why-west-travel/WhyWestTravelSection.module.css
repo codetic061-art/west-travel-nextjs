@@ -3,7 +3,7 @@
   --heading: #102c40;
   --body: #536875;
   --accent: #216e72;
-  --mint: #e1eeE7;
+  --mint: #e1eee7;
   --line: #ded6c5;
   --sand: #a58b61;
   --wash: #e3e9df;
@@ -95,7 +95,7 @@
 
 .visual { grid-area: visual; position: relative; isolation: isolate; width: 100%; max-width: 530px; aspect-ratio: 1 / 1.1; margin: 0 auto; }
 .atmosphere { position: absolute; inset: 23% 0 3%; background: linear-gradient(155deg, transparent 8%, var(--wash) 45%, transparent 87%); }
-.landmarks { position: absolute; inset: 25% -2% 3%; -webkit-mask: url('/images/why-west-travel/landmark-feather.svg') center / 100% 100% no-repeat; mask: url('/images/why-west-travel/landmark-feather.svg') center / 100% 100% no-repeat; }
+.landmarks { position: absolute; inset: auto -2% 5%; aspect-ratio: 10 / 7; -webkit-mask: url('/images/why-west-travel/landmark-feather.svg') center / 100% 100% no-repeat; mask: url('/images/why-west-travel/landmark-feather.svg') center / 100% 100% no-repeat; }
 .landmarks img { object-fit: cover; }
 .traveler { position: absolute; inset: 20% 13% 0; z-index: 2; }
 .traveler img { object-fit: contain; object-position: center bottom; }
