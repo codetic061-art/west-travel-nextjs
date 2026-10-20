@@ -257,10 +257,10 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
           </a>
 
           <a
-            href="#hero-copy"
+            href="#why-west-travel"
             onClick={(e) => {
               e.preventDefault();
-              document.getElementById("hero-copy")?.scrollIntoView({ behavior: "smooth" });
+              (document.getElementById("why-west-travel") ?? document.getElementById("hero-copy"))?.scrollIntoView({ behavior: "smooth" });
             }}
             className={`rounded-full px-3 py-1.5 text-[13.5px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
               isLight
@@ -424,7 +424,7 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
             {[
               { label: t.nav.experiences, target: "hero-destination-cards" },
               { label: t.nav.ourJourneys, target: "featured-trips" },
-              { label: t.nav.about, target: "hero-copy" },
+              { label: t.nav.about, target: "why-west-travel" },
               { label: t.nav.contact, target: "hero-booking-bar" },
             ].map((item) => (
               <button

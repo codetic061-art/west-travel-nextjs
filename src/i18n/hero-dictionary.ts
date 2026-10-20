@@ -1,4 +1,5 @@
 import type { DestinationId } from "@/config/destinations";
+import type { WhyWestFeatureId } from "@/config/why-west-travel";
 
 export type SupportedLocale = "en" | "tr" | "es";
 
@@ -18,6 +19,7 @@ export interface FeaturedTripsTranslation {
   supportingText: string;
   exploreAllCta: string;
   cardCta: string;
+  cardCtaShort: string;
   durationPlaceholder: string;
   quotePlaceholder: string;
   prevJourneyLabel: string;
@@ -25,6 +27,22 @@ export interface FeaturedTripsTranslation {
   goToJourneyPrefix: string;
   moreDetailsLabel: string;
   hideDetailsLabel: string;
+}
+
+export interface WhyWestFeatureTranslation {
+  title: string;
+  description: string;
+}
+
+export interface WhyWestTravelTranslation {
+  eyebrowPrefix: string;
+  eyebrowHighlight: string;
+  headingLine1: string;
+  headingLine2: string;
+  supportingText: string;
+  primaryCta: string;
+  travelerImageAlt: string;
+  features: Record<WhyWestFeatureId, WhyWestFeatureTranslation>;
 }
 
 export interface HeroTranslation {
@@ -82,6 +100,7 @@ export interface HeroTranslation {
     closeSummaryLabel: string;
   };
   featuredTrips: FeaturedTripsTranslation;
+  whyWestTravel: WhyWestTravelTranslation;
 }
 
 export const HERO_DICTIONARY: Record<SupportedLocale, HeroTranslation> = {
@@ -180,6 +199,7 @@ export const HERO_DICTIONARY: Record<SupportedLocale, HeroTranslation> = {
       supportingText: "Explore curated trips across Egypt, Dubai and Türkiye.",
       exploreAllCta: "Explore All Trips",
       cardCta: "Explore Journey",
+      cardCtaShort: "Explore",
       durationPlaceholder: "Trip duration",
       quotePlaceholder: "Request a quote",
       prevJourneyLabel: "Previous journey card",
@@ -187,6 +207,37 @@ export const HERO_DICTIONARY: Record<SupportedLocale, HeroTranslation> = {
       goToJourneyPrefix: "Show journey",
       moreDetailsLabel: "Journey info",
       hideDetailsLabel: "Hide info",
+    },
+    whyWestTravel: {
+      eyebrowPrefix: "WHY",
+      eyebrowHighlight: "WEST TRAVEL",
+      headingLine1: "Get the Best",
+      headingLine2: "Travel Experience",
+      supportingText:
+        "Thoughtful planning, clear trip details, and dedicated support — we make your journey smoother, safer and more memorable.",
+      primaryCta: "Learn More",
+      travelerImageAlt:
+        "Smiling young traveler in a sand sunhat holding an open travel map with the Great Pyramids of Giza, the Sphinx, and the Dubai skyline behind him",
+      features: {
+        network: {
+          title: "Global Travel Network",
+          description:
+            "Access to trusted partners and unique travel experiences worldwide.",
+        },
+        transfer: {
+          title: "Easy Transfer",
+          description: "Smooth and secure transfers for a hassle-free journey.",
+        },
+        support: {
+          title: "24/7 Support",
+          description: "We're here for you, anytime, anywhere.",
+        },
+        booking: {
+          title: "Flexible Booking",
+          description:
+            "Simple steps, fast confirmation, more time for what matters.",
+        },
+      },
     },
   },
   tr: {
@@ -276,18 +327,50 @@ export const HERO_DICTIONARY: Record<SupportedLocale, HeroTranslation> = {
       closeSummaryLabel: "Kapat",
     },
     featuredTrips: {
-      eyebrow: "FEATURED TRIPS",
-      heading: "Find Your Next Journey",
-      supportingText: "Explore curated trips across Egypt, Dubai and Türkiye.",
-      exploreAllCta: "Explore All Trips",
-      cardCta: "Explore Journey",
-      durationPlaceholder: "Trip duration",
-      quotePlaceholder: "Request a quote",
+      eyebrow: "ÖNE ÇIKAN TURLAR",
+      heading: "Bir Sonraki Yolculuğunuzu Bulun",
+      supportingText: "Mısır, Dubai ve Türkiye genelinde özenle seçilmiş turları keşfedin.",
+      exploreAllCta: "Tüm Turları Keşfet",
+      cardCta: "Turu İncele",
+      cardCtaShort: "İncele",
+      durationPlaceholder: "Tur süresi",
+      quotePlaceholder: "Teklif isteyin",
       prevJourneyLabel: "Önceki yolculuk",
       nextJourneyLabel: "Sonraki yolculuk",
       goToJourneyPrefix: "Yolculuğu göster",
       moreDetailsLabel: "Detaylar",
       hideDetailsLabel: "Gizle",
+    },
+    whyWestTravel: {
+      eyebrowPrefix: "NEDEN",
+      eyebrowHighlight: "WEST TRAVEL",
+      headingLine1: "En İyi Seyahat",
+      headingLine2: "Deneyimini Yaşayın",
+      supportingText:
+        "Özenli planlama, net tur detayları ve özel destek — yolculuğunuzu daha akıcı, güvenli ve unutulmaz kılıyoruz.",
+      primaryCta: "Daha Fazla Bilgi",
+      travelerImageAlt:
+        "Gize Piramitleri, Sfenks ve Dubai silüeti önünde açık seyahat haritası tutan gülümseyen genç gezgin",
+      features: {
+        network: {
+          title: "Küresel Seyahat Ağı",
+          description:
+            "Dünya çapında güvenilir iş ortaklarına ve benzersiz seyahat deneyimlerine erişim.",
+        },
+        transfer: {
+          title: "Kolay Transfer",
+          description: "Sorunsuz bir yolculuk için akıcı ve güvenli transferler.",
+        },
+        support: {
+          title: "7/24 Destek",
+          description: "Her zaman, her yerde yanınızdayız.",
+        },
+        booking: {
+          title: "Esnek Rezervasyon",
+          description:
+            "Basit adımlar, hızlı onay, önemli anlar için daha fazla zaman.",
+        },
+      },
     },
   },
   es: {
@@ -377,18 +460,51 @@ export const HERO_DICTIONARY: Record<SupportedLocale, HeroTranslation> = {
       closeSummaryLabel: "Cerrar",
     },
     featuredTrips: {
-      eyebrow: "FEATURED TRIPS",
-      heading: "Find Your Next Journey",
-      supportingText: "Explore curated trips across Egypt, Dubai and Türkiye.",
-      exploreAllCta: "Explore All Trips",
-      cardCta: "Explore Journey",
-      durationPlaceholder: "Trip duration",
-      quotePlaceholder: "Request a quote",
+      eyebrow: "VIAJES DESTACADOS",
+      heading: "Encuentra Tu Próximo Viaje",
+      supportingText: "Explora viajes seleccionados por Egipto, Dubái y Türkiye.",
+      exploreAllCta: "Explorar Todos los Viajes",
+      cardCta: "Explorar Viaje",
+      cardCtaShort: "Explorar",
+      durationPlaceholder: "Duración del viaje",
+      quotePlaceholder: "Solicitar cotización",
       prevJourneyLabel: "Viaje anterior",
       nextJourneyLabel: "Siguiente viaje",
       goToJourneyPrefix: "Mostrar viaje",
       moreDetailsLabel: "Detalles",
       hideDetailsLabel: "Ocultar",
+    },
+    whyWestTravel: {
+      eyebrowPrefix: "POR QUÉ",
+      eyebrowHighlight: "WEST TRAVEL",
+      headingLine1: "Vive la Mejor",
+      headingLine2: "Experiencia de Viaje",
+      supportingText:
+        "Planificación cuidadosa, detalles claros y soporte dedicado — hacemos que tu viaje sea más fluido, seguro y memorable.",
+      primaryCta: "Saber Más",
+      travelerImageAlt:
+        "Joven viajero sonriente con sombrero sosteniendo un mapa frente a las Pirámides de Guiza, la Esfinge y el horizonte de Dubái",
+      features: {
+        network: {
+          title: "Red Global de Viajes",
+          description:
+            "Acceso a socios de confianza y experiencias de viaje únicas en todo el mundo.",
+        },
+        transfer: {
+          title: "Traslado Sencillo",
+          description:
+            "Traslados fluidos y seguros para un viaje sin complicaciones.",
+        },
+        support: {
+          title: "Soporte 24/7",
+          description: "Estamos aquí para ti, en cualquier momento y lugar.",
+        },
+        booking: {
+          title: "Reserva Flexible",
+          description:
+            "Pasos simples, confirmación rápida y más tiempo para lo que importa.",
+        },
+      },
     },
   },
 };

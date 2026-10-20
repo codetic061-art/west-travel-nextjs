@@ -259,10 +259,10 @@ export function JourneyCard({
           </div>
         </div>
 
-        {/* Primary Bottom Bar: Left Metadata Stack + Right "Explore Journey →" Pill Button */}
-        <div className="mt-3 flex items-end justify-between gap-3 pt-1">
+        {/* Primary Bottom Bar: Left Metadata Stack + Right Responsive "Explore Journey →" Pill Button */}
+        <div className="mt-3 flex items-end justify-between gap-2.5 sm:gap-3 pt-1">
           {/* Trip Duration & Price / Request a Quote Metadata */}
-          <dl className="flex flex-col gap-1 min-w-0 text-[11.5px] sm:text-xs text-white/85">
+          <dl className="flex flex-col gap-1 min-w-0 flex-1 text-[11.5px] sm:text-xs text-white/85">
             <div className="flex items-center gap-1.5">
               <dt className="sr-only">Duration</dt>
               <Calendar
@@ -281,27 +281,25 @@ export function JourneyCard({
             </div>
           </dl>
 
-          {/* Explore Journey → Pill Outline CTA with Delayed Downward Entrance */}
-          <div style={ctaEntranceStyle} className="shrink-0">
+          {/* Explore Journey → Pill Outline CTA with Fluid Tablet/Mobile Sizing & Delayed Entrance */}
+          <div style={ctaEntranceStyle} className="shrink-0 max-w-full">
             <Link
               href={journey.href}
               onClick={(e) => e.stopPropagation()}
               data-journey-cta={journey.slug}
+              data-featured-size={isFeaturedSize ? "true" : "false"}
               aria-label={`${copy.cardCta}: ${journey.title}`}
-              className={`group/cta inline-flex items-center gap-1.5 rounded-full border backdrop-blur-md font-medium text-white transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4] ${
-                isFeaturedSize
-                  ? "px-4 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-[13px]"
-                  : "px-3.5 sm:px-4 py-1.5 sm:py-2 text-[11.5px] sm:text-xs"
-              } ${
+              className={`west-journey-card-cta group/cta inline-flex items-center justify-center rounded-full border backdrop-blur-md font-medium text-white transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4] ${
                 journey.isFeaturedCenter
                   ? "border-[#2DD4BF]/85 bg-[#082B3F]/75 shadow-[0_0_18px_rgba(45,212,191,0.28)] hover:bg-[#0E7C8E] hover:border-[#67E8F9] hover:shadow-[0_0_24px_rgba(45,212,191,0.5)]"
                   : "border-[#2DD4BF]/70 bg-[#072235]/65 shadow-[0_0_14px_rgba(20,155,176,0.2)] hover:bg-[#0E7C8E]/90 hover:border-[#5EEAD4] hover:shadow-[0_0_20px_rgba(45,212,191,0.42)]"
               }`}
             >
-              <span>{copy.cardCta}</span>
+              <span className="sm:hidden">{copy.cardCtaShort || "Explore"}</span>
+              <span className="hidden sm:inline">{copy.cardCta}</span>
               <ArrowRight
                 aria-hidden="true"
-                className="h-3.5 w-3.5 text-[#2DD4BF] group-hover/cta:text-white transition-transform duration-300 group-hover/cta:translate-x-1"
+                className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 text-[#2DD4BF] group-hover/cta:text-white transition-transform duration-300 group-hover/cta:translate-x-1"
               />
             </Link>
           </div>
