@@ -33,18 +33,30 @@ export function EgyptianEdges() {
   );
 }
 
-/** A single arc stays inside the visual column, clear of all copy. */
+/** One cubic route; the plane follows its exact position and derivative at t=.72. */
 export function FlightRoute() {
+  const t = 0.72;
+  const u = 1 - t;
+  const x = u ** 3 * 35 + 3 * u ** 2 * t * 137 + 3 * u * t ** 2 * 456 + t ** 3 * 565;
+  const y = u ** 3 * 153 + 3 * u ** 2 * t * 5 + 3 * u * t ** 2 * 3 + t ** 3 * 153;
+  const dx = 3 * u ** 2 * (137 - 35) + 6 * u * t * (456 - 137) + 3 * t ** 2 * (565 - 456);
+  const dy = 3 * u ** 2 * (5 - 153) + 6 * u * t * (3 - 5) + 3 * t ** 2 * (153 - 3);
+  const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
   return (
-    <svg className={styles.route} viewBox="0 0 600 180" fill="none" aria-hidden="true" focusable="false">
-      <path d="M35 153C137 5 456 3 565 153" stroke="currentColor" strokeOpacity=".48" strokeWidth="1.7" strokeDasharray="7 7" />
-      <path transform="translate(432 62) rotate(13) scale(.8)" d="M24 0L2-5L-10-22L-16-22L-10-4L-23-5L-29-12L-33-11L-28 0L-33 11L-29 12L-23 5L-10 4L-16 22L-10 22L2 5Z" fill="currentColor" />
-      {([{ x: 66, y: 113, color: "#4daab3" }, { x: 251, y: 44, color: "#d7b27a" }, { x: 543, y: 117, color: "#50849a" }] as const).map(({ x, y, color }) => (
-        <g key={x} transform={`translate(${x} ${y})`}>
-          <path d="M0 0S-11-13-11-21a11 11 0 0 1 22 0C11-13 0 0 0 0Z" fill={color} />
-          <circle cy="-21" r="4.5" fill="var(--surface)" />
+    <svg className={styles.route} viewBox="0 0 600 600" fill="none" aria-hidden="true" focusable="false">
+      <path d="M35 153C137 5 456 3 565 153" stroke="currentColor" strokeOpacity=".55" strokeWidth="1.6" strokeDasharray="1 7" strokeLinecap="round" />
+      <path transform={`translate(${x} ${y}) rotate(${angle}) scale(.36)`} d="M24 0L2-5L-10-22L-16-22L-10-4L-23-5L-29-12L-33-11L-28 0L-33 11L-29 12L-23 5L-10 4L-16 22L-10 22L2 5Z" fill="currentColor" opacity=".85" />
+      {([{ x: 95, y: 300, gold: true }, { x: 510, y: 240, gold: false }] as const).map(({ x: pinX, y: pinY, gold }) => (
+        <g key={pinX} transform={`translate(${pinX} ${pinY})`} className={gold ? styles.pinGold : styles.pinTeal}>
+          <path d="M0 0S-8-10-8-16a8 8 0 0 1 16 0C8-10 0 0 0 0Z" fill="currentColor" />
+          <circle cy="-16" r="3" fill="var(--surface)" />
         </g>
       ))}
+      <g className={styles.clouds} stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" opacity=".32">
+        <path d="M28 104H65C76 104 76 90 66 89C66 74 44 71 40 87C27 82 18 100 28 104Z" />
+        <path d="M498 165H539C550 165 550 151 540 150C540 134 518 132 514 147C501 142 489 160 498 165Z" />
+      </g>
     </svg>
   );
 }

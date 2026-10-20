@@ -1,5 +1,4 @@
 import React from "react";
-import { HeroProvider } from "./HeroProvider";
 import { PanoramicBackground } from "./PanoramicBackground";
 import { FloatingNavbar } from "./FloatingNavbar";
 import { HeroCopy } from "./HeroCopy";
@@ -8,17 +7,16 @@ import { BookingBar } from "./BookingBar";
 
 /**
  * Production Hero Section for WEST TRAVEL.
- * Server Component shell wrapping isolated interactive Client Components.
+ * Server Component shell using the page-level theme and locale provider.
  */
 export function HeroSection() {
   return (
-    <HeroProvider initialLocale="en" initialTheme="dark">
       <section
         id="top"
         aria-label="WEST TRAVEL Hero — Egypt, Dubai & Türkiye"
         className="relative flex min-h-screen w-full flex-col justify-between overflow-x-hidden bg-[#051320] text-white selection:bg-[#149BB0] selection:text-white"
       >
-        {/* Layered 3-Destination Panoramic Background & Interactive Video Stage */}
+        {/* Cohesive Panoramic Background & Interactive Video Stage */}
         <PanoramicBackground />
 
         {/* Top Header & Floating Glassmorphic Navbar */}
@@ -41,6 +39,5 @@ export function HeroSection() {
           <BookingBar />
         </div>
       </section>
-    </HeroProvider>
   );
 }

@@ -1,5 +1,5 @@
 .section {
-  --surface: #f8f5ee;
+  --surface: var(--west-surface-why-base, #f8f5ee);
   --heading: #0b2b4b;
   --body: #718594;
   --accent: #008c9b;
@@ -7,16 +7,19 @@
   --line: #e4dac6;
   --sand: #cdb17d;
   --wash: #e8ddca;
+  --route: #4daab3;
+  --pin-gold: #d7b27a;
   position: relative;
   isolation: isolate;
   overflow: hidden;
   padding: clamp(3rem, 4.5vw, 5rem) 0 2rem;
-  background: radial-gradient(ellipse at 48% 38%, #fffdf8 0, transparent 70%), var(--surface);
+  background: var(--west-surface-why, linear-gradient(#faf6ed, #f3eddf));
+  border-top: 1px solid var(--west-section-divider, #e4dac6);
   color: var(--heading);
 }
 
 .section[data-theme-mode="dark"] {
-  --surface: #061523;
+  --surface: var(--west-surface-why-base, #0b2433);
   --heading: #f4f3eb;
   --body: #b2c4cd;
   --accent: #88d2c7;
@@ -24,7 +27,9 @@
   --line: #233a43;
   --sand: #b9a17b;
   --wash: #18353d;
-  background: radial-gradient(ellipse at 48% 38%, #102636 0, transparent 70%), var(--surface);
+  --route: #5fc4c9;
+  --pin-gold: #e2c48f;
+  background: var(--west-surface-why, linear-gradient(#0b2433, #0e2c3b));
 }
 
 .layout {
@@ -109,7 +114,11 @@
 .photo[data-loaded="true"] { opacity: 1; }
 .section[data-theme-mode="dark"] .landmarks { opacity: 0.68; }
 .section[data-theme-mode="dark"] .traveler { filter: brightness(0.88) saturate(0.85); }
-.route { position: absolute; z-index: 3; top: -1%; left: -9%; width: 118%; height: auto; color: var(--accent); pointer-events: none; }
+.route { position: absolute; z-index: 3; top: -1%; left: -9%; width: 118%; height: auto; color: var(--route); pointer-events: none; }
+.pinGold { color: var(--pin-gold); opacity: .8; }
+.pinTeal { color: var(--route); opacity: .8; }
+.clouds { color: var(--route); }
+.section[data-theme-mode="dark"] .route { opacity: .8; }
 .edge { position: absolute; top: 4%; height: 88%; width: 58px; color: var(--sand); opacity: 0.12; pointer-events: none; display: none; }
 .left { left: 0; }
 .right { right: 0; transform: rotate(180deg); }
@@ -121,10 +130,13 @@
 .section[data-theme-mode="dark"] .palm { opacity: .075; }
 .section[data-theme-mode="dark"] .dunes { opacity: .25; }
 
+@media (max-width: 1023px) {
+  .route { left: 0; width: 100%; }
+  .clouds { display: none; }
+}
 @media (max-width: 599px) {
   .section { padding-bottom: 3.5rem; }
   .visual { max-width: 330px; }
-  .route { display: none; }
   .eyebrow { letter-spacing: .12em; gap: .4rem; }
   .heading { font-size: clamp(2rem, 8.5vw, 3rem); }
 }
