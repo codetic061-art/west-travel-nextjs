@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
-import { useHeroContext } from "@/components/hero/HeroProvider";
+import { useHero } from "@/components/hero/HeroProvider";
 import { DESTINATIONS_CONFIG, type DestinationId } from "@/config/destinations";
 import {
   FEATURED_TRIPS_CONFIG,
@@ -35,12 +35,13 @@ const TRAVELER_COUNTS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
 export function TripInquiryDrawer() {
   const {
-    dictionary,
-    isDark,
+    t: dictionary,
+    theme,
     isInquiryDrawerOpen,
     inquiryDrawerPrefill,
     closeInquiryDrawer,
-  } = useHeroContext();
+  } = useHero();
+  const isDark = theme === "dark";
   const prefersReducedMotion = usePrefersReducedMotion();
   const titleId = useId();
   const descriptionId = useId();
@@ -257,7 +258,8 @@ export function TripInquiryDrawer() {
       ? dictionary.destinations[formState.destinationId].name
       : "";
     const tripLabel = formState.tripId
-      ? dictionary.featuredTrips.cards[formState.tripId].title
+      ? (FEATURED_TRIPS_CONFIG.find((trip) => trip.id === formState.tripId)
+          ?.title ?? "")
       : "";
     const travelersLabel =
       formState.travelers === 1
@@ -927,8 +929,10 @@ export function TripInquiryDrawer() {
                           : d.fields.journeyAllDestinationsHint}
                       </option>
                       {availableTrips.map((trip) => {
-                        const tripCopy =
-                          dictionary.featuredTrips.cards[trip.id];
+                        const tripOption =
+                          trip.durationLabel !== null
+                            ? `${trip.title} (${trip.durationLabel})`
+                            : trip.title;
                         return (
                           <option
                             key={trip.id}
@@ -939,7 +943,7 @@ export function TripInquiryDrawer() {
                                 : "bg-[#FBF7F0] text-[#13293D]"
                             }
                           >
-                            {tripCopy.title} ({tripCopy.durationLabel})
+                            {tripOption}
                           </option>
                         );
                       })}

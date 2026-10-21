@@ -16,6 +16,26 @@ export interface SectionEntranceState<T extends HTMLElement = HTMLElement> {
 }
 
 /**
+ * Standalone motion-preference hook: tracks the user's
+ * `prefers-reduced-motion` system setting (SSR-safe, defaults to false).
+ */
+export function usePrefersReducedMotion(): boolean {
+  const [reducedMotion, setReducedMotion] = useState<boolean>(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mediaQuery.matches);
+    const handleChange = (event: MediaQueryListEvent) => {
+      setReducedMotion(event.matches);
+    };
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  return reducedMotion;
+}
+
+/**
  * Reusable viewport-triggered entrance hook with `prefers-reduced-motion` support.
  * - Below-the-fold sections wait until they enter the viewport (`threshold: 0.16`, `rootMargin: "0px 0px -10% 0px"`)
  *   so animations never fire prematurely during initial page load.

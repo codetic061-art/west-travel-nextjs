@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useId, useRef, useState } from "react";
-import { useHeroContext } from "@/components/hero/HeroProvider";
+import { useHero } from "@/components/hero/HeroProvider";
 import {
   SOCIAL_FAB_ACTIONS,
   type FooterSocialProfile,
@@ -101,7 +101,8 @@ const ARC_OFFSETS: ReadonlyArray<{
 ];
 
 export function FloatingSocialFab() {
-  const { dictionary, isDark, isInquiryDrawerOpen } = useHeroContext();
+  const { t: dictionary, theme, isInquiryDrawerOpen } = useHero();
+  const isDark = theme === "dark";
   const prefersReducedMotion = usePrefersReducedMotion();
   const [isOpen, setIsOpen] = useState(false);
   const [isMorphing, setIsMorphing] = useState(false);
