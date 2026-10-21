@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import Link from "next/link";
 import {
   MapPin,
   Calendar,
@@ -475,7 +476,7 @@ export function BookingBar() {
         </div>
       </form>
 
-      {/* Non-Hallucinated Frontend Search State Confirmation Banner */}
+      {/* Non-Hallucinated Frontend Search State Confirmation Banner with Direct Link to Destination Discovery */}
       {lastSubmittedQuery && (
         <div
           role="status"
@@ -510,15 +511,29 @@ export function BookingBar() {
               </span>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={clearSubmittedQuery}
-            aria-label={t.booking.closeSummaryLabel}
-            className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium opacity-75 hover:opacity-100"
-          >
-            <X className="h-3.5 w-3.5" />
-            <span>{t.booking.closeSummaryLabel}</span>
-          </button>
+          <div className="flex items-center gap-3">
+            <Link
+              href={
+                lastSubmittedQuery.destination &&
+                lastSubmittedQuery.destination !== "all"
+                  ? `/destinations?destination=${lastSubmittedQuery.destination}`
+                  : "/destinations"
+              }
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#0E7C8E] px-3.5 py-1.5 text-[11px] font-semibold text-white hover:bg-[#149BB0] transition-colors"
+            >
+              <span>{t.featuredTrips.exploreAllCta}</span>
+              <ArrowRight className="h-3 w-3" />
+            </Link>
+            <button
+              type="button"
+              onClick={clearSubmittedQuery}
+              aria-label={t.booking.closeSummaryLabel}
+              className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-medium opacity-75 hover:opacity-100"
+            >
+              <X className="h-3.5 w-3.5" />
+              <span>{t.booking.closeSummaryLabel}</span>
+            </button>
+          </div>
         </div>
       )}
     </div>

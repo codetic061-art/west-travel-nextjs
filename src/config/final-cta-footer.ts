@@ -98,25 +98,25 @@ export const FINAL_CTA_SECTION_CONFIG: FinalCtaSectionConfig = {
   imageJpg: "/images/west-travel/final-cta-nile-panorama.jpg",
   objectPosition: "50% 54%",
   primaryCtaHref: "#trip-inquiry-drawer",
-  secondaryTripsHref: "/trips",
+  secondaryTripsHref: "/destinations",
 };
 
 export const FOOTER_QUICK_LINKS: readonly FooterNavLinkItem[] = [
   {
     id: "home",
-    href: "/#top",
-    isInternalRoute: false,
+    href: "/",
+    isInternalRoute: true,
     scrollTargetId: "top",
   },
   {
     id: "destinations",
-    href: "/#hero-destination-cards",
-    isInternalRoute: false,
+    href: "/destinations",
+    isInternalRoute: true,
     scrollTargetId: "hero-destination-cards",
   },
   {
     id: "journeys",
-    href: "/trips",
+    href: "/destinations#destination-journeys",
     isInternalRoute: true,
     scrollTargetId: "featured-trips",
   },
@@ -140,7 +140,7 @@ export const FOOTER_CONTACT_CONFIG: FooterContactConfig = {
   phoneOrWhatsapp: COMPANY_IDENTITY_CONFIG.whatsappDisplay,
   whatsappUrl: COMPANY_IDENTITY_CONFIG.whatsappUrl,
   officeLocation: null,
-  operatingDestinations: ["egypt", "dubai", "turkiye"],
+  operatingDestinations: ["egypt", "turkiye", "dubai"],
   inquiryHref: "#trip-inquiry-drawer",
   inquiryScrollTargetId: "hero-booking-bar",
 };

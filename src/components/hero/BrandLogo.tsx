@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { COMPANY_IDENTITY_CONFIG } from "@/config/final-cta-footer";
 
 interface BrandLogoProps {
@@ -17,8 +18,8 @@ export function BrandLogo({ isLight = false }: BrandLogoProps) {
   const [usePngFallback, setUsePngFallback] = useState(false);
 
   return (
-    <a
-      href="#top"
+    <Link
+      href="/"
       aria-label={`${COMPANY_IDENTITY_CONFIG.brandName} Home`}
       className={`group inline-flex items-center gap-3 rounded-full pr-4 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] transition-all duration-300 ${
         isLight ? "west-glass-pill px-3.5 py-1.5" : ""
@@ -101,6 +102,6 @@ export function BrandLogo({ isLight = false }: BrandLogoProps) {
           TOURS
         </span>
       </span>
-    </a>
+    </Link>
   );
 }

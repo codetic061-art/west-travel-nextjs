@@ -62,7 +62,7 @@ export const FEATURED_TRIPS_SECTION_CONFIG: FeaturedTripsSectionCopyConfig = {
   heading: "Find Your Next Journey",
   supportingText: "Explore curated trips across Egypt, Dubai and Türkiye.",
   exploreAllCtaLabel: "Explore All Trips",
-  exploreAllHref: "/trips",
+  exploreAllHref: "/destinations",
   cardCtaLabel: "Explore Journey",
   durationPlaceholderLabel: "Trip duration",
   quotePlaceholderLabel: "Request a quote",
@@ -218,10 +218,21 @@ export const FEATURED_TRIPS_CONFIG: readonly FeaturedJourneyRecord[] = [
 export function getFeaturedJourneys(
   customRecords?: readonly FeaturedJourneyRecord[]
 ): readonly FeaturedJourneyRecord[] {
-  if (customRecords && customRecords.length > 0) {
+  if (customRecords !== undefined) {
     return customRecords;
   }
   return FEATURED_TRIPS_CONFIG;
+}
+
+export function getJourneysByDestination(
+  destinationId: DestinationId | "all",
+  customRecords?: readonly FeaturedJourneyRecord[]
+): readonly FeaturedJourneyRecord[] {
+  const source = getFeaturedJourneys(customRecords);
+  if (destinationId === "all") {
+    return source;
+  }
+  return source.filter((item) => item.destinationId === destinationId);
 }
 
 export function getFeaturedJourneyBySlug(slug: string): FeaturedJourneyRecord | undefined {
