@@ -23,12 +23,12 @@ export function HeroCopy() {
     }
   };
 
-  const getSequenceStyle = (delayMs: number, durationMs = 680): React.CSSProperties =>
+  const getSequenceStyle = (delayMs: number, durationMs = 960): React.CSSProperties =>
     reducedMotion
       ? { opacity: 1, transform: "none" }
       : {
           opacity: hasEntered ? 1 : 0,
-          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 18px, 0)",
+          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 22px, 0)",
           transitionProperty: "opacity, transform",
           transitionDuration: `${durationMs}ms`,
           transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
@@ -42,9 +42,9 @@ export function HeroCopy() {
       data-hero-copy-entered={hasEntered ? "true" : "false"}
       className="flex flex-col items-start justify-center text-left max-w-2xl pt-4 lg:pt-6"
     >
-      {/* 1. Eyebrow with Warm Sunset Gold Line (160ms) */}
+      {/* 1. Eyebrow with Warm Sunset Gold Line (220ms, 920ms duration) */}
       <div
-        style={getSequenceStyle(160, 620)}
+        style={getSequenceStyle(220, 920)}
         className="mb-4 sm:mb-5 inline-flex items-center gap-3.5"
       >
         <span
@@ -56,7 +56,7 @@ export function HeroCopy() {
         </span>
       </div>
 
-      {/* 2. Dominant Editorial Serif Headline with Masked Character-by-Character Reveal */}
+      {/* 2. Dominant Editorial Serif Headline with Slower Masked Character-by-Character Reveal */}
       <h1 className="font-serif text-4xl sm:text-6xl lg:text-[4.25rem] xl:text-[4.85rem] font-semibold leading-[1.04] tracking-[-0.015em] text-white drop-shadow-[0_8px_28px_rgba(0,0,0,0.55)]">
         <span className="block">
           <SplitTextReveal
@@ -64,9 +64,9 @@ export function HeroCopy() {
             mode="chars"
             hasEntered={hasEntered}
             reducedMotion={reducedMotion}
-            baseDelayMs={230}
-            staggerMs={24}
-            durationMs={600}
+            baseDelayMs={340}
+            staggerMs={36}
+            durationMs={860}
           />
         </span>
         <span className="block mt-1">
@@ -75,25 +75,25 @@ export function HeroCopy() {
             mode="chars"
             hasEntered={hasEntered}
             reducedMotion={reducedMotion}
-            baseDelayMs={490}
-            staggerMs={28}
-            durationMs={620}
+            baseDelayMs={740}
+            staggerMs={40}
+            durationMs={880}
             unitClassName="bg-gradient-to-r from-[#F9E6B3] via-[#F4C97A] to-[#E5A93C] bg-clip-text text-transparent"
           />
         </span>
       </h1>
 
-      {/* 3. Supporting Copy (620ms) */}
+      {/* 3. Supporting Copy (980ms, 960ms duration) */}
       <p
-        style={getSequenceStyle(620, 680)}
+        style={getSequenceStyle(980, 960)}
         className="mt-5 sm:mt-6 max-w-lg text-base sm:text-lg md:text-[19px] font-normal leading-relaxed text-white/92 drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]"
       >
         {t.hero.supportingText}
       </p>
 
-      {/* 4. Primary Teal Pill CTA (730ms) */}
+      {/* 4. Primary Teal Pill CTA (1140ms, 960ms duration) */}
       <div
-        style={getSequenceStyle(730, 680)}
+        style={getSequenceStyle(1140, 960)}
         className="mt-7 sm:mt-8 flex flex-wrap items-center gap-4"
       >
         <button

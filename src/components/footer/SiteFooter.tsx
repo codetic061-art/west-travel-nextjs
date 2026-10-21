@@ -14,6 +14,7 @@ import {
 import { useHero } from "@/components/hero/HeroProvider";
 import { BrandLogo } from "@/components/hero/BrandLogo";
 import {
+  COMPANY_IDENTITY_CONFIG,
   FOOTER_CONTACT_CONFIG,
   FOOTER_LEGAL_CONFIG,
   FOOTER_NEWSLETTER_CONFIG,
@@ -23,22 +24,19 @@ import {
 import { useSectionEntrance } from "@/components/motion/MotionPrimitives";
 
 /**
- * Section 6: SiteFooter — Compact, Functional, Theme-Adaptive Footer.
- * - Desktop: Balanced 4-column layout (Brand, Quick Links, Contact Info, Newsletter) + Bottom Copyright Row.
- * - Tablet: Clean 2x2 grid with comfortable spacing.
- * - Mobile: Compact stacked layout with 2-column link/contact row and full-width pill newsletter form.
- * - Adapts intentionally to Light Mode (warm ivory surface, navy headings, muted blue-gray copy)
- *   and Dark Mode (deep navy/petrol surface, off-white headings, muted slate copy, teal accents).
- * - Never fabricates phone numbers, email addresses, office addresses, social URLs, or backend subscription success.
+ * Section 6: SiteFooter — Official WEST GLOBAL TOURS Compact, Theme-Adaptive Footer.
+ * - Displays official WEST GLOBAL TOURS emblem & wordmark, real WhatsApp (+20 120 139 8685 / wa.me),
+ *   real Email (westglobaltours.info@gmail.com), real Instagram & Facebook links,
+ *   and bottom copyright + discreet accessible "Developed by Mina Medhat" link.
  */
 export function SiteFooter() {
-  const { t, theme } = useHero();
+  const { t, theme, openInquiryDrawer } = useHero();
   const isLight = theme === "light";
   const copy = t.footer;
 
   const { ref: footerRef, hasEntered, reducedMotion } = useSectionEntrance<HTMLElement>({
-    threshold: 0.1,
-    rootMargin: "0px 0px -4% 0px",
+    threshold: 0.12,
+    rootMargin: "0px 0px -6% 0px",
   });
 
   const [email, setEmail] = useState("");
@@ -46,11 +44,17 @@ export function SiteFooter() {
     "idle" | "invalid" | "pending_integration" | "subscribed"
   >("idle");
 
-  const handleSmoothAnchorClick = (
+  const handleLinkClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
     scrollTargetId?: string,
-    isInternalRoute?: boolean
+    isInternalRoute?: boolean,
+    opensInquiryDrawer?: boolean
   ) => {
+    if (opensInquiryDrawer) {
+      e.preventDefault();
+      openInquiryDrawer(undefined, e.currentTarget);
+      return;
+    }
     if (!scrollTargetId || isInternalRoute) return;
     const targetEl = document.getElementById(scrollTargetId);
     if (targetEl) {
@@ -72,7 +76,6 @@ export function SiteFooter() {
     }
 
     if (!FOOTER_NEWSLETTER_CONFIG.subscriptionEndpoint) {
-      // Honest status message when no backend endpoint is configured yet
       setStatusState("pending_integration");
       return;
     }
@@ -85,12 +88,32 @@ export function SiteFooter() {
       ? { opacity: 1, transform: "none" }
       : {
           opacity: hasEntered ? 1 : 0,
-          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 14px, 0)",
+          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 18px, 0)",
           transitionProperty: "opacity, transform",
-          transitionDuration: "560ms",
+          transitionDuration: "860ms",
           transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
           transitionDelay: `${delayMs}ms`,
         };
+
+  const renderSocialSvg = (id: string) => {
+    if (id === "instagram") {
+      return (
+        <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-current stroke-[1.8]" aria-hidden="true">
+          <rect x="2.5" y="2.5" width="19" height="19" rx="5" />
+          <circle cx="12" cy="12" r="4.2" />
+          <circle cx="17.4" cy="6.6" r="1" className="fill-current stroke-none" />
+        </svg>
+      );
+    }
+    if (id === "facebook") {
+      return (
+        <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
+          <path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.2H8v3h2.5V21h3Z" />
+        </svg>
+      );
+    }
+    return null;
+  };
 
   return (
     <footer
@@ -106,8 +129,8 @@ export function SiteFooter() {
     >
       <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-8 lg:px-12 pt-11 pb-8 sm:pt-14 sm:pb-10">
         {/* Main 4-Column Desktop / 2-Column Tablet / Compact Mobile Layout */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.25fr_0.75fr_0.95fr_1.25fr] gap-8 sm:gap-10 lg:gap-8">
-          {/* Column 1 — Brand */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.25fr_0.75fr_1.05fr_1.2fr] gap-8 sm:gap-10 lg:gap-8">
+          {/* Column 1 — Brand + Official WEST GLOBAL TOURS Emblem + Real Social Links */}
           <div style={getColumnRevealStyle(0)} className="flex flex-col items-start">
             <BrandLogo isLight={isLight} />
             <p
@@ -118,23 +141,24 @@ export function SiteFooter() {
               {copy.brandDescription}
             </p>
 
-            {/* Render verified social profile links only when configured */}
+            {/* Real Instagram & Facebook Profile Links */}
             {FOOTER_SOCIAL_PROFILES.length > 0 && (
-              <div className="mt-5 flex items-center gap-2.5">
+              <div className="mt-5 flex items-center gap-2.5" aria-label={copy.socialFollowLabel}>
                 {FOOTER_SOCIAL_PROFILES.map((profile) => (
                   <a
                     key={profile.id}
                     href={profile.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    aria-label={profile.label}
-                    className={`inline-flex h-9 w-9 items-center justify-center rounded-full border text-xs font-semibold transition-colors ${
+                    aria-label={`${profile.label} — ${COMPANY_IDENTITY_CONFIG.brandName}`}
+                    data-footer-social={profile.id}
+                    className={`inline-flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
                       isLight
-                        ? "border-[#D8CEBC] bg-white/80 text-[#0B2B4B] hover:border-[#0E7C8E] hover:text-[#0E7C8E]"
-                        : "border-white/15 bg-white/5 text-white/85 hover:border-[#2DD4BF] hover:text-[#2DD4BF]"
+                        ? "border-[#D8CEBC] bg-white/90 text-[#0B2B4B] hover:border-[#0E7C8E] hover:bg-[#0E7C8E] hover:text-white shadow-sm"
+                        : "border-white/15 bg-white/5 text-white/85 hover:border-[#2DD4BF] hover:bg-[#0E7C8E] hover:text-white"
                     }`}
                   >
-                    {profile.label.slice(0, 2)}
+                    {renderSocialSvg(profile.id)}
                   </a>
                 ))}
               </div>
@@ -144,7 +168,7 @@ export function SiteFooter() {
           {/* Column 2 — Quick Links */}
           <nav
             aria-label={copy.quickLinksTitle}
-            style={getColumnRevealStyle(75)}
+            style={getColumnRevealStyle(130)}
             className="flex flex-col items-start"
           >
             <h3
@@ -178,10 +202,11 @@ export function SiteFooter() {
                     <a
                       href={item.href}
                       onClick={(e) =>
-                        handleSmoothAnchorClick(
+                        handleLinkClick(
                           e,
                           item.scrollTargetId,
-                          item.isInternalRoute
+                          item.isInternalRoute,
+                          item.opensInquiryDrawer
                         )
                       }
                       className={linkClasses}
@@ -194,8 +219,8 @@ export function SiteFooter() {
             </ul>
           </nav>
 
-          {/* Column 3 — Contact Info (Strictly Real Project Routes & Non-Fabricated Details) */}
-          <div style={getColumnRevealStyle(150)} className="flex flex-col items-start">
+          {/* Column 3 — Contact Info (Supplied Official Email, WhatsApp, and Trip Inquiry Drawer Trigger) */}
+          <div style={getColumnRevealStyle(260)} className="flex flex-col items-start">
             <h3
               className={`text-xs sm:text-[13px] font-semibold uppercase tracking-[0.16em] ${
                 isLight ? "text-[#0B2B4B]" : "text-white"
@@ -205,18 +230,57 @@ export function SiteFooter() {
             </h3>
 
             <ul className="mt-3.5 space-y-2.5 text-xs sm:text-[13.5px]">
-              {/* Active Trip Inquiry Link */}
+              {/* Direct Email: westglobaltours.info@gmail.com */}
               <li>
                 <a
-                  href={FOOTER_CONTACT_CONFIG.inquiryHref}
-                  onClick={(e) =>
-                    handleSmoothAnchorClick(
-                      e,
-                      FOOTER_CONTACT_CONFIG.inquiryScrollTargetId,
-                      false
-                    )
-                  }
-                  className={`group/contact inline-flex items-center gap-2 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] rounded ${
+                  href={FOOTER_CONTACT_CONFIG.emailHref}
+                  data-footer-contact="email"
+                  className={`inline-flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] rounded ${
+                    isLight
+                      ? "text-[#4F6478] hover:text-[#0E7C8E]"
+                      : "text-[#A7BCC8] hover:text-[#5EEAD4]"
+                  }`}
+                >
+                  <Mail
+                    className={`h-3.5 w-3.5 shrink-0 ${
+                      isLight ? "text-[#0E7C8E]" : "text-[#2DD4BF]"
+                    }`}
+                    aria-hidden="true"
+                  />
+                  <span className="break-all">{FOOTER_CONTACT_CONFIG.businessEmail}</span>
+                </a>
+              </li>
+
+              {/* WhatsApp Click-to-Chat: +20 120 139 8685 */}
+              <li>
+                <a
+                  href={FOOTER_CONTACT_CONFIG.whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-footer-contact="whatsapp"
+                  className={`inline-flex items-center gap-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] rounded ${
+                    isLight
+                      ? "text-[#4F6478] hover:text-[#0E7C8E]"
+                      : "text-[#A7BCC8] hover:text-[#5EEAD4]"
+                  }`}
+                >
+                  <MessageSquare
+                    className={`h-3.5 w-3.5 shrink-0 ${
+                      isLight ? "text-[#0E7C8E]" : "text-[#2DD4BF]"
+                    }`}
+                    aria-hidden="true"
+                  />
+                  <span>{FOOTER_CONTACT_CONFIG.phoneOrWhatsapp}</span>
+                </a>
+              </li>
+
+              {/* Open Trip Inquiry Drawer Action */}
+              <li>
+                <button
+                  type="button"
+                  onClick={(e) => openInquiryDrawer(undefined, e.currentTarget)}
+                  data-footer-contact="inquiry-drawer"
+                  className={`group/contact inline-flex cursor-pointer items-center gap-2 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] rounded ${
                     isLight
                       ? "text-[#0E7C8E] hover:text-[#095E6D]"
                       : "text-[#5EEAD4] hover:text-white"
@@ -228,58 +292,10 @@ export function SiteFooter() {
                     className="h-3.5 w-3.5 shrink-0 transition-transform duration-200 group-hover/contact:translate-x-0.5 group-hover/contact:-translate-y-0.5"
                     aria-hidden="true"
                   />
-                </a>
+                </button>
               </li>
 
-              {/* Business Email (Real mailto if configured, honest status label otherwise) */}
-              <li
-                className={`flex items-start gap-2 ${
-                  isLight ? "text-[#4F6478]" : "text-[#A7BCC8]"
-                }`}
-              >
-                <Mail
-                  className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${
-                    isLight ? "text-[#0E7C8E]" : "text-[#2DD4BF]"
-                  }`}
-                  aria-hidden="true"
-                />
-                {FOOTER_CONTACT_CONFIG.businessEmail ? (
-                  <a
-                    href={`mailto:${FOOTER_CONTACT_CONFIG.businessEmail}`}
-                    className="hover:underline"
-                  >
-                    {FOOTER_CONTACT_CONFIG.businessEmail}
-                  </a>
-                ) : (
-                  <span>{copy.contactEmailPending}</span>
-                )}
-              </li>
-
-              {/* Phone / WhatsApp (Real tel/link if configured, honest status label otherwise) */}
-              <li
-                className={`flex items-start gap-2 ${
-                  isLight ? "text-[#4F6478]" : "text-[#A7BCC8]"
-                }`}
-              >
-                <MessageSquare
-                  className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${
-                    isLight ? "text-[#0E7C8E]" : "text-[#2DD4BF]"
-                  }`}
-                  aria-hidden="true"
-                />
-                {FOOTER_CONTACT_CONFIG.phoneOrWhatsapp ? (
-                  <a
-                    href={`tel:${FOOTER_CONTACT_CONFIG.phoneOrWhatsapp}`}
-                    className="hover:underline"
-                  >
-                    {FOOTER_CONTACT_CONFIG.phoneOrWhatsapp}
-                  </a>
-                ) : (
-                  <span>{copy.contactPhonePending}</span>
-                )}
-              </li>
-
-              {/* Operating Destinations / Location */}
+              {/* Operating Destinations */}
               <li
                 className={`flex items-start gap-2 ${
                   isLight ? "text-[#4F6478]" : "text-[#A7BCC8]"
@@ -291,16 +307,13 @@ export function SiteFooter() {
                   }`}
                   aria-hidden="true"
                 />
-                <span>
-                  {FOOTER_CONTACT_CONFIG.officeLocation ??
-                    copy.contactDestinationsLabel}
-                </span>
+                <span>{copy.contactDestinationsLabel}</span>
               </li>
             </ul>
           </div>
 
           {/* Column 4 — Compact Pill Newsletter Subscription */}
-          <div style={getColumnRevealStyle(225)} className="flex flex-col items-start">
+          <div style={getColumnRevealStyle(390)} className="flex flex-col items-start">
             <h3
               className={`text-xs sm:text-[13px] font-semibold uppercase tracking-[0.16em] ${
                 isLight ? "text-[#0B2B4B]" : "text-white"
@@ -396,9 +409,9 @@ export function SiteFooter() {
           </div>
         </div>
 
-        {/* Bottom Bar — Subtle Divider, Copyright, Destination Corridor & Optional Legal Links */}
+        {/* Bottom Bar — Copyright & Discreet Developer Credit Link */}
         <div
-          style={getColumnRevealStyle(290)}
+          style={getColumnRevealStyle(500)}
           className={`mt-9 pt-6 border-t flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${
             isLight
               ? "border-[#E4DAC6]/85 text-[#5D7082]"
@@ -428,13 +441,24 @@ export function SiteFooter() {
                 {copy.termsAndConditions}
               </Link>
             )}
-            <span
-              className={`text-[11px] font-medium uppercase tracking-[0.18em] ${
-                isLight ? "text-[#0E7C8E]" : "text-[#5EEAD4]"
-              }`}
-            >
-              {copy.contactDestinationsLabel}
-            </span>
+
+            {/* Discreet, Keyboard-Accessible Developer Credit */}
+            <p className="inline-flex items-center gap-1 text-[11.5px]">
+              <span>{copy.developerCreditPrefix}</span>
+              <a
+                href={COMPANY_IDENTITY_CONFIG.developerUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-developer-credit="mina-medhat"
+                className={`font-medium underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] rounded px-0.5 transition-colors ${
+                  isLight
+                    ? "text-[#3E5266] hover:text-[#0E7C8E]"
+                    : "text-[#B6CAD7] hover:text-[#5EEAD4]"
+                }`}
+              >
+                {copy.developerName}
+              </a>
+            </p>
           </div>
         </div>
       </div>

@@ -38,7 +38,7 @@ export interface WhyWestTravelSectionConfig {
 export const WHY_WEST_TRAVEL_SECTION_CONFIG: WhyWestTravelSectionConfig = {
   sectionId: "why-west-travel",
   eyebrowPrefix: "WHY",
-  eyebrowHighlight: "WEST TRAVEL",
+  eyebrowHighlight: "WEST GLOBAL TOURS",
   heading: "Get the Best Travel Experience",
   supportingText:
     "Thoughtful planning, clear trip details, and dedicated support — we make your journey smoother, safer and more memorable.",

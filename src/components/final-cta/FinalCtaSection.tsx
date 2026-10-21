@@ -14,40 +14,26 @@ import {
 
 /**
  * Section 5: Final CTA — Ready for Your Next Journey?
- * - Combines the strongest visual qualities of both supplied references:
- *   1. Rounded panoramic travel photograph frame with golden-hour Nile & felucca scenery.
- *   2. Controlled atmospheric dark overlay & vignette so centered white typography remains crisp in both themes
- *      while keeping the warm golden sunset sky and shimmering water vibrant.
- *   3. Clear visual hierarchy: uppercase eyebrow, serif headline with character/word reveal,
- *      supporting copy, and a pill CTA button ("Plan My Trip →") with circular arrow badge.
- * - Connects directly to the existing interactive Trip Search & Inquiry bar (#hero-booking-bar).
+ * - Viewport-triggered slower motion (1180ms center-out mask reveal, 940ms content reveals).
+ * - Clicking "Plan My Trip →" opens the right-side Trip Inquiry Drawer (`openInquiryDrawer`).
  */
 export function FinalCtaSection() {
-  const { t, theme } = useHero();
+  const { t, theme, openInquiryDrawer } = useHero();
   const isLight = theme === "light";
   const copy = t.finalCta;
 
   const { ref: sectionRef, hasEntered, reducedMotion } = useSectionEntrance<HTMLElement>({
     threshold: 0.16,
-    rootMargin: "0px 0px -8% 0px",
+    rootMargin: "0px 0px -10% 0px",
   });
 
   const [useFallbackJpg, setUseFallbackJpg] = useState(false);
 
-  const handlePlanTripClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    const bookingEl = document.getElementById("hero-booking-bar");
-    if (bookingEl) {
-      e.preventDefault();
-      bookingEl.scrollIntoView({
-        behavior: reducedMotion ? "auto" : "smooth",
-        block: "center",
-      });
-      // Focus the first interactive control inside the booking bar after smooth scroll begins
-      window.setTimeout(() => {
-        const firstButton = bookingEl.querySelector<HTMLButtonElement>("button");
-        firstButton?.focus({ preventScroll: true });
-      }, reducedMotion ? 0 : 480);
-    }
+  const handlePlanTripClick = (
+    e: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>
+  ) => {
+    e.preventDefault();
+    openInquiryDrawer(undefined, e.currentTarget);
   };
 
   const panelMaskStyle = getDirectionalMaskStyle(
@@ -55,11 +41,11 @@ export function FinalCtaSection() {
     hasEntered,
     reducedMotion,
     0,
-    920,
+    1180,
     "28px"
   );
 
-  const getItemRevealStyle = (delayMs: number, offsetY = 18): React.CSSProperties =>
+  const getItemRevealStyle = (delayMs: number, offsetY = 20): React.CSSProperties =>
     reducedMotion
       ? { opacity: 1, transform: "none" }
       : {
@@ -68,7 +54,7 @@ export function FinalCtaSection() {
             ? "translate3d(0, 0, 0)"
             : `translate3d(0, ${offsetY}px, 0)`,
           transitionProperty: "opacity, transform",
-          transitionDuration: "720ms",
+          transitionDuration: "960ms",
           transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
           transitionDelay: `${delayMs}ms`,
         };
@@ -85,7 +71,7 @@ export function FinalCtaSection() {
       }`}
     >
       <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-8 lg:px-12">
-        {/* Cinematic Panoramic Panel with Directional Mask Reveal */}
+        {/* Cinematic Panoramic Panel with 1.18s Directional Mask Reveal */}
         <div
           style={panelMaskStyle}
           data-cta-panel=""
@@ -118,21 +104,21 @@ export function FinalCtaSection() {
                   ? "none"
                   : hasEntered
                   ? "scale(1.0)"
-                  : "scale(1.06)",
+                  : "scale(1.07)",
                 transition: reducedMotion
                   ? "none"
-                  : "transform 1250ms cubic-bezier(0.22, 1, 0.36, 1)",
+                  : "transform 1450ms cubic-bezier(0.22, 1, 0.36, 1)",
               }}
               className="object-cover saturate-[1.08] contrast-[1.03]"
             />
           </div>
 
-          {/* 2. Controlled Multi-Layer Atmospheric Overlay — Preserves Golden Sunset Sky While Ensuring Crisp White Text */}
+          {/* 2. Controlled Multi-Layer Atmospheric Overlay */}
           <div
             aria-hidden="true"
             style={{
-              opacity: reducedMotion || hasEntered ? 1 : 0.45,
-              transition: reducedMotion ? "none" : "opacity 820ms ease 120ms",
+              opacity: reducedMotion || hasEntered ? 1 : 0.4,
+              transition: reducedMotion ? "none" : "opacity 1050ms ease 160ms",
             }}
             className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#061829]/34 via-[#061B2E]/44 to-[#04111E]/78"
           />
@@ -141,7 +127,6 @@ export function FinalCtaSection() {
             className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_56%_52%_at_50%_50%,rgba(4,18,32,0.52)_0%,rgba(4,16,28,0.18)_65%,rgba(3,12,22,0.38)_100%)]"
           />
 
-          {/* Top Specular Glass Rim */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/65 to-transparent opacity-85"
@@ -149,9 +134,9 @@ export function FinalCtaSection() {
 
           {/* 3. Centered Conversion-Focused Copy Stack */}
           <div className="relative z-10 mx-auto flex max-w-[42rem] flex-col items-center text-center">
-            {/* Small Uppercase Eyebrow */}
+            {/* Small Uppercase Eyebrow (280ms) */}
             <div
-              style={getItemRevealStyle(210, 14)}
+              style={getItemRevealStyle(280, 16)}
               className="inline-flex items-center gap-3 rounded-full bg-[#061A2C]/55 px-4 py-1.5 backdrop-blur-md border border-white/25"
             >
               <span
@@ -167,7 +152,7 @@ export function FinalCtaSection() {
               />
             </div>
 
-            {/* Large, Elegant Serif Headline with Character/Word Reveal */}
+            {/* Large, Elegant Serif Headline with Character Reveal (400ms) */}
             <h2
               id="final-cta-heading"
               className="mt-4 sm:mt-5 font-serif text-3xl sm:text-5xl lg:text-[3.4rem] font-semibold leading-[1.1] tracking-[-0.015em] text-white drop-shadow-[0_6px_24px_rgba(0,0,0,0.55)]"
@@ -177,27 +162,28 @@ export function FinalCtaSection() {
                 mode="chars"
                 hasEntered={hasEntered}
                 reducedMotion={reducedMotion}
-                baseDelayMs={290}
-                staggerMs={20}
-                durationMs={620}
+                baseDelayMs={400}
+                staggerMs={30}
+                durationMs={840}
               />
             </h2>
 
-            {/* Short Supporting Sentence */}
+            {/* Short Supporting Sentence (680ms) */}
             <p
-              style={getItemRevealStyle(480, 16)}
+              style={getItemRevealStyle(680, 18)}
               className="mt-3.5 sm:mt-4 max-w-[34rem] text-sm sm:text-base lg:text-[17.5px] font-normal leading-relaxed text-white/95 drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]"
             >
               {copy.supportingText}
             </p>
 
-            {/* Primary Rounded Pill CTA Button ("Plan My Trip →") Inspired by Both References */}
-            <div style={getItemRevealStyle(600, 16)} className="mt-7 sm:mt-8">
-              <a
-                href={FINAL_CTA_SECTION_CONFIG.primaryCtaHref}
+            {/* Primary Rounded Pill CTA Button ("Plan My Trip →") — Opens the Right-Side Inquiry Drawer */}
+            <div style={getItemRevealStyle(840, 18)} className="mt-7 sm:mt-8">
+              <button
+                type="button"
                 onClick={handlePlanTripClick}
+                aria-haspopup="dialog"
                 data-final-cta-button="plan-my-trip"
-                className="group/btn inline-flex items-center gap-3.5 rounded-full bg-white/22 hover:bg-white/30 backdrop-blur-xl border border-white/55 pl-6 pr-2 py-2 sm:pl-7 sm:pr-2.5 sm:py-2.5 text-sm sm:text-[15px] font-semibold text-white shadow-[0_14px_38px_rgba(3,12,23,0.48),inset_0_1px_1px_rgba(255,255,255,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#5EEAD4]/80 hover:shadow-[0_18px_44px_rgba(14,124,142,0.48)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#061523]"
+                className="group/btn inline-flex cursor-pointer items-center gap-3.5 rounded-full bg-white/22 hover:bg-white/30 backdrop-blur-xl border border-white/55 pl-6 pr-2 py-2 sm:pl-7 sm:pr-2.5 sm:py-2.5 text-sm sm:text-[15px] font-semibold text-white shadow-[0_14px_38px_rgba(3,12,23,0.48),inset_0_1px_1px_rgba(255,255,255,0.5)] transition-all duration-300 hover:-translate-y-0.5 hover:border-[#5EEAD4]/80 hover:shadow-[0_18px_44px_rgba(14,124,142,0.48)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#061523]"
               >
                 <span className="tracking-wide">{copy.primaryCta}</span>
                 <span
@@ -206,12 +192,12 @@ export function FinalCtaSection() {
                 >
                   <ArrowRight className="h-4 w-4 stroke-[2.2] transition-transform duration-300 group-hover/btn:-rotate-12" />
                 </span>
-              </a>
+              </button>
             </div>
 
-            {/* Subtle Destination Corridor Pills Below Button */}
+            {/* Subtle Destination Corridor Pills Below Button (980ms) */}
             <div
-              style={getItemRevealStyle(700, 12)}
+              style={getItemRevealStyle(980, 14)}
               className="mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-[11px] sm:text-xs font-medium text-white/88"
             >
               {DESTINATIONS_CONFIG.map((dest, idx) => (

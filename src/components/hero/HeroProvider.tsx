@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { HERO_DICTIONARY, type HeroTranslation, type SupportedLocale } from "@/i18n/hero-dictionary";
 import type { DestinationId } from "@/config/destinations";
 
@@ -15,6 +15,13 @@ export interface BookingQueryState {
   endDate: string;
   adults: number;
   children: number;
+}
+
+export interface InquiryDrawerPrefill {
+  destination?: DestinationId | "";
+  journeySlug?: string;
+  travelers?: number;
+  preferredDate?: string;
 }
 
 interface HeroContextValue {
@@ -32,6 +39,10 @@ interface HeroContextValue {
   lastSubmittedQuery: (BookingQueryState & { submittedAt: string }) | null;
   submitBookingSearch: () => void;
   clearSubmittedQuery: () => void;
+  isInquiryDrawerOpen: boolean;
+  inquiryDrawerPrefill: InquiryDrawerPrefill | null;
+  openInquiryDrawer: (prefill?: InquiryDrawerPrefill, triggerEl?: HTMLElement | null) => void;
+  closeInquiryDrawer: () => void;
 }
 
 const HeroContext = createContext<HeroContextValue | null>(null);
@@ -61,6 +72,11 @@ export function HeroProvider({
   const [lastSubmittedQuery, setLastSubmittedQuery] = useState<
     (BookingQueryState & { submittedAt: string }) | null
   >(null);
+
+  const [isInquiryDrawerOpen, setIsInquiryDrawerOpen] = useState(false);
+  const [inquiryDrawerPrefill, setInquiryDrawerPrefill] =
+    useState<InquiryDrawerPrefill | null>(null);
+  const inquiryTriggerRef = useRef<HTMLElement | null>(null);
 
   // Read persisted theme after hydration to prevent SSR/Client mismatch
   useEffect(() => {
@@ -126,6 +142,41 @@ export function HeroProvider({
 
   const clearSubmittedQuery = () => setLastSubmittedQuery(null);
 
+  const openInquiryDrawer = useCallback(
+    (prefill?: InquiryDrawerPrefill, triggerEl?: HTMLElement | null) => {
+      if (triggerEl) {
+        inquiryTriggerRef.current = triggerEl;
+      } else if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) {
+        inquiryTriggerRef.current = document.activeElement;
+      }
+      const resolvedDest =
+        prefill?.destination ??
+        (booking.destination === "egypt" ||
+        booking.destination === "dubai" ||
+        booking.destination === "turkiye"
+          ? booking.destination
+          : activeDestination ?? "");
+      setInquiryDrawerPrefill({
+        destination: resolvedDest,
+        journeySlug: prefill?.journeySlug ?? "",
+        travelers: prefill?.travelers ?? booking.adults + booking.children,
+        preferredDate: prefill?.preferredDate ?? booking.startDate ?? "",
+      });
+      setIsInquiryDrawerOpen(true);
+    },
+    [booking, activeDestination]
+  );
+
+  const closeInquiryDrawer = useCallback(() => {
+    setIsInquiryDrawerOpen(false);
+    const trigger = inquiryTriggerRef.current;
+    if (trigger && typeof trigger.focus === "function") {
+      window.setTimeout(() => {
+        trigger.focus({ preventScroll: true });
+      }, 60);
+    }
+  }, []);
+
   const value = useMemo<HeroContextValue>(
     () => ({
       locale,
@@ -142,8 +193,22 @@ export function HeroProvider({
       lastSubmittedQuery,
       submitBookingSearch,
       clearSubmittedQuery,
+      isInquiryDrawerOpen,
+      inquiryDrawerPrefill,
+      openInquiryDrawer,
+      closeInquiryDrawer,
     }),
-    [locale, theme, activeDestination, booking, lastSubmittedQuery]
+    [
+      locale,
+      theme,
+      activeDestination,
+      booking,
+      lastSubmittedQuery,
+      isInquiryDrawerOpen,
+      inquiryDrawerPrefill,
+      openInquiryDrawer,
+      closeInquiryDrawer,
+    ]
   );
 
   // If a parent HeroProvider is already active in the tree, pass through without shadowing

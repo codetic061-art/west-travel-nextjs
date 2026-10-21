@@ -8,7 +8,7 @@ import {
 } from "@/config/why-west-travel";
 
 export const metadata = {
-  title: "Why West Travel — About Our Journey Standards | WEST TRAVEL",
+  title: "Why West Global Tours — About Our Journey Standards | WEST GLOBAL TOURS",
   description:
     "Thoughtful planning, clear trip details, and dedicated support across Egypt, Dubai, and Türkiye.",
 };
@@ -30,11 +30,11 @@ export default function AboutWestTravelPage() {
             className="inline-flex items-center gap-2 rounded-full border border-[#D5C7AE] dark:border-white/20 bg-white/80 dark:bg-white/5 px-4 py-2 text-xs sm:text-sm font-medium text-[#081C2E] dark:text-white hover:border-[#0E7C8E] transition-colors"
           >
             <ArrowLeft className="h-4 w-4 text-[#0E7C8E] dark:text-[#2DD4BF]" />
-            <span>Back to Why West Travel</span>
+            <span>Back to Why West Global Tours</span>
           </Link>
 
           <span className="text-xs font-semibold uppercase tracking-[0.22em] text-[#0E7C8E] dark:text-[#2DD4BF]">
-            WEST TRAVEL · EDITORIAL OVERVIEW
+            WEST GLOBAL TOURS · EDITORIAL OVERVIEW
           </span>
         </div>
 
@@ -64,7 +64,7 @@ export default function AboutWestTravelPage() {
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href="/#hero-booking-bar"
+                href="/#final-cta"
                 className="inline-flex items-center gap-2 rounded-full border border-[#0E7C8E]/40 dark:border-[#2DD4BF]/40 px-6 py-3.5 text-sm font-semibold text-[#0E7C8E] dark:text-[#2DD4BF] hover:bg-[#0E7C8E]/10 transition-colors"
               >
                 <span>Plan a Custom Inquiry</span>

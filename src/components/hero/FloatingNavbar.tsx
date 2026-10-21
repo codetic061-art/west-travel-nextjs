@@ -26,6 +26,7 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
     toggleTheme,
     activeDestination,
     selectDestinationForBooking,
+    openInquiryDrawer,
   } = useHero();
   const [destDropdownOpen, setDestDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -57,12 +58,9 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
     }
   };
 
-  const handleScrollToBooking = () => {
+  const handleOpenContactDrawer = (triggerEl?: HTMLElement | null) => {
     setMobileMenuOpen(false);
-    const el = document.getElementById("hero-booking-bar");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
+    openInquiryDrawer(undefined, triggerEl);
   };
 
   const handleScrollToJourneys = () => {
@@ -76,17 +74,17 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
   };
 
   /**
-   * Sequenced Navbar Entrance Style Helper:
-   * 1. Logo enters first (0ms, 500ms duration).
-   * 2. Nav links appear one by one with 85ms stagger (120ms -> 460ms).
-   * 3. Language selector, theme toggle, and mobile controls appear last (530ms).
+   * Slower, Deliberate Navbar Entrance Sequence (Section 2):
+   * 1. Logo enters first (0ms, 860ms duration).
+   * 2. Nav links appear one by one with 135ms stagger (150ms -> 690ms, 840ms duration).
+   * 3. Language selector, theme toggle, and mobile controls appear last (840ms, 860ms duration).
    */
-  const getNavRevealStyle = (delayMs: number, durationMs = 480): React.CSSProperties =>
+  const getNavRevealStyle = (delayMs: number, durationMs = 840): React.CSSProperties =>
     reducedMotion
       ? { opacity: 1, transform: "none" }
       : {
           opacity: hasEntered ? 1 : 0,
-          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, -10px, 0)",
+          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, -14px, 0)",
           transitionProperty: "opacity, transform",
           transitionDuration: `${durationMs}ms`,
           transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
@@ -95,9 +93,6 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
 
   /**
    * Tactile, pill-shaped mechanical Sun/Moon toggle switch.
-   * - Displays a rounded glassmorphic track containing both Sun (left) and Moon (right) icons.
-   * - Slides a physical circular thumb smoothly between Light Mode (left/Sun) and Dark Mode (right/Moon)
-   *   over 340ms with cubic-bezier(0.22, 1, 0.36, 1) easing.
    */
   const renderMechanicalThemeSwitch = (compact = false) => {
     const switchTitle = isLight
@@ -122,7 +117,6 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
             : "bg-gradient-to-r from-[#04101C]/95 via-[#072034]/95 to-[#0B2D45]/95 border border-white/25 shadow-[inset_0_2px_5px_rgba(0,0,0,0.68),0_0_16px_rgba(45,212,191,0.22)] focus-visible:ring-offset-[#051320]"
         }`}
       >
-        {/* Background Track Icons (Both Sun and Moon remain part of the mechanical switch track) */}
         <span
           aria-hidden="true"
           className="pointer-events-none relative z-0 flex w-full items-center justify-between px-[5px]"
@@ -143,7 +137,6 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
           />
         </span>
 
-        {/* Physical Sliding Circular Thumb / Knob */}
         <span
           aria-hidden="true"
           className={`theme-switch-thumb pointer-events-none absolute left-[3px] top-[2px] z-10 flex items-center justify-center rounded-full ${
@@ -156,7 +149,6 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
               : "translate-x-[30px] bg-gradient-to-br from-[#2DD4BF] via-[#0E7C8E] to-[#083B4C] text-white shadow-[0_2px_10px_rgba(45,212,191,0.55),inset_0_1px_1px_rgba(255,255,255,0.55)]"
           }`}
         >
-          {/* Synchronized Active Icon inside the Sliding Knob */}
           <Sun
             className={`theme-switch-icon absolute h-3.5 w-3.5 ${
               isLight
@@ -183,8 +175,8 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
       className="relative z-30 w-full px-4 sm:px-8 lg:px-12 pt-5 sm:pt-7"
     >
       <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4">
-        {/* 1. Top-left Official WEST TRAVEL Logo (Enters First: 0ms, 500ms) */}
-        <div style={getNavRevealStyle(0, 500)} data-nav-seq="logo">
+        {/* 1. Top-left Official WEST GLOBAL TOURS Logo (Enters First: 0ms, 860ms) */}
+        <div style={getNavRevealStyle(0, 860)} data-nav-seq="logo">
           <BrandLogo isLight={isLight} />
         </div>
 
@@ -195,11 +187,11 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
             isLight ? "text-slate-900" : "text-white/92"
           }`}
         >
-          {/* Nav Item 1: Destinations Dropdown (120ms) */}
+          {/* Nav Item 1: Destinations Dropdown (150ms) */}
           <div
             className="relative"
             ref={dropdownRef}
-            style={getNavRevealStyle(120, 460)}
+            style={getNavRevealStyle(150, 840)}
             data-nav-seq="item-0"
           >
             <button
@@ -259,10 +251,10 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
             )}
           </div>
 
-          {/* Nav Item 2: Experiences (205ms) */}
+          {/* Nav Item 2: Experiences (285ms) */}
           <a
             href="#hero-destination-cards"
-            style={getNavRevealStyle(205, 460)}
+            style={getNavRevealStyle(285, 840)}
             data-nav-seq="item-1"
             onClick={(e) => {
               e.preventDefault();
@@ -278,10 +270,10 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
             {t.nav.experiences}
           </a>
 
-          {/* Nav Item 3: Our Journeys (290ms) */}
+          {/* Nav Item 3: Our Journeys (420ms) */}
           <a
             href="#featured-trips"
-            style={getNavRevealStyle(290, 460)}
+            style={getNavRevealStyle(420, 840)}
             data-nav-seq="item-2"
             onClick={(e) => {
               e.preventDefault();
@@ -296,10 +288,10 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
             {t.nav.ourJourneys}
           </a>
 
-          {/* Nav Item 4: About (375ms) */}
+          {/* Nav Item 4: About (555ms) */}
           <a
             href="#why-west-travel"
-            style={getNavRevealStyle(375, 460)}
+            style={getNavRevealStyle(555, 840)}
             data-nav-seq="item-3"
             onClick={(e) => {
               e.preventDefault();
@@ -314,14 +306,14 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
             {t.nav.about}
           </a>
 
-          {/* Nav Item 5: Contact (460ms) */}
+          {/* Nav Item 5: Contact (690ms) — Opens the Trip Inquiry Drawer */}
           <a
-            href="#hero-booking-bar"
-            style={getNavRevealStyle(460, 460)}
+            href="#trip-inquiry-drawer"
+            style={getNavRevealStyle(690, 840)}
             data-nav-seq="item-4"
             onClick={(e) => {
               e.preventDefault();
-              handleScrollToBooking();
+              handleOpenContactDrawer(e.currentTarget);
             }}
             className={`rounded-full px-3 py-1.5 text-[13.5px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
               isLight
@@ -332,19 +324,17 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
             {t.nav.contact}
           </a>
 
-          {/* 3. Language Selector & Theme Controls Enter Last (530ms) */}
+          {/* 3. Language Selector & Theme Controls Enter Last (830ms) */}
           <div
-            style={getNavRevealStyle(530, 480)}
+            style={getNavRevealStyle(830, 860)}
             data-nav-seq="controls"
             className="flex items-center"
           >
-            {/* Thin Vertical Separator */}
             <span
               aria-hidden="true"
               className={`mx-1.5 h-4 w-[1px] ${isLight ? "bg-slate-900/20" : "bg-white/20"}`}
             />
 
-            {/* Language Selector: EN / TR / ES */}
             <div
               role="group"
               aria-label={t.nav.languageLabel}
@@ -374,16 +364,13 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
               })}
             </div>
 
-            {/* Thin Vertical Separator */}
             <span
               aria-hidden="true"
               className={`mx-1.5 h-4 w-[1px] ${isLight ? "bg-slate-900/20" : "bg-white/20"}`}
             />
 
-            {/* Tactile Pill-Shaped Mechanical Sun/Moon Switch */}
             {renderMechanicalThemeSwitch(false)}
 
-            {/* Optional Account Icon */}
             {hasAccountRoute && (
               <a
                 href="/account"
@@ -396,9 +383,9 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
           </div>
         </nav>
 
-        {/* Mobile & Tablet Compact Controls (530ms) */}
+        {/* Mobile & Tablet Compact Controls (830ms) */}
         <div
-          style={getNavRevealStyle(530, 480)}
+          style={getNavRevealStyle(830, 860)}
           className="flex items-center gap-2 lg:hidden"
         >
           <div
@@ -425,7 +412,6 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
             ))}
           </div>
 
-          {/* Mobile Mechanical Theme Switch */}
           {renderMechanicalThemeSwitch(true)}
 
           <button
@@ -478,17 +464,21 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
 
           <div className="flex flex-wrap gap-2 border-t border-current/10 pt-3">
             {[
-              { label: t.nav.experiences, target: "hero-destination-cards" },
-              { label: t.nav.ourJourneys, target: "featured-trips" },
-              { label: t.nav.about, target: "why-west-travel" },
-              { label: t.nav.contact, target: "hero-booking-bar" },
+              { label: t.nav.experiences, target: "hero-destination-cards", isDrawer: false },
+              { label: t.nav.ourJourneys, target: "featured-trips", isDrawer: false },
+              { label: t.nav.about, target: "why-west-travel", isDrawer: false },
+              { label: t.nav.contact, target: "trip-inquiry-drawer", isDrawer: true },
             ].map((item) => (
               <button
                 key={item.label}
                 type="button"
-                onClick={() => {
+                onClick={(e) => {
                   setMobileMenuOpen(false);
-                  document.getElementById(item.target)?.scrollIntoView({ behavior: "smooth" });
+                  if (item.isDrawer) {
+                    handleOpenContactDrawer(e.currentTarget);
+                  } else {
+                    document.getElementById(item.target)?.scrollIntoView({ behavior: "smooth" });
+                  }
                 }}
                 className={`rounded-full px-4 py-2 text-xs font-medium ${
                   isLight ? "bg-white/60 hover:bg-white/80" : "bg-white/10 hover:bg-white/15"

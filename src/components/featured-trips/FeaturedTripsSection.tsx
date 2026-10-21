@@ -22,11 +22,8 @@ export interface FeaturedTripsSectionProps {
 
 /**
  * Section 2: Featured Trips — Find Your Next Journey.
- * - Matches the Light Mode reference layout and provides a dedicated Dark Mode palette.
+ * - Viewport-triggered slower motion (0.94s header reveals, 1.05s card entrances, 1.18s directional image masks).
  * - Desktop: 5-card asymmetric layout (2 stacked left, 1 tall featured center, 2 stacked right).
- * - Tablet: Balanced 2-column grid with prominent featured center journey.
- * - Mobile: Swipeable horizontal snap carousel with prev/next arrows and 5 pagination dots.
- * - Includes the mandatory centered "Explore All Trips →" pill CTA below the subtitle.
  */
 export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTripsSectionProps) {
   const { t, theme } = useHero();
@@ -41,13 +38,12 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
 
   const mobileCarouselRef = useRef<HTMLDivElement | null>(null);
   const { ref: sectionRef, hasEntered, reducedMotion } = useSectionEntrance<HTMLElement>({
-    threshold: 0.12,
-    rootMargin: "0px 0px -8% 0px",
+    threshold: 0.16,
+    rootMargin: "0px 0px -10% 0px",
   });
 
   const [activeIndex, setActiveIndex] = useState<number>(0);
 
-  // Synchronize mobile carousel scroll position with pagination controls
   const scrollToMobileIndex = useCallback(
     (index: number) => {
       const bounded = ((index % journeys.length) + journeys.length) % journeys.length;
@@ -101,14 +97,14 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
     scrollToMobileIndex(activeIndex + 1);
   };
 
-  const getHeaderEntranceStyle = (delayMs: number): React.CSSProperties =>
+  const getHeaderEntranceStyle = (delayMs: number, durationMs = 940): React.CSSProperties =>
     reducedMotion
       ? { opacity: 1, transform: "none" }
       : {
           opacity: hasEntered ? 1 : 0,
-          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 18px, 0)",
+          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 22px, 0)",
           transitionProperty: "opacity, transform",
-          transitionDuration: "720ms",
+          transitionDuration: `${durationMs}ms`,
           transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
           transitionDelay: `${delayMs}ms`,
         };
@@ -126,19 +122,16 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
           : "text-[#F8FAFC]"
       }`}
     >
-      {/* Subtle Theme-Specific Ambient Background Surface Layer */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-transparent"
       />
 
-      {/* Main Content Container */}
       <div className="relative z-10 mx-auto w-full max-w-[1380px] px-4 sm:px-8 lg:px-12">
-        {/* Section Header Hierarchy */}
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
           {/* Eyebrow: — FEATURED TRIPS — */}
           <div
-            style={getHeaderEntranceStyle(0)}
+            style={getHeaderEntranceStyle(0, 900)}
             className="inline-flex items-center gap-3.5 sm:gap-4"
           >
             <span
@@ -166,7 +159,7 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
             />
           </div>
 
-          {/* Main Editorial Serif Heading: Find Your Next Journey (Masked Character Reveal) */}
+          {/* Main Editorial Serif Heading: Find Your Next Journey (Slower Masked Character Reveal) */}
           <h2
             id="featured-trips-heading"
             className={`mt-3 font-serif text-3xl sm:text-5xl lg:text-[3.35rem] font-semibold leading-[1.12] tracking-[-0.015em] ${
@@ -178,15 +171,15 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
               mode="chars"
               hasEntered={hasEntered}
               reducedMotion={reducedMotion}
-              baseDelayMs={65}
-              staggerMs={20}
-              durationMs={600}
+              baseDelayMs={110}
+              staggerMs={32}
+              durationMs={840}
             />
           </h2>
 
-          {/* Supporting Text: Explore curated trips across Egypt, Dubai and Türkiye. */}
+          {/* Supporting Text */}
           <p
-            style={getHeaderEntranceStyle(180)}
+            style={getHeaderEntranceStyle(260, 940)}
             className={`mt-3.5 text-sm sm:text-base lg:text-[17px] font-normal leading-relaxed ${
               isLight ? "text-[#546576]" : "text-slate-300/85"
             }`}
@@ -195,7 +188,7 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
           </p>
 
           {/* Mandatory Section-Level CTA — Explore All Trips → */}
-          <div style={getHeaderEntranceStyle(250)} className="mt-6 flex justify-center">
+          <div style={getHeaderEntranceStyle(400, 940)} className="mt-6 flex justify-center">
             <Link
               href={FEATURED_TRIPS_SECTION_CONFIG.exploreAllHref}
               data-section-cta="explore-all-trips"
@@ -214,12 +207,11 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
           </div>
         </div>
 
-        {/* 1. DESKTOP ASYMMETRIC FIVE-CARD LAYOUT (lg and above: 2 Left, 1 Tall Center, 2 Right) */}
+        {/* 1. DESKTOP ASYMMETRIC FIVE-CARD LAYOUT */}
         <div
           data-layout-tier="desktop-asymmetric"
           className="mt-10 lg:mt-12 hidden lg:grid lg:grid-cols-[1fr_1.12fr_1fr] xl:grid-cols-[1fr_1.15fr_1fr] items-stretch gap-6"
         >
-          {/* Left Column: Two Smaller Stacked Journey Cards */}
           <div className="flex flex-col justify-between gap-6">
             {leftCards.map((journey) => (
               <JourneyCard
@@ -236,7 +228,6 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
             ))}
           </div>
 
-          {/* Center Column: One Larger, Visually Prominent Featured Journey Card */}
           <div className="flex flex-col justify-center">
             <JourneyCard
               key={`desktop-center-${centerCard.id}`}
@@ -251,7 +242,6 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
             />
           </div>
 
-          {/* Right Column: Two Smaller Stacked Journey Cards */}
           <div className="flex flex-col justify-between gap-6">
             {rightCards.map((journey) => (
               <JourneyCard
@@ -269,7 +259,7 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
           </div>
         </div>
 
-        {/* 2. TABLET REDUCED-COLUMN LAYOUT (md to lg: Prominent Center Journey + 2x2 Grid) */}
+        {/* 2. TABLET REDUCED-COLUMN LAYOUT */}
         <div
           data-layout-tier="tablet-grid"
           className="mt-10 hidden md:grid lg:hidden grid-cols-2 gap-5"
@@ -302,7 +292,7 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
           ))}
         </div>
 
-        {/* 3. MOBILE SWIPEABLE HORIZONTAL SNAP CAROUSEL (below md: all 5 journeys reachable) */}
+        {/* 3. MOBILE SWIPEABLE HORIZONTAL SNAP CAROUSEL */}
         <div data-layout-tier="mobile-carousel" className="mt-8 md:hidden -mx-4 px-4">
           <div
             ref={mobileCarouselRef}
@@ -332,9 +322,9 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
           </div>
         </div>
 
-        {/* Bottom Navigation Controls: Previous Arrow (<), 5 Pagination Dots, Next Arrow (>) */}
+        {/* Bottom Navigation Controls */}
         <div
-          style={getHeaderEntranceStyle(340)}
+          style={getHeaderEntranceStyle(540, 940)}
           className="mt-8 lg:mt-10 flex items-center justify-center gap-5 sm:gap-6"
           role="group"
           aria-label="Featured Trips Pagination Controls"
@@ -352,7 +342,6 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
             <ChevronLeft className="h-4 w-4 stroke-[2]" />
           </button>
 
-          {/* 5 Journey Pagination Dots */}
           <div className="flex items-center gap-2.5" role="tablist" aria-label="Select featured journey">
             {journeys.map((journey, idx) => {
               const isCurrent = activeIndex === idx;

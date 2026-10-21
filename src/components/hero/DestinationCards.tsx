@@ -32,7 +32,6 @@ export function DestinationCards() {
 
   const handleCardSelect = (id: DestinationId) => {
     if (activeDestination === id) {
-      // Clicking the already-active card toggles back to the 3-destination panoramic view
       setActiveDestination(null);
     } else {
       selectDestinationForBooking(id);
@@ -60,7 +59,8 @@ export function DestinationCards() {
         ? "w-full h-[180px] xl:h-[194px]"
         : "flex-shrink-0 snap-center w-[278px] sm:w-[308px] h-[178px] sm:h-[190px]";
 
-    const delayMs = 760 + staggerIndex * 95;
+    // Slower, appreciable stagger (155ms apart) and 1180ms directional image-mask reveal
+    const delayMs = 980 + staggerIndex * 155;
     const maskDirection: MaskDirection =
       variant === "featured" ? "bottom-to-top" : "right-to-left";
 
@@ -71,8 +71,10 @@ export function DestinationCards() {
           transform: hasEntered
             ? undefined
             : variant === "featured"
-            ? "translate3d(0, 22px, 0)"
-            : "translate3d(22px, 0, 0)",
+            ? "translate3d(0, 26px, 0)"
+            : "translate3d(26px, 0, 0)",
+          transitionDuration: "960ms",
+          transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
           transitionDelay: `${delayMs}ms`,
         };
 
@@ -81,7 +83,7 @@ export function DestinationCards() {
       hasEntered,
       reducedMotion,
       delayMs,
-      780,
+      1180,
       "22px"
     );
 
@@ -103,7 +105,7 @@ export function DestinationCards() {
             : "west-card-shell hover:border-[#5EEAD4]/60 hover:-translate-y-1"
         }`}
       >
-        {/* High-Resolution Destination Photograph with Directional Mask Reveal */}
+        {/* High-Resolution Destination Photograph with 1.18s Directional Mask Reveal */}
         <div className="absolute inset-0" style={imageMaskStyle}>
           <Image
             src={dest.cardImageWebp}
@@ -201,10 +203,7 @@ export function DestinationCards() {
     >
       {/* Desktop Asymmetric Editorial Grid: 1 Large Featured Card (Left) + 2 Compact Cards (Right) */}
       <div className="hidden lg:grid lg:grid-cols-[246px_228px] xl:grid-cols-[266px_246px] items-center gap-4">
-        {/* Left Column: ONE Large Featured Card (02 Istanbul - Türkiye, offset vertically between the right stack) */}
         <div className="w-full">{renderCard(featuredDest, "featured", 0)}</div>
-
-        {/* Right Column: TWO Smaller Destination Cards (01 Cairo - Egypt & 03 Dubai - UAE) */}
         <div className="flex flex-col gap-4 w-full">
           {compactDests.map((dest, idx) => renderCard(dest, "compact", idx + 1))}
         </div>
@@ -222,7 +221,7 @@ export function DestinationCards() {
             ? { opacity: 1 }
             : {
                 opacity: hasEntered ? 1 : 0,
-                transition: "opacity 600ms ease 1020ms",
+                transition: "opacity 840ms ease 1420ms",
               }
         }
         className="mt-3.5 flex flex-wrap items-center justify-between lg:justify-end gap-3 w-full pr-1"

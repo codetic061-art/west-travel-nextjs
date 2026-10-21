@@ -23,14 +23,9 @@ export interface JourneyCardProps {
 }
 
 /**
- * Individual bookable Journey Card for the WEST TRAVEL Featured Trips section.
- * - Preserves primary legibility before hover (location pin + label, serif journey title,
- *   duration/quote metadata rows, and "Explore Journey →" pill button).
- * - Reveals expanded journey description (when real content exists) and itinerary metadata
- *   on desktop hover, keyboard focus-within, or touch tap interaction.
- * - Coordinates asymmetric entrance motion (left column from left, center from below,
- *   right column from right), directional image mask reveals, and a delayed settle animation
- *   for the CTA button.
+ * Individual bookable Journey Card for the WEST GLOBAL TOURS Featured Trips section.
+ * - Uses slower, deliberate entrance durations (1040ms card slide, 1180ms directional image mask,
+ *   840ms delayed CTA button settle, and 155ms stagger between cards).
  */
 export function JourneyCard({
   journey,
@@ -47,7 +42,6 @@ export function JourneyCard({
   const isFeaturedSize = variant === "desktop-featured" || variant === "tablet-featured";
   const isMobile = variant === "mobile";
 
-  // Calculate entrance animation vector, directional mask, & stagger timing
   const getEntranceTiming = (): {
     cardDelayMs: number;
     initialTransform: string;
@@ -55,34 +49,34 @@ export function JourneyCard({
   } => {
     if (isMobile) {
       return {
-        cardDelayMs: 120 + journey.carouselIndex * 70,
-        initialTransform: "translate3d(0, 22px, 0)",
+        cardDelayMs: 180 + journey.carouselIndex * 135,
+        initialTransform: "translate3d(0, 26px, 0)",
         maskDirection: "bottom-to-top",
       };
     }
     if (journey.columnPosition === "left") {
       return {
-        cardDelayMs: journey.columnStackIndex === 0 ? 115 : 240,
-        initialTransform: "translate3d(-38px, 0, 0)",
+        cardDelayMs: journey.columnStackIndex === 0 ? 180 : 350,
+        initialTransform: "translate3d(-44px, 0, 0)",
         maskDirection: "left-to-right",
       };
     }
     if (journey.columnPosition === "center") {
       return {
-        cardDelayMs: 175,
-        initialTransform: "translate3d(0, 38px, 0)",
+        cardDelayMs: 265,
+        initialTransform: "translate3d(0, 44px, 0)",
         maskDirection: "bottom-to-top",
       };
     }
     return {
-      cardDelayMs: journey.columnStackIndex === 0 ? 145 : 270,
-      initialTransform: "translate3d(38px, 0, 0)",
+      cardDelayMs: journey.columnStackIndex === 0 ? 225 : 395,
+      initialTransform: "translate3d(44px, 0, 0)",
       maskDirection: "right-to-left",
     };
   };
 
   const { cardDelayMs, initialTransform, maskDirection } = getEntranceTiming();
-  const ctaDelayMs = cardDelayMs + 165;
+  const ctaDelayMs = cardDelayMs + 240;
 
   const cardEntranceStyle: React.CSSProperties = reducedMotion
     ? { opacity: 1, transform: "none" }
@@ -90,7 +84,7 @@ export function JourneyCard({
         opacity: hasEntered ? 1 : 0,
         transform: hasEntered ? "translate3d(0, 0, 0)" : initialTransform,
         transitionProperty: "opacity, transform, box-shadow, border-color",
-        transitionDuration: "780ms",
+        transitionDuration: "1040ms",
         transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
         transitionDelay: `${cardDelayMs}ms`,
       };
@@ -99,8 +93,8 @@ export function JourneyCard({
     maskDirection,
     hasEntered,
     reducedMotion,
-    cardDelayMs + 30,
-    820,
+    cardDelayMs + 45,
+    1180,
     "20px"
   );
 
@@ -108,9 +102,9 @@ export function JourneyCard({
     ? { opacity: 1, transform: "none" }
     : {
         opacity: hasEntered ? 1 : 0,
-        transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 10px, 0)",
+        transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 14px, 0)",
         transitionProperty: "opacity, transform, background-color, border-color, box-shadow",
-        transitionDuration: "620ms",
+        transitionDuration: "840ms",
         transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
         transitionDelay: `${ctaDelayMs}ms`,
       };
@@ -126,7 +120,6 @@ export function JourneyCard({
       ? "h-[252px]"
       : "h-[396px] sm:h-[416px]";
 
-  // Separate Light Mode and Dark Mode surface, border, and shadow styling
   const cardSurfaceClasses = journey.isFeaturedCenter
     ? isLight
       ? "bg-[#092136] border border-[#22D3EE]/80 ring-1 ring-[#22D3EE]/60 shadow-[0_22px_52px_rgba(10,32,54,0.22),0_0_26px_rgba(34,211,238,0.30)] hover:shadow-[0_28px_60px_rgba(10,32,54,0.30),0_0_34px_rgba(34,211,238,0.42)]"
@@ -159,7 +152,7 @@ export function JourneyCard({
         isLight ? "focus-within:ring-offset-[#FAF8F3]" : "focus-within:ring-offset-[#061523]"
       } ${cardSurfaceClasses}`}
     >
-      {/* Scenic Travel Photograph with Directional Mask Reveal & Smooth Scale on Hover/Focus */}
+      {/* Scenic Travel Photograph with 1.18s Directional Mask Reveal */}
       <div className="absolute inset-0" style={imageMaskStyle}>
         <Image
           src={journey.imageWebp}
@@ -175,19 +168,16 @@ export function JourneyCard({
         />
       </div>
 
-      {/* Subtle Top Readability Vignette for Location Pin Label */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#041322]/42 via-[#041322]/12 to-transparent"
       />
 
-      {/* Base Bottom Readability Gradient Scrim (Keeps upper sky vivid while anchoring bottom text) */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-[#03111F]/95 via-[#051B2E]/58 to-transparent transition-opacity duration-500"
       />
 
-      {/* Stronger Hover / Focus / Touch Readability Scrim */}
       <div
         aria-hidden="true"
         className={`pointer-events-none absolute inset-0 bg-gradient-to-t from-[#020D18]/98 via-[#051A2D]/78 to-[#041322]/25 transition-opacity duration-500 ${
@@ -197,7 +187,6 @@ export function JourneyCard({
         }`}
       />
 
-      {/* Subtle Top Specular Highlight Rim */}
       <div
         aria-hidden="true"
         className={`pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent to-transparent ${
@@ -209,7 +198,7 @@ export function JourneyCard({
         }`}
       />
 
-      {/* Top Row: Location Pin + Location Label (and Touch Info Toggle on Mobile/Touch) */}
+      {/* Top Row: Location Pin + Location Label */}
       <div className="absolute inset-x-4 sm:inset-x-5 top-4 flex items-center justify-between gap-2 z-10">
         <div className="inline-flex items-center gap-1.5 text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.65)]">
           <span
@@ -223,7 +212,6 @@ export function JourneyCard({
           </span>
         </div>
 
-        {/* Accessible Touch / Keyboard Details Toggle (visible on mobile/touch or keyboard focus) */}
         <button
           type="button"
           onClick={(e) => {
@@ -243,9 +231,8 @@ export function JourneyCard({
         </button>
       </div>
 
-      {/* Bottom Content Stack: Journey Title + Expandable Hover Details + Metadata & Explore CTA */}
+      {/* Bottom Content Stack */}
       <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end p-4 sm:p-5">
-        {/* Individual Journey Title */}
         <h3
           className={`font-serif font-medium tracking-[-0.01em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] transition-transform duration-500 ease-out ${
             isFeaturedSize
@@ -256,7 +243,6 @@ export function JourneyCard({
           {journey.title}
         </h3>
 
-        {/* Expandable Hover / Focus / Touch Details Panel (Description + Available Itinerary Metadata) */}
         <div
           className={`grid transition-all duration-500 ease-out ${
             touchExpanded || isMobile
@@ -277,7 +263,6 @@ export function JourneyCard({
               </p>
             )}
 
-            {/* Available Itinerary Metadata Pills */}
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
               <span className="inline-flex items-center gap-1 rounded-full bg-white/12 border border-white/20 px-2.5 py-0.5 text-[10.5px] font-medium text-[#A5F3FC]">
                 <Compass className="h-2.5 w-2.5 text-[#2DD4BF] shrink-0" />
@@ -290,9 +275,7 @@ export function JourneyCard({
           </div>
         </div>
 
-        {/* Primary Bottom Bar: Left Metadata Stack + Right Responsive "Explore Journey →" Pill Button */}
         <div className="mt-3 flex items-end justify-between gap-2.5 sm:gap-3 pt-1">
-          {/* Trip Duration & Price / Request a Quote Metadata */}
           <dl className="flex flex-col gap-1 min-w-0 flex-1 text-[11.5px] sm:text-xs text-white/85">
             <div className="flex items-center gap-1.5">
               <dt className="sr-only">Duration</dt>
@@ -312,7 +295,6 @@ export function JourneyCard({
             </div>
           </dl>
 
-          {/* Explore Journey → Pill Outline CTA with Fluid Tablet/Mobile Sizing & Delayed Entrance */}
           <div style={ctaEntranceStyle} className="shrink-0 max-w-full">
             <Link
               href={journey.href}
