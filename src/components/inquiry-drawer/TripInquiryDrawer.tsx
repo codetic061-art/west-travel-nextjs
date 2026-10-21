@@ -5,7 +5,7 @@ import { useHero } from "@/components/hero/HeroProvider";
 import { DESTINATIONS_CONFIG, type DestinationId } from "@/config/destinations";
 import {
   FEATURED_TRIPS_CONFIG,
-  type FeaturedTripId,
+  type FeaturedJourneyRecord,
 } from "@/config/featured-trips";
 import {
   buildEmailInquiryHref,
@@ -18,7 +18,7 @@ interface InquiryFormState {
   fullName: string;
   phone: string;
   destinationId: DestinationId | "";
-  tripId: FeaturedTripId | "";
+  tripId: FeaturedJourneyRecord["id"] | "";
   travelers: number;
   travelDate: string;
   notes: string;
@@ -879,7 +879,7 @@ export function TripInquiryDrawer() {
                       value={formState.tripId}
                       onChange={(e) => {
                         const nextTripId = e.target.value as
-                          | FeaturedTripId
+                          | FeaturedJourneyRecord["id"]
                           | "";
                         setFormState((prev) => {
                           let nextDest = prev.destinationId;
