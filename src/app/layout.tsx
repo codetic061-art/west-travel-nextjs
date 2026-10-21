@@ -17,9 +17,9 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "WEST TRAVEL — Egypt, Dubai & Türkiye | Luxury Journeys",
+  title: "WEST GLOBAL TOURS — Egypt, Dubai & Türkiye | Luxury Journeys",
   description:
-    "Explore · Dream · Discover. Three extraordinary destinations—Egypt, Dubai & Türkiye—in one unforgettable journey.",
+    "Explore · Dream · Discover. Three extraordinary destinations—Egypt, Dubai & Türkiye—in one unforgettable journey with WEST GLOBAL TOURS.",
 };
 
 export default function RootLayout({

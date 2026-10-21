@@ -22,7 +22,6 @@ const FEATURE_ICONS = {
   booking: CalendarCheck,
 } as const;
 
-// Separate campaign assets, not the legacy combined collage. See the asset handoff.
 const ASSETS = {
   traveler: "/images/why-west-travel/traveler.webp",
   landmarks: "/images/why-west-travel/landmarks.webp",
@@ -31,11 +30,8 @@ const ASSETS = {
 type ImageStatus = "loading" | "ready" | "failed";
 
 /**
- * Section 3: Why West Travel — Coordinated 3-Part Editorial Reveal (Section 14):
- * - Left: Service benefits enter with a subtle stagger from the left; circular icons settle shortly after.
- * - Center: Traveler-and-landmark composition reveals through a controlled vertical mask + organic brush mask.
- * - Right: Eyebrow, word-by-word serif heading, supporting text, and "Learn More" CTA appear from the right.
- * - Decorative SVGs use a restrained opacity/route reveal without continuous oscillation.
+ * Section 3: Why West Global Tours — Coordinated 3-Part Editorial Reveal (Section 2 & 14):
+ * - Viewport-triggered slower motion (960ms content reveals, 145ms benefit stagger, 1240ms center visual mask).
  */
 export function WhyWestTravelSection() {
   const { t, theme, locale } = useHero();
@@ -43,8 +39,8 @@ export function WhyWestTravelSection() {
   const assetCopy = WHY_WEST_ASSET_COPY[locale];
 
   const { ref: sectionRef, hasEntered, reducedMotion } = useSectionEntrance<HTMLElement>({
-    threshold: 0.14,
-    rootMargin: "0px 0px -8% 0px",
+    threshold: 0.16,
+    rootMargin: "0px 0px -10% 0px",
   });
 
   const [traveler, setTraveler] = useState<ImageStatus>("loading");
@@ -53,17 +49,17 @@ export function WhyWestTravelSection() {
   const getDirectionalSlideStyle = (
     direction: "left" | "right" | "up",
     delayMs: number,
-    durationMs = 700
+    durationMs = 960
   ): React.CSSProperties => {
     if (reducedMotion) {
       return { opacity: 1, transform: "none" };
     }
     const initialTransform =
       direction === "left"
-        ? "translate3d(-24px, 0, 0)"
+        ? "translate3d(-28px, 0, 0)"
         : direction === "right"
-        ? "translate3d(24px, 0, 0)"
-        : "translate3d(0, 22px, 0)";
+        ? "translate3d(28px, 0, 0)"
+        : "translate3d(0, 26px, 0)";
     return {
       opacity: hasEntered ? 1 : 0,
       transform: hasEntered ? "translate3d(0, 0, 0)" : initialTransform,
@@ -78,8 +74,8 @@ export function WhyWestTravelSection() {
     "bottom-to-top",
     hasEntered,
     reducedMotion,
-    110,
-    880,
+    160,
+    1240,
     "0px"
   );
 
@@ -99,7 +95,7 @@ export function WhyWestTravelSection() {
           <MessageAccent />
           <p
             className={styles.eyebrow}
-            style={getDirectionalSlideStyle("right", 40)}
+            style={getDirectionalSlideStyle("right", 80, 920)}
             data-reveal="right"
           >
             <span className={styles.eyebrowPrefix}>{copy.eyebrowPrefix}</span>{" "}
@@ -117,9 +113,9 @@ export function WhyWestTravelSection() {
                 mode="words"
                 hasEntered={hasEntered}
                 reducedMotion={reducedMotion}
-                baseDelayMs={110}
-                staggerMs={55}
-                durationMs={620}
+                baseDelayMs={180}
+                staggerMs={110}
+                durationMs={860}
               />
             </span>{" "}
             <span>
@@ -128,16 +124,16 @@ export function WhyWestTravelSection() {
                 mode="words"
                 hasEntered={hasEntered}
                 reducedMotion={reducedMotion}
-                baseDelayMs={230}
-                staggerMs={55}
-                durationMs={620}
+                baseDelayMs={420}
+                staggerMs={110}
+                durationMs={860}
               />
             </span>
           </h2>
 
           <p
             className={styles.description}
-            style={getDirectionalSlideStyle("right", 280)}
+            style={getDirectionalSlideStyle("right", 520, 960)}
             data-reveal="right"
           >
             {copy.supportingText}
@@ -145,7 +141,7 @@ export function WhyWestTravelSection() {
 
           <div
             className={styles.ctaWrap}
-            style={getDirectionalSlideStyle("right", 380)}
+            style={getDirectionalSlideStyle("right", 680, 960)}
             data-reveal="right"
           >
             <Link
@@ -159,7 +155,7 @@ export function WhyWestTravelSection() {
           </div>
         </div>
 
-        {/* Center Visual Column: Landmarks + Traveler Revealed Through Controlled Directional Mask */}
+        {/* Center Visual Column: Landmarks + Traveler Revealed Through 1.24s Directional Mask */}
         <div
           className={styles.visual}
           style={centerVisualMaskStyle}
@@ -199,28 +195,28 @@ export function WhyWestTravelSection() {
           </div>
         </div>
 
-        {/* Left Column on Desktop: Staggered Service Benefits */}
+        {/* Left Column on Desktop: Staggered Service Benefits (145ms apart) */}
         <ul className={styles.benefits}>
           {WHY_WEST_TRAVEL_FEATURES.map((feature, index) => {
             const Icon = FEATURE_ICONS[feature.id];
             const localized = copy.features[feature.id];
-            const rowDelay = 60 + index * 85;
+            const rowDelay = 120 + index * 145;
             const iconStyle: React.CSSProperties = reducedMotion
               ? { opacity: 1, transform: "none" }
               : {
                   opacity: hasEntered ? 1 : 0,
-                  transform: hasEntered ? "scale(1)" : "scale(0.86)",
+                  transform: hasEntered ? "scale(1)" : "scale(0.84)",
                   transitionProperty: "opacity, transform",
-                  transitionDuration: "540ms",
+                  transitionDuration: "820ms",
                   transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
-                  transitionDelay: `${rowDelay + 75}ms`,
+                  transitionDelay: `${rowDelay + 120}ms`,
                 };
 
             return (
               <li
                 key={feature.id}
                 className={styles.feature}
-                style={getDirectionalSlideStyle("left", rowDelay)}
+                style={getDirectionalSlideStyle("left", rowDelay, 960)}
                 data-reveal="left"
                 data-why-feature={feature.id}
                 data-verification-status={feature.verificationStatus}

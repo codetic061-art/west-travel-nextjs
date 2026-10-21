@@ -14,7 +14,6 @@ import {
 } from "@/config/traveler-stories";
 import {
   SplitTextReveal,
-  getDirectionalMaskStyle,
   useSectionEntrance,
 } from "@/components/motion/MotionPrimitives";
 import {
@@ -84,6 +83,17 @@ function getSlotSagPx(slotOffset: number, visibleCount: number): number {
   }
 }
 
+/**
+ * Section 4: Traveler Stories ("Our Latest Stories") — Polaroid Clothesline Carousel
+ * Implements the 7-step physical clothesline entrance sequence when scrolling into view:
+ * 1. The empty clothesline becomes visible first (0ms–500ms).
+ * 2. Holds the empty line briefly (~900ms) so visitors perceive the physical rope before cards arrive.
+ * 3. Review cards enter from their respective directions in a coordinated sequence (staggered 155ms apart).
+ * 4. Each card reaches its rope and clothespin position with a gentle physical rope impact flex.
+ * 5. Cards approach their resting slots cleanly without overlapping or covering neighboring text.
+ * 6. Each card and its clothespin perform a short damped spring-back swing (~820ms).
+ * 7. Movement settles into stable resting angles [-2.8deg, +1.5deg, -1.5deg, +2.8deg].
+ */
 export function TravelerStoriesSection({
   stories: customStories,
 }: TravelerStoriesSectionProps) {
@@ -101,8 +111,8 @@ export function TravelerStoriesSection({
   const hasSampleEntries = stories.some((s) => s.isSampleData);
 
   const { ref: sectionRef, hasEntered, reducedMotion } = useSectionEntrance<HTMLElement>({
-    threshold: 0.14,
-    rootMargin: "0px 0px -8% 0px",
+    threshold: 0.18,
+    rootMargin: "0px 0px -10% 0px",
   });
 
   // Monotonic step counter drives one-by-one circular replacement so every card DOM node
@@ -113,6 +123,8 @@ export function TravelerStoriesSection({
   );
   const [motionDirection, setMotionDirection] = useState<MotionDirection>("idle");
   const [isRopeFlexing, setIsRopeFlexing] = useState<boolean>(false);
+  const [cardsReleased, setCardsReleased] = useState<boolean>(false);
+  const [initialHangDone, setInitialHangDone] = useState<boolean>(false);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   const swingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -139,12 +151,44 @@ export function TravelerStoriesSection({
     return () => window.removeEventListener("resize", updateViewportCounts);
   }, []);
 
+  // Coordinate the 7-step clothesline entrance sequence when the section enters the viewport
   useEffect(() => {
     if (reducedMotion) {
+      setCardsReleased(true);
+      setInitialHangDone(true);
       setMotionDirection("idle");
       setIsRopeFlexing(false);
+      return;
     }
-  }, [reducedMotion]);
+
+    if (!hasEntered) return;
+
+    // Step 1 & 2: Empty clothesline is visible at 0ms and held empty for ~900ms
+    const releaseTimer = window.setTimeout(() => {
+      setCardsReleased(true);
+    }, 900);
+
+    // Step 4: As cards reach the rope (~1550ms), trigger a physical rope impact flex
+    const impactTimer = window.setTimeout(() => {
+      setIsRopeFlexing(true);
+    }, 1520);
+
+    const relaxRopeTimer = window.setTimeout(() => {
+      setIsRopeFlexing(false);
+    }, 2180);
+
+    // Step 7: Mark initial hang sequence complete once all 4 cards have settled
+    const settleTimer = window.setTimeout(() => {
+      setInitialHangDone(true);
+    }, 2680);
+
+    return () => {
+      window.clearTimeout(releaseTimer);
+      window.clearTimeout(impactTimer);
+      window.clearTimeout(relaxRopeTimer);
+      window.clearTimeout(settleTimer);
+    };
+  }, [hasEntered, reducedMotion]);
 
   useEffect(() => {
     return () => {
@@ -158,6 +202,8 @@ export function TravelerStoriesSection({
     (delta: number) => {
       if (delta === 0 || totalStories === 0) return;
       const direction: MotionDirection = delta > 0 ? "next" : "prev";
+      setCardsReleased(true);
+      setInitialHangDone(true);
       setStepCount((prev) => prev + delta);
 
       if (reducedMotion) {
@@ -175,7 +221,7 @@ export function TravelerStoriesSection({
       swingTimeoutRef.current = setTimeout(() => {
         setMotionDirection("idle");
         setIsRopeFlexing(false);
-      }, 690);
+      }, 780);
     },
     [reducedMotion, totalStories]
   );
@@ -237,14 +283,14 @@ export function TravelerStoriesSection({
     }
   };
 
-  const getHeaderRevealStyle = (delayMs: number): React.CSSProperties =>
+  const getHeaderRevealStyle = (delayMs: number, durationMs = 940): React.CSSProperties =>
     reducedMotion
       ? { opacity: 1, transform: "none" }
       : {
           opacity: hasEntered ? 1 : 0,
-          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 16px, 0)",
+          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 20px, 0)",
           transitionProperty: "opacity, transform",
-          transitionDuration: "680ms",
+          transitionDuration: `${durationMs}ms`,
           transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
           transitionDelay: `${delayMs}ms`,
         };
@@ -262,6 +308,8 @@ export function TravelerStoriesSection({
       aria-labelledby="traveler-stories-heading"
       data-theme-mode={theme}
       data-entered={hasEntered ? "true" : "false"}
+      data-cards-released={cardsReleased ? "true" : "false"}
+      data-initial-hang-done={initialHangDone ? "true" : "false"}
       data-active-story-index={activeIndex}
       data-review-dataset={
         hasSampleEntries
@@ -280,9 +328,9 @@ export function TravelerStoriesSection({
       <LowerRightPostmark />
 
       <div className={styles.container}>
-        {/* Section Heading & Introductory Copy with Scroll-Triggered Reveal */}
+        {/* Section Heading & Introductory Copy with Slower Scroll-Triggered Reveal */}
         <header className={styles.header}>
-          <p className={styles.eyebrow} style={getHeaderRevealStyle(0)}>
+          <p className={styles.eyebrow} style={getHeaderRevealStyle(0, 880)}>
             <span className={styles.eyebrowRule} aria-hidden="true" />
             <span>{copy.eyebrow || TRAVELER_STORIES_SECTION_CONFIG.eyebrow}</span>
             <span className={styles.eyebrowRuleRight} aria-hidden="true" />
@@ -293,12 +341,12 @@ export function TravelerStoriesSection({
               mode="chars"
               hasEntered={hasEntered}
               reducedMotion={reducedMotion}
-              baseDelayMs={65}
-              staggerMs={22}
-              durationMs={600}
+              baseDelayMs={110}
+              staggerMs={34}
+              durationMs={840}
             />
           </h2>
-          <p className={styles.subtitle} style={getHeaderRevealStyle(180)}>
+          <p className={styles.subtitle} style={getHeaderRevealStyle(260, 940)}>
             {copy.supportingText || TRAVELER_STORIES_SECTION_CONFIG.supportingText}
           </p>
         </header>
@@ -306,13 +354,13 @@ export function TravelerStoriesSection({
         {/* Physical Clothesline Stage & Hanging Polaroid Carousel */}
         <div
           className={styles.clotheslineStage}
-          style={getHeaderRevealStyle(230)}
+          style={getHeaderRevealStyle(120, 920)}
           role="region"
           aria-roledescription="carousel"
           aria-label={copy.carouselAriaLabel}
           onKeyDown={handleKeyDown}
         >
-          {/* Full-Width Curved Braided Clothesline Rope */}
+          {/* Step 1: Full-Width Curved Braided Clothesline Rope (Appears first & holds empty for ~0.9s) */}
           <ClotheslineRope isFlexing={isRopeFlexing} />
 
           <div className={styles.carouselRow}>
@@ -353,41 +401,48 @@ export function TravelerStoriesSection({
                   : getSlotAngleDeg(slotOffset, visibleCount);
                 const sagPx = getSlotSagPx(slotOffset, visibleCount);
 
+                const isLeftHalf = slotOffset < visibleCount / 2;
+                const staggerDelayMs = Math.max(0, slotOffset) * 160;
+
                 let swingState = "idle";
-                if (!reducedMotion && isVisible && motionDirection !== "idle") {
-                  if (
-                    motionDirection === "next" &&
-                    slotOffset === visibleCount - 1
-                  ) {
-                    swingState = "enter-next";
-                  } else if (motionDirection === "prev" && slotOffset === 0) {
-                    swingState = "enter-prev";
-                  } else if (motionDirection === "next") {
-                    swingState = "shift-next";
-                  } else if (motionDirection === "prev") {
-                    swingState = "shift-prev";
+                if (!reducedMotion && isVisible) {
+                  if (!initialHangDone && cardsReleased) {
+                    swingState = isLeftHalf ? "initial-hang-left" : "initial-hang-right";
+                  } else if (motionDirection !== "idle") {
+                    if (
+                      motionDirection === "next" &&
+                      slotOffset === visibleCount - 1
+                    ) {
+                      swingState = "enter-next";
+                    } else if (motionDirection === "prev" && slotOffset === 0) {
+                      swingState = "enter-prev";
+                    } else if (motionDirection === "next") {
+                      swingState = "shift-next";
+                    } else if (motionDirection === "prev") {
+                      swingState = "shift-prev";
+                    }
                   }
                 }
+
+                // Step 3: Directional vector from which each card approaches the empty clothesline
+                const initialEntryOffsetX = isLeftHalf ? "-68px" : "68px";
+                const initialEntryOffsetY = "-34px";
 
                 const slotStyle = {
                   "--slot-offset": slotOffset,
                   "--slot-sag-y": `${sagPx}px`,
                   "--card-angle": `${angleDeg}deg`,
                   "--slot-z": isVisible ? 4 + (slotOffset % 2) : 1,
+                  "--hang-delay": `${staggerDelayMs}ms`,
+                  "--entry-x":
+                    reducedMotion || cardsReleased ? "0px" : initialEntryOffsetX,
+                  "--entry-y":
+                    reducedMotion || cardsReleased ? "0px" : initialEntryOffsetY,
                 } as React.CSSProperties;
 
                 const imageSrc = failedImages[story.id]
                   ? story.imageJpg
                   : story.imageWebp;
-
-                const photoMaskStyle = getDirectionalMaskStyle(
-                  "top-to-bottom",
-                  hasEntered,
-                  reducedMotion,
-                  260 + Math.max(0, slotOffset) * 85,
-                  760,
-                  "2px"
-                );
 
                 return (
                   <article
@@ -395,7 +450,12 @@ export function TravelerStoriesSection({
                     className={styles.cardSlot}
                     style={slotStyle}
                     data-slot-offset={slotOffset}
-                    data-slot-visible={isVisible ? "true" : "false"}
+                    data-slot-visible={
+                      isVisible && (reducedMotion || cardsReleased) ? "true" : "false"
+                    }
+                    data-hang-phase={
+                      reducedMotion || initialHangDone ? "interactive" : "initial-hang"
+                    }
                     data-story-id={story.id}
                     data-sample-review={story.isSampleData ? "true" : "false"}
                     data-verification-status={story.verificationStatus}
@@ -410,8 +470,8 @@ export function TravelerStoriesSection({
 
                       {/* Compact Near-Square Polaroid Paper Frame */}
                       <div className={styles.polaroidCard}>
-                        {/* Landscape Destination Photograph with Directional Top-to-Bottom Reveal */}
-                        <div className={styles.photoFrame} style={photoMaskStyle}>
+                        {/* Landscape Destination Photograph */}
+                        <div className={styles.photoFrame}>
                           <Image
                             src={imageSrc}
                             alt={localizedItem.imageAlt}

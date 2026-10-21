@@ -8,7 +8,7 @@ import {
 } from "@/config/featured-trips";
 
 export const metadata = {
-  title: "Featured Trips — WEST TRAVEL | Egypt, Dubai & Türkiye",
+  title: "Featured Trips — WEST GLOBAL TOURS | Egypt, Dubai & Türkiye",
   description: "Explore curated trips across Egypt, Dubai and Türkiye.",
 };
 
@@ -30,7 +30,7 @@ export default function TripsIndexPage() {
             <span>Back to Featured Trips</span>
           </Link>
           <span className="text-xs font-semibold uppercase tracking-[0.22em] text-[#0E7C8E] dark:text-[#2DD4BF]">
-            WEST TRAVEL · JOURNEY CATALOG
+            WEST GLOBAL TOURS · JOURNEY CATALOG
           </span>
         </div>
 

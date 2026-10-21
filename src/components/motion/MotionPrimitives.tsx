@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from "react";
 export interface UseSectionEntranceOptions {
   threshold?: number;
   rootMargin?: string;
-  /** If true, triggers immediately after mount (used for above-the-fold Hero/Navbar). */
+  /** If true, triggers immediately after mount (used only for above-the-fold Hero/Navbar). */
   immediate?: boolean;
 }
 
@@ -17,13 +17,18 @@ export interface SectionEntranceState<T extends HTMLElement = HTMLElement> {
 
 /**
  * Reusable viewport-triggered entrance hook with `prefers-reduced-motion` support.
- * Triggers once when the target element enters the viewport and never re-hides content
- * on subsequent scroll movements.
+ * - Below-the-fold sections wait until they enter the viewport (`threshold: 0.16`, `rootMargin: "0px 0px -10% 0px"`)
+ *   so animations never fire prematurely during initial page load.
+ * - Runs once when first visible and never re-hides content on minor scroll movements.
  */
 export function useSectionEntrance<T extends HTMLElement = HTMLElement>(
   options: UseSectionEntranceOptions = {}
 ): SectionEntranceState<T> {
-  const { threshold = 0.14, rootMargin = "0px 0px -8% 0px", immediate = false } = options;
+  const {
+    threshold = 0.16,
+    rootMargin = "0px 0px -10% 0px",
+    immediate = false,
+  } = options;
   const ref = useRef<T | null>(null);
   const [hasEntered, setHasEntered] = useState<boolean>(false);
   const [reducedMotion, setReducedMotion] = useState<boolean>(false);
@@ -95,9 +100,12 @@ export interface SplitTextRevealProps {
   reducedMotion: boolean;
   /** Base delay in ms before the first unit starts revealing */
   baseDelayMs?: number;
-  /** Stagger step in ms between consecutive characters or words */
+  /**
+   * Deliberately paced stagger step in ms between consecutive characters (~34ms) or words (~105ms)
+   * so visitors can appreciate each typographic reveal.
+   */
   staggerMs?: number;
-  /** Duration in ms for each character or word reveal */
+  /** Duration in ms for each character or word reveal (~840ms default) */
   durationMs?: number;
   className?: string;
   /** Optional class applied to each inner character/word span (useful for gradient text) */
@@ -106,9 +114,9 @@ export interface SplitTextRevealProps {
 
 /**
  * Accessible character-by-character or word-by-word masked reveal.
+ * - Tuned to slower editorial pacing (~840ms per unit, 34ms/char or 105ms/word stagger).
  * - Preserves full screen-reader accessibility via `aria-label` and `aria-hidden="true"` visual spans.
  * - Prevents layout shift by keeping words intact inside `inline-block whitespace-nowrap` wrappers.
- * - Immediately displays static text when `prefers-reduced-motion: reduce` is enabled.
  */
 export function SplitTextReveal({
   text,
@@ -116,8 +124,8 @@ export function SplitTextReveal({
   hasEntered,
   reducedMotion,
   baseDelayMs = 0,
-  staggerMs = mode === "chars" ? 24 : 58,
-  durationMs = 640,
+  staggerMs = mode === "chars" ? 34 : 105,
+  durationMs = 840,
   className = "",
   unitClassName = "",
 }: SplitTextRevealProps) {
@@ -146,7 +154,7 @@ export function SplitTextReveal({
                     opacity: hasEntered ? 1 : 0,
                     transform: hasEntered
                       ? "translate3d(0, 0%, 0)"
-                      : "translate3d(0, 82%, 0)",
+                      : "translate3d(0, 88%, 0)",
                     transitionProperty: "opacity, transform",
                     transitionDuration: `${durationMs}ms`,
                     transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
@@ -183,7 +191,7 @@ export function SplitTextReveal({
                         opacity: hasEntered ? 1 : 0,
                         transform: hasEntered
                           ? "translate3d(0, 0%, 0)"
-                          : "translate3d(0, 88%, 0)",
+                          : "translate3d(0, 92%, 0)",
                         transitionProperty: "opacity, transform",
                         transitionDuration: `${durationMs}ms`,
                         transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
@@ -212,14 +220,15 @@ export type MaskDirection =
   | "center-out";
 
 /**
- * Returns compositor-friendly `clip-path` and subtle scale styles for directional image reveals.
+ * Returns compositor-friendly `clip-path` styles for directional image-mask reveals.
+ * Default duration is 1140ms (within the 0.9s–1.4s target range) so image reveals are clearly appreciable.
  */
 export function getDirectionalMaskStyle(
   direction: MaskDirection,
   hasEntered: boolean,
   reducedMotion: boolean,
   delayMs = 0,
-  durationMs = 860,
+  durationMs = 1140,
   borderRadius = "0px"
 ): React.CSSProperties {
   if (reducedMotion) {
@@ -242,7 +251,7 @@ export function getDirectionalMaskStyle(
         initialClip = `inset(0% 0% 0% 100% round ${borderRadius})`;
         break;
       case "center-out":
-        initialClip = `inset(8% 14% 8% 14% round ${borderRadius})`;
+        initialClip = `inset(10% 16% 10% 16% round ${borderRadius})`;
         break;
     }
   }

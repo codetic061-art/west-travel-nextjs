@@ -18,11 +18,10 @@ import { useHero, type BookingDestinationFilter } from "./HeroProvider";
 import { useSectionEntrance } from "@/components/motion/MotionPrimitives";
 
 /**
- * Search Bar with Center-Out Expansion Entrance (Section 11):
- * 1. Outer container begins as a narrow centered shape and expands horizontally in both directions.
- * 2. Rounded glass surface, border, and shadow settle into place without scaling/distorting text.
- * 3. Internal fields (Destination, Dates, Travelers) and Search CTA reveal sequentially.
- * 4. Once expansion finishes, clip-path is cleared so popovers above the bar are never clipped.
+ * Search Bar with Slower, Appreciable Center-Out Expansion Entrance (Section 2 & 11):
+ * 1. Outer container begins as a narrow centered shape and expands horizontally over 1080ms.
+ * 2. Internal fields (Destination, Dates, Travelers) and Search CTA reveal sequentially (140ms stagger, 820ms duration).
+ * 3. Once expansion finishes, clip-path is cleared so popovers above the bar are never clipped.
  */
 export function BookingBar() {
   const {
@@ -55,7 +54,7 @@ export function BookingBar() {
     if (!hasEntered) return;
     const timer = window.setTimeout(() => {
       setExpansionFinished(true);
-    }, 1620);
+    }, 2480);
     return () => window.clearTimeout(timer);
   }, [hasEntered, reducedMotion]);
 
@@ -125,9 +124,9 @@ export function BookingBar() {
             ? "inset(0% 0% 0% 0% round 22px)"
             : "inset(0% 44% 0% 44% round 22px)",
           transitionProperty: "clip-path, -webkit-clip-path, opacity",
-          transitionDuration: "740ms",
+          transitionDuration: "1080ms",
           transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
-          transitionDelay: "860ms",
+          transitionDelay: "1080ms",
         };
 
   const getFieldRevealStyle = (delayMs: number): React.CSSProperties =>
@@ -135,9 +134,9 @@ export function BookingBar() {
       ? { opacity: 1, transform: "none" }
       : {
           opacity: hasEntered ? 1 : 0,
-          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 10px, 0)",
+          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 14px, 0)",
           transitionProperty: "opacity, transform",
-          transitionDuration: "520ms",
+          transitionDuration: "820ms",
           transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
           transitionDelay: `${delayMs}ms`,
         };
@@ -163,8 +162,8 @@ export function BookingBar() {
             isLight ? "lg:divide-slate-900/15" : "lg:divide-white/15"
           }`}
         >
-          {/* 1. Destination Selector (1060ms) */}
-          <div className="relative px-3 py-1.5" style={getFieldRevealStyle(1060)}>
+          {/* 1. Destination Selector (1380ms) */}
+          <div className="relative px-3 py-1.5" style={getFieldRevealStyle(1380)}>
             <button
               type="button"
               onClick={() =>
@@ -257,8 +256,8 @@ export function BookingBar() {
             )}
           </div>
 
-          {/* 2. Travel Dates Selector (1145ms) */}
-          <div className="relative px-3 lg:px-5 py-1.5" style={getFieldRevealStyle(1145)}>
+          {/* 2. Travel Dates Selector (1520ms) */}
+          <div className="relative px-3 lg:px-5 py-1.5" style={getFieldRevealStyle(1520)}>
             <button
               type="button"
               onClick={() => setOpenPopover((prev) => (prev === "dates" ? null : "dates"))}
@@ -350,8 +349,8 @@ export function BookingBar() {
             )}
           </div>
 
-          {/* 3. Travelers Selector (1230ms) */}
-          <div className="relative px-3 lg:px-5 py-1.5" style={getFieldRevealStyle(1230)}>
+          {/* 3. Travelers Selector (1660ms) */}
+          <div className="relative px-3 lg:px-5 py-1.5" style={getFieldRevealStyle(1660)}>
             <button
               type="button"
               onClick={() =>
@@ -393,7 +392,6 @@ export function BookingBar() {
                   isLight ? "text-slate-900" : "text-white"
                 }`}
               >
-                {/* Adults Row */}
                 <div className="flex items-center justify-between py-2">
                   <div>
                     <div className="text-xs font-semibold">{t.booking.adultsLabel}</div>
@@ -421,7 +419,6 @@ export function BookingBar() {
                   </div>
                 </div>
 
-                {/* Children Row */}
                 <div className="flex items-center justify-between py-2 border-t border-current/10">
                   <div>
                     <div className="text-xs font-semibold">{t.booking.childrenLabel}</div>
@@ -464,8 +461,8 @@ export function BookingBar() {
             )}
           </div>
 
-          {/* 4. Search Trips Primary Action Button (1315ms) */}
-          <div className="pt-2 md:pt-0 lg:pl-4 flex justify-end" style={getFieldRevealStyle(1315)}>
+          {/* 4. Search Trips Primary Action Button (1800ms) */}
+          <div className="pt-2 md:pt-0 lg:pl-4 flex justify-end" style={getFieldRevealStyle(1800)}>
             <button
               type="submit"
               className="group inline-flex w-full lg:w-auto items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-[#0C7A8B] via-[#118FA3] to-[#16A3B8] px-7 py-3.5 text-sm font-semibold text-white shadow-[0_10px_28px_rgba(14,124,142,0.45)] border border-[#5EEAD4]/40 transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4]"

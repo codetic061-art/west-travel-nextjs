@@ -489,15 +489,21 @@
     (100% - (var(--visible-count) - 1) * var(--card-gap)) / var(--visible-count)
   );
   transform: translate3d(
-    calc(var(--slot-offset, 0) * (100% + var(--card-gap))),
-    var(--slot-sag-y, 0px),
+    calc(var(--slot-offset, 0) * (100% + var(--card-gap)) + var(--entry-x, 0px)),
+    calc(var(--slot-sag-y, 0px) + var(--entry-y, 0px)),
     0
   );
   transition:
-    transform 560ms cubic-bezier(0.22, 1, 0.36, 1),
-    opacity 460ms cubic-bezier(0.22, 1, 0.36, 1);
+    transform 780ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 680ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform, opacity;
   z-index: var(--slot-z, 2);
+}
+
+.cardSlot[data-hang-phase="initial-hang"] {
+  transition:
+    transform 920ms cubic-bezier(0.22, 1, 0.36, 1) var(--hang-delay, 0ms),
+    opacity 760ms cubic-bezier(0.22, 1, 0.36, 1) var(--hang-delay, 0ms);
 }
 
 .cardSlot[data-slot-visible="false"] {
@@ -538,7 +544,45 @@
 }
 
 .polaroidPendulum[data-swing-state="shift-prev"] {
-  animation: pendulumShiftPrev 580ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: pendulumShiftPrev 680ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.polaroidPendulum[data-swing-state="initial-hang-left"] {
+  animation: pendulumInitialHangLeft 880ms cubic-bezier(0.22, 1, 0.36, 1) var(--hang-delay, 0ms) both;
+}
+
+.polaroidPendulum[data-swing-state="initial-hang-right"] {
+  animation: pendulumInitialHangRight 880ms cubic-bezier(0.22, 1, 0.36, 1) var(--hang-delay, 0ms) both;
+}
+
+@keyframes pendulumInitialHangLeft {
+  0% {
+    transform: rotate(calc(var(--card-angle, 0deg) - 9.5deg)) translateY(-8px);
+  }
+  48% {
+    transform: rotate(calc(var(--card-angle, 0deg) + 3.4deg)) translateY(2px);
+  }
+  76% {
+    transform: rotate(calc(var(--card-angle, 0deg) - 1.1deg)) translateY(0px);
+  }
+  100% {
+    transform: rotate(var(--card-angle, 0deg)) translateY(0px);
+  }
+}
+
+@keyframes pendulumInitialHangRight {
+  0% {
+    transform: rotate(calc(var(--card-angle, 0deg) + 9.5deg)) translateY(-8px);
+  }
+  48% {
+    transform: rotate(calc(var(--card-angle, 0deg) - 3.4deg)) translateY(2px);
+  }
+  76% {
+    transform: rotate(calc(var(--card-angle, 0deg) + 1.1deg)) translateY(0px);
+  }
+  100% {
+    transform: rotate(var(--card-angle, 0deg)) translateY(0px);
+  }
 }
 
 @keyframes pendulumEnterNext {
