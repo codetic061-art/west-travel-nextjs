@@ -14,7 +14,9 @@ import {
 
 /**
  * Section 5: Final CTA — Ready for Your Next Journey?
- * - Viewport-triggered slower motion (1180ms center-out mask reveal, 940ms content reveals).
+ * - Viewport-triggered thin-line progressive image reveal (`top-to-bottom`, `1380ms` duration)
+ *   so the panoramic Nile felucca sunset photograph visibly uncovers from a narrow top line
+ *   when the section enters the viewport (`threshold: 0.24`, `rootMargin: "0px 0px -12% 0px"`).
  * - Clicking "Plan My Trip →" opens the right-side Trip Inquiry Drawer (`openInquiryDrawer`).
  */
 export function FinalCtaSection() {
@@ -23,8 +25,8 @@ export function FinalCtaSection() {
   const copy = t.finalCta;
 
   const { ref: sectionRef, hasEntered, reducedMotion } = useSectionEntrance<HTMLElement>({
-    threshold: 0.16,
-    rootMargin: "0px 0px -10% 0px",
+    threshold: 0.24,
+    rootMargin: "0px 0px -12% 0px",
   });
 
   const [useFallbackJpg, setUseFallbackJpg] = useState(false);
@@ -36,12 +38,13 @@ export function FinalCtaSection() {
     openInquiryDrawer(undefined, e.currentTarget);
   };
 
+  // Progressive thin-line reveal from top edge down through the full panoramic photograph (1380ms)
   const panelMaskStyle = getDirectionalMaskStyle(
-    "center-out",
+    "top-to-bottom",
     hasEntered,
     reducedMotion,
     0,
-    1180,
+    1380,
     "28px"
   );
 
@@ -54,7 +57,7 @@ export function FinalCtaSection() {
             ? "translate3d(0, 0, 0)"
             : `translate3d(0, ${offsetY}px, 0)`,
           transitionProperty: "opacity, transform",
-          transitionDuration: "960ms",
+          transitionDuration: "980ms",
           transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
           transitionDelay: `${delayMs}ms`,
         };
@@ -71,10 +74,11 @@ export function FinalCtaSection() {
       }`}
     >
       <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-8 lg:px-12">
-        {/* Cinematic Panoramic Panel with 1.18s Directional Mask Reveal */}
+        {/* Cinematic Panoramic Panel with 1.38s Thin-Line Progressive Reveal */}
         <div
           style={panelMaskStyle}
           data-cta-panel=""
+          data-reveal-state={hasEntered ? "revealed" : "masked-thin-line"}
           className={`group/cta-panel relative w-full overflow-hidden rounded-[26px] sm:rounded-[32px] min-h-[360px] sm:min-h-[410px] lg:min-h-[448px] flex items-center justify-center px-5 py-12 sm:px-10 sm:py-16 lg:px-16 lg:py-20 ${
             isLight
               ? "border border-[#E5D9C3]/90 shadow-[0_26px_64px_-12px_rgba(8,28,46,0.24)]"
@@ -94,6 +98,7 @@ export function FinalCtaSection() {
               }
               alt={copy.imageAlt}
               fill
+              priority
               sizes="(max-width: 640px) 95vw, (max-width: 1440px) 92vw, 1360px"
               onError={() => {
                 if (!useFallbackJpg) setUseFallbackJpg(true);
@@ -104,10 +109,10 @@ export function FinalCtaSection() {
                   ? "none"
                   : hasEntered
                   ? "scale(1.0)"
-                  : "scale(1.07)",
+                  : "scale(1.06)",
                 transition: reducedMotion
                   ? "none"
-                  : "transform 1450ms cubic-bezier(0.22, 1, 0.36, 1)",
+                  : "transform 1520ms cubic-bezier(0.22, 1, 0.36, 1)",
               }}
               className="object-cover saturate-[1.08] contrast-[1.03]"
             />
@@ -117,8 +122,8 @@ export function FinalCtaSection() {
           <div
             aria-hidden="true"
             style={{
-              opacity: reducedMotion || hasEntered ? 1 : 0.4,
-              transition: reducedMotion ? "none" : "opacity 1050ms ease 160ms",
+              opacity: reducedMotion || hasEntered ? 1 : 0.45,
+              transition: reducedMotion ? "none" : "opacity 1120ms ease 180ms",
             }}
             className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#061829]/34 via-[#061B2E]/44 to-[#04111E]/78"
           />
@@ -129,14 +134,14 @@ export function FinalCtaSection() {
 
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/65 to-transparent opacity-85"
+            className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#F4C266]/75 to-transparent opacity-90"
           />
 
           {/* 3. Centered Conversion-Focused Copy Stack */}
           <div className="relative z-10 mx-auto flex max-w-[42rem] flex-col items-center text-center">
-            {/* Small Uppercase Eyebrow (280ms) */}
+            {/* Small Uppercase Eyebrow (340ms) */}
             <div
-              style={getItemRevealStyle(280, 16)}
+              style={getItemRevealStyle(340, 16)}
               className="inline-flex items-center gap-3 rounded-full bg-[#061A2C]/55 px-4 py-1.5 backdrop-blur-md border border-white/25"
             >
               <span
@@ -152,7 +157,7 @@ export function FinalCtaSection() {
               />
             </div>
 
-            {/* Large, Elegant Serif Headline with Character Reveal (400ms) */}
+            {/* Large, Elegant Serif Headline with Character Reveal (480ms) */}
             <h2
               id="final-cta-heading"
               className="mt-4 sm:mt-5 font-serif text-3xl sm:text-5xl lg:text-[3.4rem] font-semibold leading-[1.1] tracking-[-0.015em] text-white drop-shadow-[0_6px_24px_rgba(0,0,0,0.55)]"
@@ -162,22 +167,22 @@ export function FinalCtaSection() {
                 mode="chars"
                 hasEntered={hasEntered}
                 reducedMotion={reducedMotion}
-                baseDelayMs={400}
-                staggerMs={30}
-                durationMs={840}
+                baseDelayMs={480}
+                staggerMs={34}
+                durationMs={900}
               />
             </h2>
 
-            {/* Short Supporting Sentence (680ms) */}
+            {/* Short Supporting Sentence (760ms) */}
             <p
-              style={getItemRevealStyle(680, 18)}
+              style={getItemRevealStyle(760, 18)}
               className="mt-3.5 sm:mt-4 max-w-[34rem] text-sm sm:text-base lg:text-[17.5px] font-normal leading-relaxed text-white/95 drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]"
             >
               {copy.supportingText}
             </p>
 
             {/* Primary Rounded Pill CTA Button ("Plan My Trip →") — Opens the Right-Side Inquiry Drawer */}
-            <div style={getItemRevealStyle(840, 18)} className="mt-7 sm:mt-8">
+            <div style={getItemRevealStyle(940, 18)} className="mt-7 sm:mt-8">
               <button
                 type="button"
                 onClick={handlePlanTripClick}
@@ -195,9 +200,9 @@ export function FinalCtaSection() {
               </button>
             </div>
 
-            {/* Subtle Destination Corridor Pills Below Button (980ms) */}
+            {/* Subtle Destination Corridor Pills Below Button (1080ms) */}
             <div
-              style={getItemRevealStyle(980, 14)}
+              style={getItemRevealStyle(1080, 14)}
               className="mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-[11px] sm:text-xs font-medium text-white/88"
             >
               {DESTINATIONS_CONFIG.map((dest, idx) => (

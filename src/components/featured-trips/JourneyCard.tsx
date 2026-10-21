@@ -8,6 +8,7 @@ import type { FeaturedJourneyRecord } from "@/config/featured-trips";
 import type { FeaturedTripsTranslation } from "@/i18n/hero-dictionary";
 import {
   getDirectionalMaskStyle,
+  getImageScaleSettleStyle,
   type MaskDirection,
 } from "@/components/motion/MotionPrimitives";
 
@@ -24,8 +25,10 @@ export interface JourneyCardProps {
 
 /**
  * Individual bookable Journey Card for the WEST GLOBAL TOURS Featured Trips section.
- * - Uses slower, deliberate entrance durations (1040ms card slide, 1180ms directional image mask,
- *   840ms delayed CTA button settle, and 155ms stagger between cards).
+ * - Image Reveal from a Thin Line: Instead of sliding the entire card from above/sides or fading from 0 opacity,
+ *   the card's photograph starts masked as a narrow 2.5% horizontal strip (`top-to-bottom` or `bottom-to-top`)
+ *   and progressively uncovers over `1320ms` (`1.32s`) with a subtle inner scale settle (`1.05` -> `1.0`).
+ * - Text overlays and the CTA button reveal in a coordinated sequence (`+260ms` and `+420ms`) as the image uncovers.
  */
 export function JourneyCard({
   journey,
@@ -44,59 +47,64 @@ export function JourneyCard({
 
   const getEntranceTiming = (): {
     cardDelayMs: number;
-    initialTransform: string;
     maskDirection: MaskDirection;
   } => {
     if (isMobile) {
       return {
-        cardDelayMs: 180 + journey.carouselIndex * 135,
-        initialTransform: "translate3d(0, 26px, 0)",
-        maskDirection: "bottom-to-top",
+        cardDelayMs: 140 + journey.carouselIndex * 150,
+        maskDirection: "top-to-bottom",
       };
     }
     if (journey.columnPosition === "left") {
       return {
-        cardDelayMs: journey.columnStackIndex === 0 ? 180 : 350,
-        initialTransform: "translate3d(-44px, 0, 0)",
-        maskDirection: "left-to-right",
+        cardDelayMs: journey.columnStackIndex === 0 ? 140 : 320,
+        maskDirection: "top-to-bottom",
       };
     }
     if (journey.columnPosition === "center") {
       return {
-        cardDelayMs: 265,
-        initialTransform: "translate3d(0, 44px, 0)",
+        cardDelayMs: 230,
         maskDirection: "bottom-to-top",
       };
     }
     return {
-      cardDelayMs: journey.columnStackIndex === 0 ? 225 : 395,
-      initialTransform: "translate3d(44px, 0, 0)",
-      maskDirection: "right-to-left",
+      cardDelayMs: journey.columnStackIndex === 0 ? 185 : 365,
+      maskDirection: "top-to-bottom",
     };
   };
 
-  const { cardDelayMs, initialTransform, maskDirection } = getEntranceTiming();
-  const ctaDelayMs = cardDelayMs + 240;
+  const { cardDelayMs, maskDirection } = getEntranceTiming();
+  const contentDelayMs = cardDelayMs + 260;
+  const ctaDelayMs = cardDelayMs + 420;
 
-  const cardEntranceStyle: React.CSSProperties = reducedMotion
-    ? { opacity: 1, transform: "none" }
-    : {
-        opacity: hasEntered ? 1 : 0,
-        transform: hasEntered ? "translate3d(0, 0, 0)" : initialTransform,
-        transitionProperty: "opacity, transform, box-shadow, border-color",
-        transitionDuration: "1040ms",
-        transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
-        transitionDelay: `${cardDelayMs}ms`,
-      };
-
+  // Thin-line progressive clip-path reveal (1320ms)
   const imageMaskStyle = getDirectionalMaskStyle(
     maskDirection,
     hasEntered,
     reducedMotion,
-    cardDelayMs + 45,
-    1180,
+    cardDelayMs,
+    1320,
     "20px"
   );
+
+  // Subtle scale settling (1.05 -> 1.0 over 1420ms) inside the expanding mask
+  const imageScaleStyle = getImageScaleSettleStyle(
+    hasEntered,
+    reducedMotion,
+    cardDelayMs,
+    1420
+  );
+
+  const overlayContentStyle: React.CSSProperties = reducedMotion
+    ? { opacity: 1, transform: "none" }
+    : {
+        opacity: hasEntered ? 1 : 0,
+        transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 12px, 0)",
+        transitionProperty: "opacity, transform",
+        transitionDuration: "880ms",
+        transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+        transitionDelay: `${contentDelayMs}ms`,
+      };
 
   const ctaEntranceStyle: React.CSSProperties = reducedMotion
     ? { opacity: 1, transform: "none" }
@@ -104,7 +112,7 @@ export function JourneyCard({
         opacity: hasEntered ? 1 : 0,
         transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 14px, 0)",
         transitionProperty: "opacity, transform, background-color, border-color, box-shadow",
-        transitionDuration: "840ms",
+        transitionDuration: "860ms",
         transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
         transitionDelay: `${ctaDelayMs}ms`,
       };
@@ -146,60 +154,67 @@ export function JourneyCard({
       data-featured-center={journey.isFeaturedCenter ? "true" : "false"}
       data-card-variant={variant}
       data-mask-direction={maskDirection}
+      data-reveal-state={hasEntered ? "revealed" : "masked-thin-line"}
       onClick={() => onSelectCard?.(journey.carouselIndex)}
-      style={cardEntranceStyle}
       className={`group relative w-full ${heightClasses} rounded-[20px] overflow-hidden select-none transition-all duration-500 ease-out focus-within:ring-2 focus-within:ring-[#2DD4BF] focus-within:ring-offset-2 ${
         isLight ? "focus-within:ring-offset-[#FAF8F3]" : "focus-within:ring-offset-[#061523]"
       } ${cardSurfaceClasses}`}
     >
-      {/* Scenic Travel Photograph with 1.18s Directional Mask Reveal */}
+      {/* Scenic Travel Photograph with 1.32s Thin-Line Progressive Mask Reveal */}
       <div className="absolute inset-0" style={imageMaskStyle}>
-        <Image
-          src={journey.imageWebp}
-          alt={journey.imageAlt}
-          fill
-          sizes={
-            isFeaturedSize
-              ? "(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 440px"
-              : "(max-width: 768px) 90vw, (max-width: 1200px) 32vw, 390px"
-          }
-          className="object-cover brightness-[1.06] saturate-[1.05] transition-transform duration-700 ease-out group-hover:scale-[1.06] group-focus-within:scale-[1.04]"
-          style={{ objectPosition: journey.objectPosition }}
+        <div className="relative h-full w-full" style={imageScaleStyle}>
+          <Image
+            src={journey.imageWebp}
+            alt={journey.imageAlt}
+            fill
+            sizes={
+              isFeaturedSize
+                ? "(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 440px"
+                : "(max-width: 768px) 90vw, (max-width: 1200px) 32vw, 390px"
+            }
+            className="object-cover brightness-[1.06] saturate-[1.05] transition-transform duration-700 ease-out group-hover:scale-[1.06] group-focus-within:scale-[1.04]"
+            style={{ objectPosition: journey.objectPosition }}
+          />
+        </div>
+
+        {/* Scrims live inside the progressive mask so they uncover together with the photograph */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#041322]/42 via-[#041322]/12 to-transparent"
+        />
+
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-[#03111F]/95 via-[#051B2E]/58 to-transparent transition-opacity duration-500"
+        />
+
+        <div
+          aria-hidden="true"
+          className={`pointer-events-none absolute inset-0 bg-gradient-to-t from-[#020D18]/98 via-[#051A2D]/78 to-[#041322]/25 transition-opacity duration-500 ${
+            touchExpanded
+              ? "opacity-100"
+              : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
+          }`}
         />
       </div>
 
+      {/* Subtle warm-gold/teal thin starting line accent visible before/during reveal */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#041322]/42 via-[#041322]/12 to-transparent"
-      />
-
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-[#03111F]/95 via-[#051B2E]/58 to-transparent transition-opacity duration-500"
-      />
-
-      <div
-        aria-hidden="true"
-        className={`pointer-events-none absolute inset-0 bg-gradient-to-t from-[#020D18]/98 via-[#051A2D]/78 to-[#041322]/25 transition-opacity duration-500 ${
-          touchExpanded
-            ? "opacity-100"
-            : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
-        }`}
-      />
-
-      <div
-        aria-hidden="true"
-        className={`pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent to-transparent ${
+        className={`pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent to-transparent ${
           journey.isFeaturedCenter
             ? "via-[#67E8F9]/90 opacity-95"
             : isLight
-            ? "via-white/80 opacity-85"
-            : "via-white/35 opacity-75"
+            ? "via-[#D4B475]/85 opacity-85"
+            : "via-white/40 opacity-75"
         }`}
       />
 
       {/* Top Row: Location Pin + Location Label */}
-      <div className="absolute inset-x-4 sm:inset-x-5 top-4 flex items-center justify-between gap-2 z-10">
+      <div
+        style={overlayContentStyle}
+        className="absolute inset-x-4 sm:inset-x-5 top-4 flex items-center justify-between gap-2 z-10"
+      >
         <div className="inline-flex items-center gap-1.5 text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.65)]">
           <span
             aria-hidden="true"
@@ -232,7 +247,10 @@ export function JourneyCard({
       </div>
 
       {/* Bottom Content Stack */}
-      <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end p-4 sm:p-5">
+      <div
+        style={overlayContentStyle}
+        className="absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end p-4 sm:p-5"
+      >
         <h3
           className={`font-serif font-medium tracking-[-0.01em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] transition-transform duration-500 ease-out ${
             isFeaturedSize

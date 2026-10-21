@@ -22,7 +22,8 @@ export interface FeaturedTripsSectionProps {
 
 /**
  * Section 2: Featured Trips — Find Your Next Journey.
- * - Viewport-triggered slower motion (0.94s header reveals, 1.05s card entrances, 1.18s directional image masks).
+ * - Viewport-triggered slower motion (`threshold: 0.24`, `rootMargin: "0px 0px -12% 0px"`).
+ * - Each card photograph progressively uncovers from a thin horizontal line over 1.32s (`1320ms`).
  * - Desktop: 5-card asymmetric layout (2 stacked left, 1 tall featured center, 2 stacked right).
  */
 export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTripsSectionProps) {
@@ -38,8 +39,8 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
 
   const mobileCarouselRef = useRef<HTMLDivElement | null>(null);
   const { ref: sectionRef, hasEntered, reducedMotion } = useSectionEntrance<HTMLElement>({
-    threshold: 0.16,
-    rootMargin: "0px 0px -10% 0px",
+    threshold: 0.24,
+    rootMargin: "0px 0px -12% 0px",
   });
 
   const [activeIndex, setActiveIndex] = useState<number>(0);
@@ -97,7 +98,7 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
     scrollToMobileIndex(activeIndex + 1);
   };
 
-  const getHeaderEntranceStyle = (delayMs: number, durationMs = 940): React.CSSProperties =>
+  const getHeaderEntranceStyle = (delayMs: number, durationMs = 960): React.CSSProperties =>
     reducedMotion
       ? { opacity: 1, transform: "none" }
       : {
@@ -131,7 +132,7 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
         <div className="mx-auto flex max-w-2xl flex-col items-center text-center">
           {/* Eyebrow: — FEATURED TRIPS — */}
           <div
-            style={getHeaderEntranceStyle(0, 900)}
+            style={getHeaderEntranceStyle(0, 920)}
             className="inline-flex items-center gap-3.5 sm:gap-4"
           >
             <span
@@ -172,14 +173,14 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
               hasEntered={hasEntered}
               reducedMotion={reducedMotion}
               baseDelayMs={110}
-              staggerMs={32}
-              durationMs={840}
+              staggerMs={36}
+              durationMs={900}
             />
           </h2>
 
           {/* Supporting Text */}
           <p
-            style={getHeaderEntranceStyle(260, 940)}
+            style={getHeaderEntranceStyle(280, 960)}
             className={`mt-3.5 text-sm sm:text-base lg:text-[17px] font-normal leading-relaxed ${
               isLight ? "text-[#546576]" : "text-slate-300/85"
             }`}
@@ -188,7 +189,7 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
           </p>
 
           {/* Mandatory Section-Level CTA — Explore All Trips → */}
-          <div style={getHeaderEntranceStyle(400, 940)} className="mt-6 flex justify-center">
+          <div style={getHeaderEntranceStyle(420, 960)} className="mt-6 flex justify-center">
             <Link
               href={FEATURED_TRIPS_SECTION_CONFIG.exploreAllHref}
               data-section-cta="explore-all-trips"
@@ -324,7 +325,7 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
 
         {/* Bottom Navigation Controls */}
         <div
-          style={getHeaderEntranceStyle(540, 940)}
+          style={getHeaderEntranceStyle(580, 960)}
           className="mt-8 lg:mt-10 flex items-center justify-center gap-5 sm:gap-6"
           role="group"
           aria-label="Featured Trips Pagination Controls"

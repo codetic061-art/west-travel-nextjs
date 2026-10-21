@@ -6,7 +6,6 @@ import {
   ArrowUpRight,
   Compass,
   Mail,
-  MessageSquare,
   MapPin,
   Info,
   CheckCircle2,
@@ -22,6 +21,11 @@ import {
   FOOTER_SOCIAL_PROFILES,
 } from "@/config/final-cta-footer";
 import { useSectionEntrance } from "@/components/motion/MotionPrimitives";
+import {
+  FacebookBrandIcon,
+  InstagramBrandIcon,
+  WhatsAppBrandIcon,
+} from "@/components/icons/BrandIcons";
 
 /**
  * Section 6: SiteFooter — Official WEST GLOBAL TOURS Compact, Theme-Adaptive Footer.
@@ -35,7 +39,7 @@ export function SiteFooter() {
   const copy = t.footer;
 
   const { ref: footerRef, hasEntered, reducedMotion } = useSectionEntrance<HTMLElement>({
-    threshold: 0.12,
+    threshold: 0.14,
     rootMargin: "0px 0px -6% 0px",
   });
 
@@ -90,27 +94,20 @@ export function SiteFooter() {
           opacity: hasEntered ? 1 : 0,
           transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 18px, 0)",
           transitionProperty: "opacity, transform",
-          transitionDuration: "860ms",
+          transitionDuration: "900ms",
           transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
           transitionDelay: `${delayMs}ms`,
         };
 
   const renderSocialSvg = (id: string) => {
     if (id === "instagram") {
-      return (
-        <svg viewBox="0 0 24 24" className="h-4 w-4 fill-none stroke-current stroke-[1.8]" aria-hidden="true">
-          <rect x="2.5" y="2.5" width="19" height="19" rx="5" />
-          <circle cx="12" cy="12" r="4.2" />
-          <circle cx="17.4" cy="6.6" r="1" className="fill-current stroke-none" />
-        </svg>
-      );
+      return <InstagramBrandIcon className="h-4 w-4" />;
     }
     if (id === "facebook") {
-      return (
-        <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current" aria-hidden="true">
-          <path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4c-.3 0-1.2-.1-2.3-.1-2.3 0-3.9 1.4-3.9 4v2.2H8v3h2.5V21h3Z" />
-        </svg>
-      );
+      return <FacebookBrandIcon className="h-4 w-4" />;
+    }
+    if (id === "whatsapp") {
+      return <WhatsAppBrandIcon className="h-4 w-4" />;
     }
     return null;
   };
@@ -264,11 +261,10 @@ export function SiteFooter() {
                       : "text-[#A7BCC8] hover:text-[#5EEAD4]"
                   }`}
                 >
-                  <MessageSquare
+                  <WhatsAppBrandIcon
                     className={`h-3.5 w-3.5 shrink-0 ${
                       isLight ? "text-[#0E7C8E]" : "text-[#2DD4BF]"
                     }`}
-                    aria-hidden="true"
                   />
                   <span>{FOOTER_CONTACT_CONFIG.phoneOrWhatsapp}</span>
                 </a>

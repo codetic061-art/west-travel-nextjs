@@ -16,20 +16,22 @@ export interface SectionEntranceState<T extends HTMLElement = HTMLElement> {
 }
 
 /**
- * Standalone motion-preference hook: tracks the user's
- * `prefers-reduced-motion` system setting (SSR-safe, defaults to false).
+ * Reusable hook to detect `prefers-reduced-motion: reduce`.
  */
 export function usePrefersReducedMotion(): boolean {
   const [reducedMotion, setReducedMotion] = useState<boolean>(false);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mediaQuery.matches);
-    const handleChange = (event: MediaQueryListEvent) => {
-      setReducedMotion(event.matches);
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mq.matches);
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setReducedMotion(e.matches);
     };
-    mediaQuery.addEventListener("change", handleChange);
-    return () => mediaQuery.removeEventListener("change", handleChange);
+
+    mq.addEventListener("change", handleChange);
+    return () => mq.removeEventListener("change", handleChange);
   }, []);
 
   return reducedMotion;
@@ -37,48 +39,51 @@ export function usePrefersReducedMotion(): boolean {
 
 /**
  * Reusable viewport-triggered entrance hook with `prefers-reduced-motion` support.
- * - Below-the-fold sections wait until they enter the viewport (`threshold: 0.16`, `rootMargin: "0px 0px -10% 0px"`)
- *   so animations never fire prematurely during initial page load.
+ * - Below-the-fold sections wait until they genuinely enter the viewport (`threshold: 0.22`,
+ *   `rootMargin: "0px 0px -12% 0px"`) so image-mask and text reveals are clearly visible to the user
+ *   at normal scrolling speed rather than firing prematurely offscreen.
+ * - Double-buffered via `requestAnimationFrame` so the browser paints the initial masked/thin-line
+ *   state before transitioning to the revealed state (preventing any flash of final content).
  * - Runs once when first visible and never re-hides content on minor scroll movements.
  */
 export function useSectionEntrance<T extends HTMLElement = HTMLElement>(
   options: UseSectionEntranceOptions = {}
 ): SectionEntranceState<T> {
   const {
-    threshold = 0.16,
-    rootMargin = "0px 0px -10% 0px",
+    threshold = 0.22,
+    rootMargin = "0px 0px -12% 0px",
     immediate = false,
   } = options;
   const ref = useRef<T | null>(null);
   const [hasEntered, setHasEntered] = useState<boolean>(false);
-  const [reducedMotion, setReducedMotion] = useState<boolean>(false);
+  const reducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mq.matches);
-    if (mq.matches) {
+    if (reducedMotion) {
       setHasEntered(true);
     }
-
-    const handleChange = (e: MediaQueryListEvent) => {
-      setReducedMotion(e.matches);
-      if (e.matches) {
-        setHasEntered(true);
-      }
-    };
-
-    mq.addEventListener("change", handleChange);
-    return () => mq.removeEventListener("change", handleChange);
-  }, []);
+  }, [reducedMotion]);
 
   useEffect(() => {
     if (reducedMotion || hasEntered) return;
 
-    if (immediate) {
-      const raf = window.requestAnimationFrame(() => {
-        setHasEntered(true);
+    let raf1 = 0;
+    let raf2 = 0;
+
+    const triggerReveal = () => {
+      raf1 = window.requestAnimationFrame(() => {
+        raf2 = window.requestAnimationFrame(() => {
+          setHasEntered(true);
+        });
       });
-      return () => window.cancelAnimationFrame(raf);
+    };
+
+    if (immediate) {
+      triggerReveal();
+      return () => {
+        window.cancelAnimationFrame(raf1);
+        window.cancelAnimationFrame(raf2);
+      };
     }
 
     const node = ref.current;
@@ -92,8 +97,8 @@ export function useSectionEntrance<T extends HTMLElement = HTMLElement>(
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setHasEntered(true);
+          if (entry.isIntersecting && entry.intersectionRatio >= Math.min(threshold, 0.15)) {
+            triggerReveal();
             observer.disconnect();
             break;
           }
@@ -103,7 +108,11 @@ export function useSectionEntrance<T extends HTMLElement = HTMLElement>(
     );
 
     observer.observe(node);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      window.cancelAnimationFrame(raf1);
+      window.cancelAnimationFrame(raf2);
+    };
   }, [reducedMotion, hasEntered, immediate, rootMargin, threshold]);
 
   return { ref, hasEntered, reducedMotion };
@@ -121,11 +130,11 @@ export interface SplitTextRevealProps {
   /** Base delay in ms before the first unit starts revealing */
   baseDelayMs?: number;
   /**
-   * Deliberately paced stagger step in ms between consecutive characters (~34ms) or words (~105ms)
+   * Deliberately paced stagger step in ms between consecutive characters (~36ms) or words (~115ms)
    * so visitors can appreciate each typographic reveal.
    */
   staggerMs?: number;
-  /** Duration in ms for each character or word reveal (~840ms default) */
+  /** Duration in ms for each character or word reveal (~920ms default) */
   durationMs?: number;
   className?: string;
   /** Optional class applied to each inner character/word span (useful for gradient text) */
@@ -134,7 +143,7 @@ export interface SplitTextRevealProps {
 
 /**
  * Accessible character-by-character or word-by-word masked reveal.
- * - Tuned to slower editorial pacing (~840ms per unit, 34ms/char or 105ms/word stagger).
+ * - Tuned to slower editorial pacing (~920ms per unit, 36ms/char or 115ms/word stagger).
  * - Preserves full screen-reader accessibility via `aria-label` and `aria-hidden="true"` visual spans.
  * - Prevents layout shift by keeping words intact inside `inline-block whitespace-nowrap` wrappers.
  */
@@ -144,8 +153,8 @@ export function SplitTextReveal({
   hasEntered,
   reducedMotion,
   baseDelayMs = 0,
-  staggerMs = mode === "chars" ? 34 : 105,
-  durationMs = 840,
+  staggerMs = mode === "chars" ? 36 : 115,
+  durationMs = 920,
   className = "",
   unitClassName = "",
 }: SplitTextRevealProps) {
@@ -174,7 +183,7 @@ export function SplitTextReveal({
                     opacity: hasEntered ? 1 : 0,
                     transform: hasEntered
                       ? "translate3d(0, 0%, 0)"
-                      : "translate3d(0, 88%, 0)",
+                      : "translate3d(0, 92%, 0)",
                     transitionProperty: "opacity, transform",
                     transitionDuration: `${durationMs}ms`,
                     transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
@@ -189,7 +198,6 @@ export function SplitTextReveal({
           );
         }
 
-        // Character-by-character reveal grouped by word to prevent mid-word line wraps
         const chars = Array.from(word);
         return (
           <React.Fragment key={`cw-${wordIdx}-${word}`}>
@@ -211,7 +219,7 @@ export function SplitTextReveal({
                         opacity: hasEntered ? 1 : 0,
                         transform: hasEntered
                           ? "translate3d(0, 0%, 0)"
-                          : "translate3d(0, 92%, 0)",
+                          : "translate3d(0, 96%, 0)",
                         transitionProperty: "opacity, transform",
                         transitionDuration: `${durationMs}ms`,
                         transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
@@ -240,38 +248,43 @@ export type MaskDirection =
   | "center-out";
 
 /**
- * Returns compositor-friendly `clip-path` styles for directional image-mask reveals.
- * Default duration is 1140ms (within the 0.9s–1.4s target range) so image reveals are clearly appreciable.
+ * Returns compositor-friendly `clip-path` styles that progressively uncover an image
+ * from a thin visible line/strip (~2.5% slit) rather than sliding the image or fading from 0 opacity.
+ * - Before the reveal begins (`!hasEntered`), the image is masked down to a thin strip at the starting
+ *   edge (`inset(0% 0% 97.5% 0%)` for top-to-bottom, `inset(97.5% 0% 0% 0%)` for bottom-to-top,
+ *   `inset(48.8% 0% 48.8% 0%)` for center-out horizontal slit, etc.).
+ * - Keeps `opacity: 1` during the expansion so the user genuinely sees the photograph being drawn/uncovered
+ *   from the thin line over `1280ms` (`1.28s` default).
  */
 export function getDirectionalMaskStyle(
   direction: MaskDirection,
   hasEntered: boolean,
   reducedMotion: boolean,
   delayMs = 0,
-  durationMs = 1140,
+  durationMs = 1280,
   borderRadius = "0px"
 ): React.CSSProperties {
   if (reducedMotion) {
     return { clipPath: "none", opacity: 1, transform: "none" };
   }
 
-  let initialClip = `inset(0% 0% 0% 0% round ${borderRadius})`;
+  let initialClip = `inset(0% 0% 97.5% 0% round ${borderRadius})`;
   if (!hasEntered) {
     switch (direction) {
       case "top-to-bottom":
-        initialClip = `inset(0% 0% 100% 0% round ${borderRadius})`;
+        initialClip = `inset(0% 0% 97.5% 0% round ${borderRadius})`;
         break;
       case "bottom-to-top":
-        initialClip = `inset(100% 0% 0% 0% round ${borderRadius})`;
+        initialClip = `inset(97.5% 0% 0% 0% round ${borderRadius})`;
         break;
       case "left-to-right":
-        initialClip = `inset(0% 100% 0% 0% round ${borderRadius})`;
+        initialClip = `inset(0% 97.5% 0% 0% round ${borderRadius})`;
         break;
       case "right-to-left":
-        initialClip = `inset(0% 0% 0% 100% round ${borderRadius})`;
+        initialClip = `inset(0% 0% 0% 97.5% round ${borderRadius})`;
         break;
       case "center-out":
-        initialClip = `inset(10% 16% 10% 16% round ${borderRadius})`;
+        initialClip = `inset(48.8% 0% 48.8% 0% round ${borderRadius})`;
         break;
     }
   }
@@ -281,8 +294,32 @@ export function getDirectionalMaskStyle(
   return {
     clipPath: hasEntered ? finalClip : initialClip,
     WebkitClipPath: hasEntered ? finalClip : initialClip,
-    opacity: hasEntered ? 1 : 0.01,
-    transitionProperty: "clip-path, -webkit-clip-path, opacity",
+    opacity: 1,
+    willChange: "clip-path",
+    transitionProperty: "clip-path, -webkit-clip-path",
+    transitionDuration: `${durationMs}ms`,
+    transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+    transitionDelay: `${delayMs}ms`,
+  };
+}
+
+/**
+ * Returns subtle inner image scale-settle styles (`scale(1.05)` -> `scale(1.0)`) that complement
+ * the thin-line `clip-path` expansion without distorting or jumping the image.
+ */
+export function getImageScaleSettleStyle(
+  hasEntered: boolean,
+  reducedMotion: boolean,
+  delayMs = 0,
+  durationMs = 1380
+): React.CSSProperties {
+  if (reducedMotion) {
+    return { transform: "none" };
+  }
+
+  return {
+    transform: hasEntered ? "scale(1)" : "scale(1.05)",
+    transitionProperty: "transform",
     transitionDuration: `${durationMs}ms`,
     transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
     transitionDelay: `${delayMs}ms`,

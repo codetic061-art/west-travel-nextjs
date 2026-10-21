@@ -1,6 +1,21 @@
 "use client";
 
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  ArrowRight,
+  ArrowUpRight,
+  Calendar,
+  ChevronDown,
+  Compass,
+  FileText,
+  Mail,
+  MapPin,
+  Phone,
+  ShieldCheck,
+  User,
+  Users,
+  X,
+} from "lucide-react";
 import { useHero } from "@/components/hero/HeroProvider";
 import { DESTINATIONS_CONFIG, type DestinationId } from "@/config/destinations";
 import {
@@ -13,6 +28,7 @@ import {
   FOOTER_CONTACT_CONFIG,
 } from "@/config/final-cta-footer";
 import { usePrefersReducedMotion } from "@/components/motion/MotionPrimitives";
+import { WhatsAppBrandIcon } from "@/components/icons/BrandIcons";
 
 interface InquiryFormState {
   fullName: string;
@@ -82,9 +98,7 @@ export function TripInquiryDrawer() {
               (trip) => trip.slug === inquiryDrawerPrefill.journeySlug
             )
           : undefined;
-        let nextTrip = matchedJourney
-          ? matchedJourney.id
-          : prev.tripId;
+        let nextTrip = matchedJourney ? matchedJourney.id : prev.tripId;
 
         if (nextDestination && nextTrip) {
           const tripConfig = FEATURED_TRIPS_CONFIG.find(
@@ -228,7 +242,6 @@ export function TripInquiryDrawer() {
     const nextErrors: InquiryFormErrors = {};
     const trimmedName = formState.fullName.trim();
     const trimmedPhone = formState.phone.trim();
-    // International phone validation: optional +, digits, spaces, dashes, parentheses, 7 to 16 digits
     const digitCount = trimmedPhone.replace(/\D/g, "").length;
     const phonePattern = /^\+?[0-9\s\-()]{7,22}$/;
 
@@ -291,6 +304,32 @@ export function TripInquiryDrawer() {
 
   const d = dictionary.inquiryDrawer;
 
+  // Shared classes for consistent icon scale, stroke weight, and alignment
+  const iconContainerClass = `mt-[3px] flex h-5 w-5 shrink-0 items-center justify-center transition-colors ${
+    isDark ? "text-[#C9AD79]/85" : "text-[#2C445C]"
+  }`;
+
+  const labelClass = `block text-[12.5px] font-semibold tracking-[0.01em] ${
+    isDark ? "text-[#E6EEF6]" : "text-[#172F46]"
+  }`;
+
+  const getUnderlineInputClass = (hasError: boolean, isPlaceholder = false) =>
+    `mt-1.5 w-full border-0 border-b bg-transparent pb-2 text-[14px] leading-snug transition-colors duration-200 focus:outline-none ${
+      hasError
+        ? "border-rose-500 focus:border-rose-500"
+        : isDark
+          ? "border-white/15 focus:border-[#4CC2B8]"
+          : "border-[#D8CEBC] focus:border-[#15887E]"
+    } ${
+      isPlaceholder
+        ? isDark
+          ? "text-[#7A90A6]"
+          : "text-[#8C9BA9]"
+        : isDark
+          ? "text-[#F7F2E8] placeholder:text-[#7A90A6]"
+          : "text-[#13293D] placeholder:text-[#8C9BA9]"
+    }`;
+
   return (
     <div
       id="trip-inquiry-drawer"
@@ -338,134 +377,149 @@ export function TripInquiryDrawer() {
               : "translate3d(104%, 0, 0)",
           }}
         >
-          {/* Decorative Faint Giza Pyramids & Palm Silhouette in Bottom-Left (matching reference image_7b6b25.jpg) */}
+          {/* Subtle Top Warm-Gold Hairline Accent */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-[#C5A367]/55 to-transparent"
+          />
+
+          {/* Refined Minimal Line-Art Giza Pyramids, Horizon Dunes & Date Palm in Muted Warm-Gold (Bottom-Left) */}
           <svg
-            viewBox="0 0 220 150"
+            viewBox="0 0 240 140"
             fill="none"
             aria-hidden="true"
-            className={`pointer-events-none absolute bottom-0 left-0 h-36 w-52 select-none ${
-              isDark ? "text-[#D8C39E]/10" : "text-[#C5AE87]/28"
+            className={`pointer-events-none absolute bottom-0 left-0 h-32 w-56 select-none ${
+              isDark ? "text-[#D4B475]/[0.14]" : "text-[#C5A367]/[0.28]"
             }`}
           >
-            {/* Pyramids */}
+            {/* Great Pyramid of Khufu & Khafre — Clean 1.3px architectural line art */}
             <path
-              d="M36 148L88 78L138 148H36Z"
-              fill="currentColor"
-              fillOpacity="0.55"
-            />
-            <path
-              d="M88 78L114 148H138L88 78Z"
-              fill="currentColor"
-              fillOpacity="0.85"
-            />
-            <path
-              d="M112 148L150 96L188 148H112Z"
-              fill="currentColor"
-              fillOpacity="0.4"
-            />
-            {/* Palm trunk & fronds */}
-            <path
-              d="M18 148C21 122 25 96 34 68"
+              d="M38 136L92 68L142 136"
               stroke="currentColor"
-              strokeWidth="4.5"
+              strokeWidth="1.3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            {/* Sunlit vs shaded ridge line */}
+            <path
+              d="M92 68L114 136"
+              stroke="currentColor"
+              strokeWidth="1.3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M92 68L142 136H114L92 68Z"
+              fill="currentColor"
+              fillOpacity="0.16"
+            />
+            {/* Secondary Pyramid of Menkaure */}
+            <path
+              d="M124 136L160 88L196 136"
+              stroke="currentColor"
+              strokeWidth="1.3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+            <path
+              d="M160 88L174 136"
+              stroke="currentColor"
+              strokeWidth="1.2"
               strokeLinecap="round"
             />
             <path
-              d="M34 68C18 62 6 69 2 78M34 68C20 52 6 52 -2 58M34 68C32 48 22 36 12 34M34 68C48 52 62 50 74 56M34 68C52 64 66 72 72 82"
+              d="M160 88L196 136H174L160 88Z"
+              fill="currentColor"
+              fillOpacity="0.12"
+            />
+            {/* Minimalist Desert Dune Contours */}
+            <path
+              d="M2 136C44 126 98 128 154 134C184 137 212 134 236 136"
               stroke="currentColor"
-              strokeWidth="3"
+              strokeWidth="1.3"
+              strokeLinecap="round"
+            />
+            {/* Slender Date Palm Line Art */}
+            <path
+              d="M22 136C24 112 28 88 36 62"
+              stroke="currentColor"
+              strokeWidth="1.45"
               strokeLinecap="round"
             />
             <path
-              d="M44 148C46 128 50 110 58 90"
+              d="M36 62C22 57 10 62 4 70M36 62C24 49 12 49 4 54M36 62C33 46 25 37 16 35M36 62C48 49 60 48 70 54M36 62C50 59 62 65 68 73"
               stroke="currentColor"
-              strokeWidth="3.2"
-              strokeLinecap="round"
-            />
-            <path
-              d="M58 90C46 86 38 90 34 96M58 90C54 76 46 70 38 68M58 90C70 80 82 80 90 86"
-              stroke="currentColor"
-              strokeWidth="2.4"
+              strokeWidth="1.25"
               strokeLinecap="round"
             />
           </svg>
 
-          {/* Decorative Faint Travel Postmark Stamp in Bottom-Right (matching reference image_7b6b25.jpg) */}
+          {/* Refined Minimal Line-Art Postmark Stamp in Muted Warm-Gold (Bottom-Right) */}
           <svg
-            viewBox="0 0 140 90"
+            viewBox="0 0 148 84"
             fill="none"
             aria-hidden="true"
-            className={`pointer-events-none absolute bottom-3 right-3 h-20 w-32 select-none ${
-              isDark ? "text-[#D8C39E]/10" : "text-[#C5AE87]/32"
+            className={`pointer-events-none absolute bottom-3 right-4 h-[68px] w-[122px] select-none ${
+              isDark ? "text-[#D4B475]/[0.14]" : "text-[#C5A367]/[0.28]"
             }`}
           >
             <circle
-              cx="44"
-              cy="46"
-              r="28"
+              cx="42"
+              cy="42"
+              r="26"
               stroke="currentColor"
-              strokeWidth="2"
-              strokeDasharray="3 3"
+              strokeWidth="1.25"
+              strokeDasharray="2.5 3"
             />
             <circle
-              cx="44"
-              cy="46"
-              r="22"
+              cx="42"
+              cy="42"
+              r="20.5"
               stroke="currentColor"
-              strokeWidth="1.5"
+              strokeWidth="1.25"
             />
-            {/* Airplane silhouette inside stamp */}
+            {/* Minimalist compass/paper-plane emblem inside postmark */}
             <path
-              d="M35 49L53 39L50 53L44 48L39 52L40 46L35 49Z"
-              fill="currentColor"
-            />
-            {/* Wavy postmark lines */}
-            <path
-              d="M78 34C88 30 98 38 108 34C118 30 128 38 136 34"
+              d="M33 44.5L50 35.5L46.5 49.5L41.5 44.5L37.5 48L38.5 43L33 44.5Z"
               stroke="currentColor"
-              strokeWidth="1.8"
+              strokeWidth="1.2"
+              strokeLinejoin="round"
+            />
+            {/* Three uniform cancellation wave lines */}
+            <path
+              d="M76 31C86 27.5 96 34.5 106 31C116 27.5 126 34.5 136 31"
+              stroke="currentColor"
+              strokeWidth="1.25"
               strokeLinecap="round"
             />
             <path
-              d="M78 46C88 42 98 50 108 46C118 42 128 50 136 46"
+              d="M76 42C86 38.5 96 45.5 106 42C116 38.5 126 45.5 136 42"
               stroke="currentColor"
-              strokeWidth="1.8"
+              strokeWidth="1.25"
               strokeLinecap="round"
             />
             <path
-              d="M78 58C88 54 98 62 108 58C118 54 128 62 136 58"
+              d="M76 53C86 49.5 96 56.5 106 53C116 49.5 126 56.5 136 53"
               stroke="currentColor"
-              strokeWidth="1.8"
+              strokeWidth="1.25"
               strokeLinecap="round"
             />
           </svg>
 
           {/* Upper-right close button */}
-          <div className="relative z-20 flex items-center justify-end px-6 pt-5 sm:px-9 sm:pt-6">
+          <div className="relative z-20 flex items-center justify-end px-6 pt-5 sm:px-10 sm:pt-6">
             <button
               ref={closeBtnRef}
               type="button"
               onClick={closeInquiryDrawer}
               aria-label={d.closeLabel}
-              className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#138D83] ${
+              className={`inline-flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#15887E] ${
                 isDark
-                  ? "text-[#B8C7D6] hover:bg-white/10 hover:text-white"
-                  : "text-[#35495E] hover:bg-[#13293D]/8 hover:text-[#13293D]"
+                  ? "border-white/10 text-[#B8C7D6] hover:border-[#D4B475]/40 hover:bg-white/10 hover:text-white"
+                  : "border-[#E5DCCB] text-[#35495E] hover:border-[#C5A367]/60 hover:bg-[#13293D]/5 hover:text-[#13293D]"
               }`}
             >
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-5 w-5"
-                aria-hidden="true"
-              >
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
+              <X className="h-[18px] w-[18px]" strokeWidth={1.85} aria-hidden="true" />
             </button>
           </div>
 
@@ -476,11 +530,11 @@ export function TripInquiryDrawer() {
               paddingBottom: "max(2rem, env(safe-area-inset-bottom, 2rem))",
             }}
           >
-            {/* Header with subtle entrance stagger */}
+            {/* Header with subtle entrance stagger & warm-gold rules */}
             <header
               className="mb-6 transition-all"
               style={{
-                transitionDuration: prefersReducedMotion ? "0ms" : "680ms",
+                transitionDuration: prefersReducedMotion ? "0ms" : "740ms",
                 transitionDelay:
                   isInquiryDrawerOpen && !prefersReducedMotion
                     ? "140ms"
@@ -498,20 +552,20 @@ export function TripInquiryDrawer() {
                 />
                 <span
                   className={`text-[11px] font-bold uppercase tracking-[0.2em] ${
-                    isDark ? "text-[#4CC2B8]" : "text-[#17857C]"
+                    isDark ? "text-[#4CC2B8]" : "text-[#15887E]"
                   }`}
                 >
                   {d.eyebrow}
                 </span>
                 <span
                   aria-hidden="true"
-                  className="h-[1px] w-10 bg-[#C5A367]/45"
+                  className="h-[1px] w-10 bg-gradient-to-r from-[#C5A367]/75 to-transparent"
                 />
               </div>
 
               <h2
                 id={titleId}
-                className={`font-serif text-[1.75rem] font-bold leading-[1.18] tracking-tight sm:text-[2.05rem] ${
+                className={`font-serif text-[1.75rem] font-bold leading-[1.18] tracking-tight sm:text-[2.02rem] ${
                   isDark ? "text-[#F7F2E8]" : "text-[#13293D]"
                 }`}
               >
@@ -520,8 +574,8 @@ export function TripInquiryDrawer() {
 
               <p
                 id={descriptionId}
-                className={`mt-1.5 text-[0.9rem] leading-relaxed ${
-                  isDark ? "text-[#9EB2C5]" : "text-[#63768A]"
+                className={`mt-1.5 text-[0.89rem] leading-relaxed ${
+                  isDark ? "text-[#9EB2C5]" : "text-[#5C7084]"
                 }`}
               >
                 {d.supportingText}
@@ -570,9 +624,9 @@ export function TripInquiryDrawer() {
             <form
               onSubmit={handleSubmit}
               noValidate
-              className="space-y-5"
+              className="space-y-[18px]"
               style={{
-                transitionDuration: prefersReducedMotion ? "0ms" : "740ms",
+                transitionDuration: prefersReducedMotion ? "0ms" : "800ms",
                 transitionDelay:
                   isInquiryDrawerOpen && !prefersReducedMotion
                     ? "220ms"
@@ -585,32 +639,11 @@ export function TripInquiryDrawer() {
             >
               {/* 1. Full Name */}
               <div className="flex items-start gap-3.5">
-                <span
-                  aria-hidden="true"
-                  className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center ${
-                    isDark ? "text-[#9EB2C5]" : "text-[#35495E]"
-                  }`}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.75"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-[18px] w-[18px]"
-                  >
-                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                    <circle cx="12" cy="7" r="4" />
-                  </svg>
+                <span aria-hidden="true" className={iconContainerClass}>
+                  <User className="h-[18px] w-[18px]" strokeWidth={1.75} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <label
-                    htmlFor="inquiry-full-name"
-                    className={`block text-[13px] font-semibold ${
-                      isDark ? "text-[#E6EEF6]" : "text-[#1E354D]"
-                    }`}
-                  >
+                  <label htmlFor="inquiry-full-name" className={labelClass}>
                     {d.fields.fullNameLabel}
                   </label>
                   <input
@@ -632,13 +665,7 @@ export function TripInquiryDrawer() {
                     }}
                     placeholder={d.fields.fullNamePlaceholder}
                     aria-invalid={Boolean(errors.fullName)}
-                    className={`mt-1 w-full border-0 border-b bg-transparent pb-2 text-[14px] transition-colors focus:outline-none ${
-                      errors.fullName
-                        ? "border-rose-500 focus:border-rose-500"
-                        : isDark
-                          ? "border-white/20 text-[#F7F2E8] placeholder:text-[#788EA4] focus:border-[#4CC2B8]"
-                          : "border-[#D6CEBE] text-[#13293D] placeholder:text-[#9AA8B6] focus:border-[#148A81]"
-                    }`}
+                    className={getUnderlineInputClass(Boolean(errors.fullName))}
                   />
                   {errors.fullName && (
                     <p
@@ -653,31 +680,11 @@ export function TripInquiryDrawer() {
 
               {/* 2. Phone / WhatsApp */}
               <div className="flex items-start gap-3.5">
-                <span
-                  aria-hidden="true"
-                  className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center ${
-                    isDark ? "text-[#9EB2C5]" : "text-[#35495E]"
-                  }`}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.75"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-[18px] w-[18px]"
-                  >
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-                  </svg>
+                <span aria-hidden="true" className={iconContainerClass}>
+                  <Phone className="h-[18px] w-[18px]" strokeWidth={1.75} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <label
-                    htmlFor="inquiry-phone"
-                    className={`block text-[13px] font-semibold ${
-                      isDark ? "text-[#E6EEF6]" : "text-[#1E354D]"
-                    }`}
-                  >
+                  <label htmlFor="inquiry-phone" className={labelClass}>
                     {d.fields.phoneLabel}
                   </label>
                   <input
@@ -699,13 +706,7 @@ export function TripInquiryDrawer() {
                     }}
                     placeholder={d.fields.phonePlaceholder}
                     aria-invalid={Boolean(errors.phone)}
-                    className={`mt-1 w-full border-0 border-b bg-transparent pb-2 text-[14px] transition-colors focus:outline-none ${
-                      errors.phone
-                        ? "border-rose-500 focus:border-rose-500"
-                        : isDark
-                          ? "border-white/20 text-[#F7F2E8] placeholder:text-[#788EA4] focus:border-[#4CC2B8]"
-                          : "border-[#D6CEBE] text-[#13293D] placeholder:text-[#9AA8B6] focus:border-[#148A81]"
-                    }`}
+                    className={getUnderlineInputClass(Boolean(errors.phone))}
                   />
                   {errors.phone && (
                     <p
@@ -720,32 +721,11 @@ export function TripInquiryDrawer() {
 
               {/* 3. Destination */}
               <div className="flex items-start gap-3.5">
-                <span
-                  aria-hidden="true"
-                  className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center ${
-                    isDark ? "text-[#9EB2C5]" : "text-[#35495E]"
-                  }`}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.75"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-[18px] w-[18px]"
-                  >
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
+                <span aria-hidden="true" className={iconContainerClass}>
+                  <MapPin className="h-[18px] w-[18px]" strokeWidth={1.75} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <label
-                    htmlFor="inquiry-destination"
-                    className={`block text-[13px] font-semibold ${
-                      isDark ? "text-[#E6EEF6]" : "text-[#1E354D]"
-                    }`}
-                  >
+                  <label htmlFor="inquiry-destination" className={labelClass}>
                     {d.fields.destinationLabel}
                   </label>
                   <div className="relative">
@@ -780,21 +760,10 @@ export function TripInquiryDrawer() {
                         }
                       }}
                       aria-invalid={Boolean(errors.destinationId)}
-                      className={`mt-1 w-full appearance-none border-0 border-b bg-transparent pb-2 pr-7 text-[14px] transition-colors focus:outline-none ${
-                        errors.destinationId
-                          ? "border-rose-500 focus:border-rose-500"
-                          : isDark
-                            ? "border-white/20 focus:border-[#4CC2B8]"
-                            : "border-[#D6CEBE] focus:border-[#148A81]"
-                      } ${
+                      className={`${getUnderlineInputClass(
+                        Boolean(errors.destinationId),
                         !formState.destinationId
-                          ? isDark
-                            ? "text-[#788EA4]"
-                            : "text-[#9AA8B6]"
-                          : isDark
-                            ? "text-[#F7F2E8]"
-                            : "text-[#13293D]"
-                      }`}
+                      )} appearance-none pr-7`}
                     >
                       <option
                         value=""
@@ -820,20 +789,13 @@ export function TripInquiryDrawer() {
                         </option>
                       ))}
                     </select>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                    <ChevronDown
                       aria-hidden="true"
+                      strokeWidth={1.8}
                       className={`pointer-events-none absolute right-0.5 top-2.5 h-4 w-4 ${
-                        isDark ? "text-[#9EB2C5]" : "text-[#63768A]"
+                        isDark ? "text-[#C9AD79]/80" : "text-[#63768A]"
                       }`}
-                    >
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
+                    />
                   </div>
                   {errors.destinationId && (
                     <p
@@ -848,34 +810,11 @@ export function TripInquiryDrawer() {
 
               {/* 4. Journey / Trip (Filtered by Destination) */}
               <div className="flex items-start gap-3.5">
-                <span
-                  aria-hidden="true"
-                  className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center ${
-                    isDark ? "text-[#9EB2C5]" : "text-[#35495E]"
-                  }`}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.75"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-[18px] w-[18px]"
-                  >
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                  </svg>
+                <span aria-hidden="true" className={iconContainerClass}>
+                  <Compass className="h-[18px] w-[18px]" strokeWidth={1.75} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <label
-                    htmlFor="inquiry-trip"
-                    className={`block text-[13px] font-semibold ${
-                      isDark ? "text-[#E6EEF6]" : "text-[#1E354D]"
-                    }`}
-                  >
+                  <label htmlFor="inquiry-trip" className={labelClass}>
                     {d.fields.journeyLabel}
                   </label>
                   <div className="relative">
@@ -907,21 +846,10 @@ export function TripInquiryDrawer() {
                         }
                       }}
                       aria-invalid={Boolean(errors.tripId)}
-                      className={`mt-1 w-full appearance-none border-0 border-b bg-transparent pb-2 pr-7 text-[14px] transition-colors focus:outline-none ${
-                        errors.tripId
-                          ? "border-rose-500 focus:border-rose-500"
-                          : isDark
-                            ? "border-white/20 focus:border-[#4CC2B8]"
-                            : "border-[#D6CEBE] focus:border-[#148A81]"
-                      } ${
+                      className={`${getUnderlineInputClass(
+                        Boolean(errors.tripId),
                         !formState.tripId
-                          ? isDark
-                            ? "text-[#788EA4]"
-                            : "text-[#9AA8B6]"
-                          : isDark
-                            ? "text-[#F7F2E8]"
-                            : "text-[#13293D]"
-                      }`}
+                      )} appearance-none pr-7`}
                     >
                       <option
                         value=""
@@ -955,20 +883,13 @@ export function TripInquiryDrawer() {
                         );
                       })}
                     </select>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                    <ChevronDown
                       aria-hidden="true"
+                      strokeWidth={1.8}
                       className={`pointer-events-none absolute right-0.5 top-2.5 h-4 w-4 ${
-                        isDark ? "text-[#9EB2C5]" : "text-[#63768A]"
+                        isDark ? "text-[#C9AD79]/80" : "text-[#63768A]"
                       }`}
-                    >
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
+                    />
                   </div>
                   {errors.tripId && (
                     <p
@@ -983,34 +904,11 @@ export function TripInquiryDrawer() {
 
               {/* 5. Number of Travelers */}
               <div className="flex items-start gap-3.5">
-                <span
-                  aria-hidden="true"
-                  className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center ${
-                    isDark ? "text-[#9EB2C5]" : "text-[#35495E]"
-                  }`}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.75"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-[18px] w-[18px]"
-                  >
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                    <circle cx="9" cy="7" r="4" />
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-                  </svg>
+                <span aria-hidden="true" className={iconContainerClass}>
+                  <Users className="h-[18px] w-[18px]" strokeWidth={1.75} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <label
-                    htmlFor="inquiry-travelers"
-                    className={`block text-[13px] font-semibold ${
-                      isDark ? "text-[#E6EEF6]" : "text-[#1E354D]"
-                    }`}
-                  >
+                  <label htmlFor="inquiry-travelers" className={labelClass}>
                     {d.fields.travelersLabel}
                   </label>
                   <div className="relative">
@@ -1024,11 +922,7 @@ export function TripInquiryDrawer() {
                           travelers: Number(e.target.value),
                         }))
                       }
-                      className={`mt-1 w-full appearance-none border-0 border-b bg-transparent pb-2 pr-7 text-[14px] transition-colors focus:outline-none ${
-                        isDark
-                          ? "border-white/20 text-[#F7F2E8] focus:border-[#4CC2B8]"
-                          : "border-[#D6CEBE] text-[#13293D] focus:border-[#148A81]"
-                      }`}
+                      className={`${getUnderlineInputClass(false)} appearance-none pr-7`}
                     >
                       {TRAVELER_COUNTS.map((count) => (
                         <option
@@ -1048,55 +942,24 @@ export function TripInquiryDrawer() {
                         </option>
                       ))}
                     </select>
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                    <ChevronDown
                       aria-hidden="true"
+                      strokeWidth={1.8}
                       className={`pointer-events-none absolute right-0.5 top-2.5 h-4 w-4 ${
-                        isDark ? "text-[#9EB2C5]" : "text-[#63768A]"
+                        isDark ? "text-[#C9AD79]/80" : "text-[#63768A]"
                       }`}
-                    >
-                      <polyline points="6 9 12 15 18 9" />
-                    </svg>
+                    />
                   </div>
                 </div>
               </div>
 
               {/* 6. Preferred Travel Date (Optional) */}
               <div className="flex items-start gap-3.5">
-                <span
-                  aria-hidden="true"
-                  className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center ${
-                    isDark ? "text-[#9EB2C5]" : "text-[#35495E]"
-                  }`}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.75"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-[18px] w-[18px]"
-                  >
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                    <line x1="16" y1="2" x2="16" y2="6" />
-                    <line x1="8" y1="2" x2="8" y2="6" />
-                    <line x1="3" y1="10" x2="21" y2="10" />
-                    <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
-                  </svg>
+                <span aria-hidden="true" className={iconContainerClass}>
+                  <Calendar className="h-[18px] w-[18px]" strokeWidth={1.75} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <label
-                    htmlFor="inquiry-travel-date"
-                    className={`block text-[13px] font-semibold ${
-                      isDark ? "text-[#E6EEF6]" : "text-[#1E354D]"
-                    }`}
-                  >
+                  <label htmlFor="inquiry-travel-date" className={labelClass}>
                     {d.fields.preferredDateLabel}
                   </label>
                   <div className="relative">
@@ -1112,11 +975,10 @@ export function TripInquiryDrawer() {
                         }))
                       }
                       placeholder={d.fields.preferredDatePlaceholder}
-                      className={`mt-1 w-full border-0 border-b bg-transparent pb-2 text-[14px] transition-colors focus:outline-none ${
-                        isDark
-                          ? "border-white/20 text-[#F7F2E8] [color-scheme:dark] focus:border-[#4CC2B8]"
-                          : "border-[#D6CEBE] text-[#13293D] [color-scheme:light] focus:border-[#148A81]"
-                      }`}
+                      className={`${getUnderlineInputClass(
+                        false,
+                        !formState.travelDate
+                      )} ${isDark ? "[color-scheme:dark]" : "[color-scheme:light]"}`}
                     />
                   </div>
                 </div>
@@ -1124,34 +986,11 @@ export function TripInquiryDrawer() {
 
               {/* 7. Additional Notes (Optional multiline field) */}
               <div className="flex items-start gap-3.5">
-                <span
-                  aria-hidden="true"
-                  className={`mt-1 flex h-6 w-6 shrink-0 items-center justify-center ${
-                    isDark ? "text-[#9EB2C5]" : "text-[#35495E]"
-                  }`}
-                >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.75"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-[18px] w-[18px]"
-                  >
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="16" y1="13" x2="8" y2="13" />
-                    <line x1="16" y1="17" x2="8" y2="17" />
-                  </svg>
+                <span aria-hidden="true" className={iconContainerClass}>
+                  <FileText className="h-[18px] w-[18px]" strokeWidth={1.75} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <label
-                    htmlFor="inquiry-notes"
-                    className={`block text-[13px] font-semibold ${
-                      isDark ? "text-[#E6EEF6]" : "text-[#1E354D]"
-                    }`}
-                  >
+                  <label htmlFor="inquiry-notes" className={labelClass}>
                     {d.fields.notesLabel}
                   </label>
                   <textarea
@@ -1166,10 +1005,10 @@ export function TripInquiryDrawer() {
                       }))
                     }
                     placeholder={d.fields.notesPlaceholder}
-                    className={`mt-1.5 w-full resize-y rounded-lg border border-b px-3 py-2 text-[13.5px] transition-colors focus:outline-none ${
+                    className={`mt-1.5 w-full resize-y rounded-lg border px-3 py-2 text-[13.5px] leading-relaxed transition-colors duration-200 focus:outline-none ${
                       isDark
-                        ? "border-white/15 bg-white/[0.03] text-[#F7F2E8] placeholder:text-[#788EA4] focus:border-[#4CC2B8]"
-                        : "border-[#DFD7C8] bg-white/55 text-[#13293D] placeholder:text-[#9AA8B6] focus:border-[#148A81]"
+                        ? "border-white/15 bg-white/[0.03] text-[#F7F2E8] placeholder:text-[#7A90A6] focus:border-[#4CC2B8]"
+                        : "border-[#D8CEBC] bg-white/60 text-[#13293D] placeholder:text-[#8C9BA9] focus:border-[#15887E]"
                     }`}
                   />
                 </div>
@@ -1182,33 +1021,24 @@ export function TripInquiryDrawer() {
                   className="group relative flex w-full items-center justify-center gap-2.5 rounded-full bg-[#15887E] px-6 py-3.5 text-[14.5px] font-semibold tracking-wide text-white shadow-[0_12px_28px_rgba(21,136,126,0.32)] transition-all duration-300 hover:bg-[#11736A] hover:shadow-[0_16px_34px_rgba(21,136,126,0.42)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#4CC2B8] focus-visible:ring-offset-2"
                 >
                   <span>{d.submitButton}</span>
-                  <span
+                  <ArrowRight
                     aria-hidden="true"
-                    className="inline-block transition-transform duration-300 group-hover:translate-x-1"
-                  >
-                    →
-                  </span>
+                    strokeWidth={2}
+                    className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
+                  />
                 </button>
 
                 {/* Restrained Privacy Note below Submit Button */}
                 <p
                   className={`mt-3 flex items-center justify-center gap-1.5 text-center text-[11.5px] ${
-                    isDark ? "text-[#8DA2B7]" : "text-[#7A8B9C]"
+                    isDark ? "text-[#8DA2B7]" : "text-[#718496]"
                   }`}
                 >
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.8"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="h-3.5 w-3.5 shrink-0 text-[#15887E]"
+                  <ShieldCheck
                     aria-hidden="true"
-                  >
-                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                    <polyline points="9 12 11 14 15 10" />
-                  </svg>
+                    strokeWidth={1.85}
+                    className="h-3.5 w-3.5 shrink-0 text-[#15887E] dark:text-[#4CC2B8]"
+                  />
                   <span>{d.privacyNote}</span>
                 </p>
               </div>
@@ -1238,8 +1068,9 @@ export function TripInquiryDrawer() {
                     rel="noopener noreferrer"
                     className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-[#25D366] px-4 py-2.5 text-center text-[12.5px] font-semibold text-white shadow-sm transition-transform hover:scale-[1.01]"
                   >
+                    <WhatsAppBrandIcon className="h-3.5 w-3.5 shrink-0" />
                     <span>{d.submissionStatus.whatsappActionLabel}</span>
-                    <span aria-hidden="true">↗</span>
+                    <ArrowUpRight className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                   </a>
                   <a
                     href={submittedPayload.emailHref}
@@ -1249,6 +1080,7 @@ export function TripInquiryDrawer() {
                         : "border-[#13293D]/20 bg-[#13293D]/5 text-[#13293D] hover:bg-[#13293D]/10"
                     }`}
                   >
+                    <Mail className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
                     <span>{d.submissionStatus.emailActionLabel}</span>
                   </a>
                 </div>
