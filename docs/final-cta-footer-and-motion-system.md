@@ -1,52 +1,39 @@
-# WEST GLOBAL TOURS — Final Website Polish, Social FAB, Trip Inquiry Drawer, Motion Refinement & Footer
+# WEST GLOBAL TOURS — Animation Timing, Thin-Line Image Reveals, Horizontal Clothesline Physics, Icon Quality & Form Polish
 
-## 1. Official Company Identity & Contact Configuration (`src/config/final-cta-footer.ts`)
-- **Official Company Name**: `WEST GLOBAL TOURS`
-- **Official Logo Asset**: `public/images/west-travel/west-global-tours-logo.webp` (`256x256`, `21.6 KB`) and `public/images/west-travel/west-global-tours-logo.png` (`256x256`, `89.9 KB`), processed directly from the supplied official `Luxury Globe Travel Emblem.png`.
-- **Official Contact & Social Channels**:
-  - **WhatsApp**: `+20 120 139 8685` (`https://wa.me/201201398685`)
-  - **Email**: `westglobaltours.info@gmail.com` (`mailto:westglobaltours.info@gmail.com`)
-  - **Instagram**: `https://www.instagram.com/westglobaltours/`
-  - **Facebook**: `https://www.facebook.com/profile.php?id=61595448091591`
-  - **Developer Credit**: `Developed by Mina Medhat` (`https://mina-medhat.is-a.dev/`)
-- No unverified TikTok URL, physical street address, or fake social channels were added.
+## 1. Root Cause Diagnosis & Fix for Image Reveals (`MotionPrimitives.tsx`, `JourneyCard.tsx`, `DestinationCards.tsx`, `WhyWestTravelSection.tsx`, `FinalCtaSection.tsx`)
+- **Why Image Reveals Were Previously Invisible or Looked Like Ordinary Slides**:
+  1. `JourneyCard.tsx` and `DestinationCards.tsx` previously applied `opacity: 0` and `translate3d(-44px/44px)` to the outer `<article>` / `<button>` card shell *while simultaneously* applying `opacity: 0.01` inside `getDirectionalMaskStyle()`. As a result, while the `clip-path` mask was expanding during the first `~500ms`, the card's `opacity` was still near `0`, hiding the mask progression and making the animation look like a simple card slide + fade.
+  2. `FinalCtaSection.tsx` used `center-out` with `inset(10% 16% 10% 16%)`, which already exposed ~70% of the final image before the reveal even began.
+  3. Below-the-fold `IntersectionObserver` triggers (`threshold: 0.16`, `rootMargin: "0px 0px -10% 0px"`) could fire as soon as the top section padding crossed the bottom viewport edge before the images were comfortably within the user's line of sight.
+- **How Initial States & Scroll Triggers Were Corrected**:
+  1. **Thin-Line Initial Mask State (`getDirectionalMaskStyle`)**: Before entering the viewport (`!hasEntered`), images start masked down to a narrow `2.5%` visible strip (`inset(0% 0% 97.5% 0% round ...)` for `top-to-bottom`, `inset(97.5% 0% 0% 0% round ...)` for `bottom-to-top`) at **full `opacity: 1`**.
+  2. **Progressive Uncover (`1280ms–1380ms`) + Inner Scale Settle (`getImageScaleSettleStyle`)**: When triggered, `clip-path` expands smoothly in one direction from the `2.5%` thin line to `inset(0% 0% 0% 0%)` over `1280ms–1380ms` (`cubic-bezier(0.22, 1, 0.36, 1)`), accompanied by a subtle inner image scale settle (`scale(1.05)` → `scale(1.0)` over `1380ms–1520ms`). Outer card shells stay anchored in their grid coordinates without sliding.
+  3. **Double-Buffered Viewport Trigger (`useSectionEntrance`)**: Below-the-fold sections use `threshold: 0.22–0.24` and `rootMargin: "0px 0px -12% 0px"` with nested `requestAnimationFrame` double-buffering so the browser is guaranteed to paint the initial thin-line masked state before transitioning to the revealed state.
 
-## 2. Slowed & Refined Site-Wide Motion System
-- **Viewport-Only Triggers Below the Fold**: `useInViewOnce` in `src/components/motion/MotionPrimitives.tsx` uses `IntersectionObserver` (`threshold: 0.16`, `rootMargin: "0px 0px -10% 0px"`) with `once: true` so below-the-fold sections remain in their pre-reveal state until scrolled into view and animate once cleanly.
-- **Refined Durations & Staggers**:
-  - Standard content/line reveals (`SplitLinesReveal`, `MotionReveal`): `840ms–980ms` with `110ms–160ms` staggers (`cubic-bezier(0.22, 1, 0.36, 1)`).
-  - Directional image-mask reveals (`DirectionalMaskReveal`): `1140ms–1240ms`.
-  - Featured Trips 5-card cascade (`FeaturedTripsSection.tsx` / `JourneyCard.tsx`): `980ms` reveal duration with `140ms` per-card stagger (`0ms` to `560ms`).
-  - Why West Global Tours editorial section (`WhyWestTravelSection.tsx`): `940ms–1180ms` reveal durations with `150ms` feature-row staggers.
-  - Final CTA panel (`FinalCtaSection.tsx`): `1180ms` directional mask reveal + `900ms` staggered text/CTA reveals.
-- **Traveler Stories ("Our Latest Stories") 7-Step Clothesline Sequence (`TravelerStoriesSection.tsx` & `.module.css`)**:
-  1. Empty SVG hemp clothesline fades in (`900ms`) when the section enters the viewport.
-  2. Empty line holds visibly for `~900ms` before any Polaroid cards arrive.
-  3. Polaroid review cards enter from their respective lateral/vertical directions (`--entry-x`, `--entry-y`) in a coordinated `150ms` staggered sequence (`980ms` travel duration).
-  4. Each card reaches its clothespin position and triggers a subtle physical rope-impact flex (`1520ms`).
-  5. Neighboring cards maintain clean spacing and never overlap or obscure text.
-  6. Layered inner pendulum wrapper (`pendulumInitialHangLeft` / `pendulumInitialHangRight`) performs a damped spring-back swing (`1.85s`) independent of the horizontal carousel track transform.
-  7. Cards settle into their resting tilt (`-2.5deg` / `+1.8deg`) with no continuous oscillation.
+## 2. Slowed Multi-Phase Floating Social FAB (`FloatingSocialFab.tsx`)
+- **Distinct 3-Phase Timing Sequence**:
+  1. **Phase 1 — Main Button Response & Liquid Morph (`420ms` / within `300–500ms`)**: Clicking the WhatsApp button immediately triggers `fabMainButtonMorphOpen` (`440ms`) and stretches the emerging liquid neck blob (`440ms`) through the inline SVG gooey filter (`feGaussianBlur` + `feColorMatrix` + `feComposite`).
+  2. **Phase 2 — Secondary Icon Emergence (`640ms` / within `500–750ms`) with `115ms` Stagger (`90ms`, `205ms`, `320ms`, `435ms`)**: Each secondary button (`WhatsApp`, `Instagram`, `Facebook`, `Email`) emerges from the center of the main button `(0, 0)` along its trajectory (`0%` → `55%` of the `1160ms` `fabSecondaryEmergeAndSettle` keyframe).
+  3. **Phase 3 — Spring Overshoot & Rebound Settle (`520ms` / within `400–600ms`)**: From `55%` (`1.11×` trajectory overshoot, `scale(1.08)`) → `78%` (`0.95×` rebound, `scale(0.97)`) → `91%` (`1.02×` micro-settle) → `100%` (`1.00×` resting coordinate, `scale(1)`).
+- **Responsive Arrangement**:
+  - **Desktop (`>= 640px`)**: Radial upward-left quarter-circle arc (`(-6, -76)`, `(-64, -58)`, `(-80, 2)`, `(-12, -142)`).
+  - **Mobile (`< 640px`)**: Compact vertical stack rising directly above the main orb (`(0, -68)`, `(0, -126)`, `(0, -184)`, `(0, -242)`).
 
-## 3. Animated Floating Social Action Button (`src/components/social-fab/FloatingSocialFab.tsx`)
-- **Closed State**: Compact circular WhatsApp orb (`56x56px`) anchored in the bottom-right corner (`right/bottom: max(1.25rem, env(safe-area-inset-*))`), with tactile top specular highlight, subtle ring glow, and accessible label.
-- **Expanded State (Liquid/Spring Physics)**:
-  - Uses an inline SVG gooey filter (`feGaussianBlur` + `feColorMatrix` + `feComposite`) combined with spring-physics `cubic-bezier(0.34, 1.54, 0.64, 1)` trajectories.
-  - Clicking the orb morphs the base, pulls an emerging liquid bridge upward, and separates 4 circular action buttons (`WhatsApp`, `Instagram`, `Facebook`, `Email`) along a compact upward quarter-circle arc (`40ms–205ms` stagger).
-  - Main orb crossfades and rotates into a dark navy/petrol close (`X`) control.
-  - Supports click-outside dismissal, `Escape` key dismissal (returning focus to the main button), keyboard `Tab` navigation, and automatically hides when the Trip Inquiry Drawer is open.
+## 3. Traveler Stories ("Our Latest Stories") 4-Phase Horizontal Clothesline Physics (`TravelerStoriesSection.tsx` & `.module.css`)
+- **Layered Transform Architecture**:
+  1. `.cardSlot` (Outer): Controls resting slot coordinate (`--slot-offset`) and catenary rope sag (`--slot-sag-y`).
+  2. `.cardSlideCarriage` (Middle): Controls the initial horizontal right-to-left race along the rope, neighbor bump overshoot, and horizontal spring rebound (`clotheslineRaceHorizontal`).
+  3. `.polaroidPendulum` (Inner): Controls rotational swing around the clothespin pinch point (`transform-origin: 50% -10px`, `pendulumRaceFromRight`), keeping `<WoodenClothespin />` attached to its Polaroid card at all times.
+- **4-Phase Sequence**:
+  - **Phase A (`0ms–920ms`)**: Braided clothesline reveals first and remains visibly empty for `920ms` while cards wait offscreen to the far right (`data-carriage-state="waiting-right"`).
+  - **Phase B (`920ms` start, `135ms` stagger)**: Cards race horizontally from the far right (`+980px` desktop, `+560px` tablet, `+340px` mobile) from right to left along the rope (`data-carriage-state="racing-in"`).
+  - **Phase C (`~1460ms` impact)**: Each arriving card overshoots slightly left (`-18px` to `-20px` desktop, `-11px` mobile), lightly bumping/approaching its neighbor and flexing the rope downward (`3.5px`), then rebounds horizontally (`+11px` → `-3px` → `0px`) without overlapping any photos or text.
+  - **Phase D (`~2850ms` settled)**: Cards finish their diminishing rotational swing (`+11.5deg` drag → `-7.2deg` impact → `+3.8deg` rebound → `-1.2deg` sway → resting slot angle `[-2.8deg, +1.5deg, -1.5deg, +2.8deg]`). Subsequent manual `Next`/`Prev` clicks bring new cards in horizontally from the right without replaying the empty-line pause.
 
-## 4. Right-Side Slide-Out Trip Inquiry Drawer (`src/components/inquiry-drawer/TripInquiryDrawer.tsx`)
-- **Layout & Visual Design**: Slides in from the right edge (`820ms`, `cubic-bezier(0.22, 1, 0.36, 1)`), occupying `~34vw` (`420px–510px`) on desktop with a restrained translucent dark backdrop over the remaining two-thirds of the homepage, and full-width on mobile. Features warm-cream (`#FBF7F0`) Light Mode and deep petrol (`#102030`) Dark Mode surfaces, plus faint Giza pyramids/palm artwork in the bottom-left and a vintage airplane postmark stamp in the bottom-right.
-- **Implemented Fields**:
-  1. **Full Name** (`required`, placeholder `"e.g., Mark Zuckerberg"`)
-  2. **Phone / WhatsApp** (`required`, international phone validation, placeholder `"e.g., +20 1XX XXX XXXX"`)
-  3. **Destination** (`required`, localized `Egypt`, `Dubai`, `Türkiye`)
-  4. **Journey / Trip** (`required`, dynamically filtered from `FEATURED_TRIPS_CONFIG` by the selected destination)
-  5. **Number of Travelers** (`1` to `10+` travelers selector, default `2 travelers`)
-  6. **Preferred Travel Date** (`optional` native date input)
-  7. **Additional Notes** (`optional` multiline field, placeholder `"Anything we should know?"`)
-- **Submission & Accessibility**:
-  - Frontend validation prevents invalid submissions with accessible inline `role="alert"` messages.
-  - Honest submission boundary: does **not** fake background delivery; prepares a structured inquiry summary with direct one-click WhatsApp (`https://wa.me/201201398685?text=...`) and Email (`mailto:westglobaltours.info@gmail.com?...`) handoff links.
-  - Focus moves into the drawer on open, traps `Tab` / `Shift+Tab` inside the drawer, protects dirty form data against accidental backdrop clicks with a confirmation prompt, locks background page scroll, and restores focus to the triggering CTA on close.
+## 4. Consistent Icon Library & Trip Inquiry Form Refinements (`BrandIcons.tsx`, `TripInquiryDrawer.tsx`, `SiteFooter.tsx`)
+- **Icon Library Upgrade**:
+  - Replaced all hand-drawn inline form SVGs in `TripInquiryDrawer.tsx` and `FloatingSocialFab.tsx` with `lucide-react` components (`User`, `Phone`, `MapPin`, `Compass`, `Users`, `Calendar`, `FileText`, `ChevronDown`, `ArrowRight`, `ArrowUpRight`, `ShieldCheck`, `Mail`, `X`) using a uniform `18×18px` scale and `1.75` stroke weight.
+  - Created `src/components/icons/BrandIcons.tsx` with canonical Simple Icons vector paths for `WhatsAppBrandIcon`, `InstagramBrandIcon`, and `FacebookBrandIcon`, shared across `FloatingSocialFab.tsx`, `SiteFooter.tsx`, and `TripInquiryDrawer.tsx`.
+- **Trip Inquiry Form Visual Polish**:
+  - Replaced heavy filled corner illustrations with clean, minimal `1.3px` line-art SVGs in muted warm-gold / sand-gold (`#C5A367` in Light Mode at `0.28` opacity, `#D4B475` in Dark Mode at `0.14` opacity) depicting the Giza pyramids, desert dune contours, slender date palm fronds, and a circular travel postmark stamp.
+  - Refined icon-to-label vertical alignment (`mt-[3px]`), field-group spacing (`space-y-[18px]`), underline border contrast (`#D8CEBC` / `white/15`), and top warm-gold hairline accent.

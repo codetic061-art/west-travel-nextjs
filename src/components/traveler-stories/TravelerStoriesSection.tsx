@@ -85,14 +85,17 @@ function getSlotSagPx(slotOffset: number, visibleCount: number): number {
 
 /**
  * Section 4: Traveler Stories ("Our Latest Stories") — Polaroid Clothesline Carousel
- * Implements the 7-step physical clothesline entrance sequence when scrolling into view:
- * 1. The empty clothesline becomes visible first (0ms–500ms).
- * 2. Holds the empty line briefly (~900ms) so visitors perceive the physical rope before cards arrive.
- * 3. Review cards enter from their respective directions in a coordinated sequence (staggered 155ms apart).
- * 4. Each card reaches its rope and clothespin position with a gentle physical rope impact flex.
- * 5. Cards approach their resting slots cleanly without overlapping or covering neighboring text.
- * 6. Each card and its clothespin perform a short damped spring-back swing (~820ms).
- * 7. Movement settles into stable resting angles [-2.8deg, +1.5deg, -1.5deg, +2.8deg].
+ * Implements the 4-Phase Horizontal Clothesline Physics Sequence:
+ * - Phase A (Empty Clothesline Reveal & Pause): When the section enters the viewport, the braided
+ *   clothesline reveals first and remains visibly empty for ~920ms while cards wait offscreen right.
+ * - Phase B (Cards Race in Horizontally from the Right): Cards travel strictly right-to-left along
+ *   the clothesline (with their clothespins attached at the top) in a 135ms staggered sequence.
+ * - Phase C (Physical Impact & Light Neighbor Bump): Each arriving card overshoots slightly left
+ *   (-18px to -22px on desktop, -10px on mobile), lightly bumping/approaching its neighbor and flexing
+ *   the rope downward before rebounding (+10px -> -4px -> 0px) without overlapping any text or photos.
+ * - Phase D (Diminishing Swing & Settle): Inner `.polaroidPendulum` wrapper pivots around the rope
+ *   pinch point (`50% -10px`), transitioning from an aerodynamic trailing tilt (+11deg) into a damped
+ *   pendulum swing that settles into resting angles `[-2.8deg, +1.5deg, -1.5deg, +2.8deg]`.
  */
 export function TravelerStoriesSection({
   stories: customStories,
@@ -111,8 +114,8 @@ export function TravelerStoriesSection({
   const hasSampleEntries = stories.some((s) => s.isSampleData);
 
   const { ref: sectionRef, hasEntered, reducedMotion } = useSectionEntrance<HTMLElement>({
-    threshold: 0.18,
-    rootMargin: "0px 0px -10% 0px",
+    threshold: 0.22,
+    rootMargin: "0px 0px -12% 0px",
   });
 
   // Monotonic step counter drives one-by-one circular replacement so every card DOM node
@@ -151,7 +154,7 @@ export function TravelerStoriesSection({
     return () => window.removeEventListener("resize", updateViewportCounts);
   }, []);
 
-  // Coordinate the 7-step clothesline entrance sequence when the section enters the viewport
+  // Coordinate the 4-phase horizontal clothesline entrance sequence when the section enters the viewport
   useEffect(() => {
     if (reducedMotion) {
       setCardsReleased(true);
@@ -163,24 +166,24 @@ export function TravelerStoriesSection({
 
     if (!hasEntered) return;
 
-    // Step 1 & 2: Empty clothesline is visible at 0ms and held empty for ~900ms
+    // Phase A: Empty clothesline is revealed at 0ms and held visibly empty for 920ms
     const releaseTimer = window.setTimeout(() => {
       setCardsReleased(true);
-    }, 900);
+    }, 920);
 
-    // Step 4: As cards reach the rope (~1550ms), trigger a physical rope impact flex
+    // Phase C: As the racing cards reach their slots (~1460ms), trigger a physical rope impact flex
     const impactTimer = window.setTimeout(() => {
       setIsRopeFlexing(true);
-    }, 1520);
+    }, 1460);
 
     const relaxRopeTimer = window.setTimeout(() => {
       setIsRopeFlexing(false);
-    }, 2180);
+    }, 2240);
 
-    // Step 7: Mark initial hang sequence complete once all 4 cards have settled
+    // Phase D: Mark initial entrance sequence complete once all 4 cards have finished their rebound & swing settle
     const settleTimer = window.setTimeout(() => {
       setInitialHangDone(true);
-    }, 2680);
+    }, 2850);
 
     return () => {
       window.clearTimeout(releaseTimer);
@@ -221,7 +224,7 @@ export function TravelerStoriesSection({
       swingTimeoutRef.current = setTimeout(() => {
         setMotionDirection("idle");
         setIsRopeFlexing(false);
-      }, 780);
+      }, 820);
     },
     [reducedMotion, totalStories]
   );
@@ -283,7 +286,7 @@ export function TravelerStoriesSection({
     }
   };
 
-  const getHeaderRevealStyle = (delayMs: number, durationMs = 940): React.CSSProperties =>
+  const getHeaderRevealStyle = (delayMs: number, durationMs = 960): React.CSSProperties =>
     reducedMotion
       ? { opacity: 1, transform: "none" }
       : {
@@ -330,7 +333,7 @@ export function TravelerStoriesSection({
       <div className={styles.container}>
         {/* Section Heading & Introductory Copy with Slower Scroll-Triggered Reveal */}
         <header className={styles.header}>
-          <p className={styles.eyebrow} style={getHeaderRevealStyle(0, 880)}>
+          <p className={styles.eyebrow} style={getHeaderRevealStyle(0, 900)}>
             <span className={styles.eyebrowRule} aria-hidden="true" />
             <span>{copy.eyebrow || TRAVELER_STORIES_SECTION_CONFIG.eyebrow}</span>
             <span className={styles.eyebrowRuleRight} aria-hidden="true" />
@@ -342,11 +345,11 @@ export function TravelerStoriesSection({
               hasEntered={hasEntered}
               reducedMotion={reducedMotion}
               baseDelayMs={110}
-              staggerMs={34}
-              durationMs={840}
+              staggerMs={36}
+              durationMs={900}
             />
           </h2>
-          <p className={styles.subtitle} style={getHeaderRevealStyle(260, 940)}>
+          <p className={styles.subtitle} style={getHeaderRevealStyle(280, 960)}>
             {copy.supportingText || TRAVELER_STORIES_SECTION_CONFIG.supportingText}
           </p>
         </header>
@@ -354,13 +357,13 @@ export function TravelerStoriesSection({
         {/* Physical Clothesline Stage & Hanging Polaroid Carousel */}
         <div
           className={styles.clotheslineStage}
-          style={getHeaderRevealStyle(120, 920)}
+          style={getHeaderRevealStyle(80, 920)}
           role="region"
           aria-roledescription="carousel"
           aria-label={copy.carouselAriaLabel}
           onKeyDown={handleKeyDown}
         >
-          {/* Step 1: Full-Width Curved Braided Clothesline Rope (Appears first & holds empty for ~0.9s) */}
+          {/* Phase A: Full-Width Curved Braided Clothesline Rope (Reveals first & holds empty for ~920ms) */}
           <ClotheslineRope isFlexing={isRopeFlexing} />
 
           <div className={styles.carouselRow}>
@@ -401,13 +404,35 @@ export function TravelerStoriesSection({
                   : getSlotAngleDeg(slotOffset, visibleCount);
                 const sagPx = getSlotSagPx(slotOffset, visibleCount);
 
-                const isLeftHalf = slotOffset < visibleCount / 2;
-                const staggerDelayMs = Math.max(0, slotOffset) * 160;
+                // Stagger cards left-to-right as they race in from the far right along the clothesline
+                const staggerDelayMs = Math.max(0, slotOffset) * 135;
+
+                // Horizontal starting distance from the right edge of the clothesline
+                const raceStartX =
+                  visibleCount === 1
+                    ? "340px"
+                    : visibleCount === 2
+                    ? `${560 - Math.max(0, slotOffset) * 70}px`
+                    : `${980 - Math.max(0, slotOffset) * 110}px`;
+
+                // Controlled horizontal impact overshoot & light neighbor bump rebound distances
+                const bumpOvershootX =
+                  visibleCount === 1
+                    ? "-11px"
+                    : slotOffset === 0
+                    ? "-20px"
+                    : "-18px";
+                const bumpReboundX =
+                  visibleCount === 1
+                    ? "6px"
+                    : slotOffset === 0
+                    ? "9px"
+                    : "11px";
 
                 let swingState = "idle";
                 if (!reducedMotion && isVisible) {
                   if (!initialHangDone && cardsReleased) {
-                    swingState = isLeftHalf ? "initial-hang-left" : "initial-hang-right";
+                    swingState = "race-from-right";
                   } else if (motionDirection !== "idle") {
                     if (
                       motionDirection === "next" &&
@@ -424,9 +449,13 @@ export function TravelerStoriesSection({
                   }
                 }
 
-                // Step 3: Directional vector from which each card approaches the empty clothesline
-                const initialEntryOffsetX = isLeftHalf ? "-68px" : "68px";
-                const initialEntryOffsetY = "-34px";
+                const carriageState = reducedMotion
+                  ? "settled"
+                  : !cardsReleased
+                  ? "waiting-right"
+                  : !initialHangDone
+                  ? "racing-in"
+                  : "settled";
 
                 const slotStyle = {
                   "--slot-offset": slotOffset,
@@ -434,10 +463,9 @@ export function TravelerStoriesSection({
                   "--card-angle": `${angleDeg}deg`,
                   "--slot-z": isVisible ? 4 + (slotOffset % 2) : 1,
                   "--hang-delay": `${staggerDelayMs}ms`,
-                  "--entry-x":
-                    reducedMotion || cardsReleased ? "0px" : initialEntryOffsetX,
-                  "--entry-y":
-                    reducedMotion || cardsReleased ? "0px" : initialEntryOffsetY,
+                  "--race-start-x": raceStartX,
+                  "--bump-overshoot-x": bumpOvershootX,
+                  "--bump-rebound-x": bumpReboundX,
                 } as React.CSSProperties;
 
                 const imageSrc = failedImages[story.id]
@@ -456,81 +484,89 @@ export function TravelerStoriesSection({
                     data-hang-phase={
                       reducedMotion || initialHangDone ? "interactive" : "initial-hang"
                     }
+                    data-carriage-state={carriageState}
                     data-story-id={story.id}
                     data-sample-review={story.isSampleData ? "true" : "false"}
                     data-verification-status={story.verificationStatus}
                     aria-hidden={!isVisible}
                   >
+                    {/* Middle Carriage Wrapper: Handles Horizontal Right-to-Left Clothesline Race & Neighbor Bump */}
                     <div
-                      className={styles.polaroidPendulum}
-                      data-swing-state={swingState}
+                      className={styles.cardSlideCarriage}
+                      data-carriage-state={carriageState}
                     >
-                      {/* Wooden Clothespin Overlapping the Rope and Polaroid Top Edge */}
-                      <WoodenClothespin />
+                      {/* Inner Pendulum Wrapper: Handles Rotational Sway Around the Clothespin Pinch Point */}
+                      <div
+                        className={styles.polaroidPendulum}
+                        data-swing-state={swingState}
+                      >
+                        {/* Wooden Clothespin Travelling With Its Card Along the Rope */}
+                        <WoodenClothespin />
 
-                      {/* Compact Near-Square Polaroid Paper Frame */}
-                      <div className={styles.polaroidCard}>
-                        {/* Landscape Destination Photograph */}
-                        <div className={styles.photoFrame}>
-                          <Image
-                            src={imageSrc}
-                            alt={localizedItem.imageAlt}
-                            fill
-                            sizes="(max-width: 639px) 280px, (max-width: 1023px) 290px, 300px"
-                            className={styles.photo}
-                            priority={isVisible && slotOffset < 2}
-                            onError={() => {
-                              if (!failedImages[story.id]) {
-                                setFailedImages((prev) => ({
-                                  ...prev,
-                                  [story.id]: true,
-                                }));
-                              }
-                            }}
-                          />
-                        </div>
+                        {/* Compact Near-Square Polaroid Paper Frame */}
+                        <div className={styles.polaroidCard}>
+                          {/* Landscape Destination Photograph */}
+                          <div className={styles.photoFrame}>
+                            <Image
+                              src={imageSrc}
+                              alt={localizedItem.imageAlt}
+                              fill
+                              sizes="(max-width: 639px) 280px, (max-width: 1023px) 290px, 300px"
+                              className={styles.photo}
+                              priority={isVisible && slotOffset < 2}
+                              onError={() => {
+                                if (!failedImages[story.id]) {
+                                  setFailedImages((prev) => ({
+                                    ...prev,
+                                    [story.id]: true,
+                                  }));
+                                }
+                              }}
+                            />
+                          </div>
 
-                        {/* Review Details in Strict Order: 1. Stars, 2. Name, 3. Excerpt, 4. Location */}
-                        <div className={styles.reviewBody}>
-                          {/* 1. Star Rating */}
-                          {typeof story.rating === "number" && (
-                            <div className={styles.ratingRow}>
-                              <div
-                                className={styles.stars}
-                                role="img"
-                                aria-label={`${story.rating} ${copy.starRatingLabel}`}
-                              >
-                                {[1, 2, 3, 4, 5].map((starNumber) => (
-                                  <Star
-                                    key={starNumber}
-                                    aria-hidden="true"
-                                    className={
-                                      starNumber <= (story.rating ?? 5)
-                                        ? styles.starIcon
-                                        : styles.starIconEmpty
-                                    }
-                                  />
-                                ))}
+                          {/* Review Details in Strict Order: 1. Stars, 2. Name, 3. Excerpt, 4. Location */}
+                          <div className={styles.reviewBody}>
+                            {/* 1. Star Rating */}
+                            {typeof story.rating === "number" && (
+                              <div className={styles.ratingRow}>
+                                <div
+                                  className={styles.stars}
+                                  role="img"
+                                  aria-label={`${story.rating} ${copy.starRatingLabel}`}
+                                >
+                                  {[1, 2, 3, 4, 5].map((starNumber) => (
+                                    <Star
+                                      key={starNumber}
+                                      aria-hidden="true"
+                                      className={
+                                        starNumber <= (story.rating ?? 5)
+                                          ? styles.starIcon
+                                          : styles.starIconEmpty
+                                      }
+                                    />
+                                  ))}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
 
-                          {/* 2. Traveler Name */}
-                          <h3 className={styles.reviewerName}>
-                            {story.reviewerName}
-                          </h3>
+                            {/* 2. Traveler Name */}
+                            <h3 className={styles.reviewerName}>
+                              {story.reviewerName}
+                            </h3>
 
-                          {/* 3. Short Review Excerpt */}
-                          <p className={styles.reviewQuote}>
-                            &ldquo;{localizedItem.quote}&rdquo;
-                          </p>
-
-                          {/* 4. Destination or Location */}
-                          {localizedItem.location && (
-                            <p className={styles.reviewLocation}>
-                              {localizedItem.location}
+                            {/* 3. Short Review Excerpt */}
+                            <p className={styles.reviewQuote}>
+                              &ldquo;{localizedItem.quote}&rdquo;
                             </p>
-                          )}
+
+                            {/* 4. Destination or Location */}
+                            {localizedItem.location && (
+                              <p className={styles.reviewLocation}>
+                                {localizedItem.location}
+                              </p>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>

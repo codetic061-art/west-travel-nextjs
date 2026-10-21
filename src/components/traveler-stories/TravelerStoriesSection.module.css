@@ -360,11 +360,11 @@
   transform: translateX(-50%);
   z-index: 3;
   pointer-events: none;
-  transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 460ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .ropeContainer[data-rope-flex="true"] {
-  transform: translateX(-50%) translateY(2px);
+  transform: translateX(-50%) translateY(3.5px);
 }
 
 .ropeSvg {
@@ -480,7 +480,11 @@
   user-select: none;
 }
 
-/* Outer Card Slot Wrapper — Controls horizontal one-by-one carousel slide & vertical rope catenary sag */
+/*
+ * 1. Outer Card Slot Wrapper:
+ * Controls ONLY the horizontal carousel track slot coordinate (`--slot-offset`)
+ * and vertical rope catenary sag (`--slot-sag-y`).
+ */
 .cardSlot {
   position: absolute;
   top: 28px;
@@ -489,21 +493,15 @@
     (100% - (var(--visible-count) - 1) * var(--card-gap)) / var(--visible-count)
   );
   transform: translate3d(
-    calc(var(--slot-offset, 0) * (100% + var(--card-gap)) + var(--entry-x, 0px)),
-    calc(var(--slot-sag-y, 0px) + var(--entry-y, 0px)),
+    calc(var(--slot-offset, 0) * (100% + var(--card-gap))),
+    var(--slot-sag-y, 0px),
     0
   );
   transition:
-    transform 780ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 820ms cubic-bezier(0.22, 1, 0.36, 1),
     opacity 680ms cubic-bezier(0.22, 1, 0.36, 1);
   will-change: transform, opacity;
   z-index: var(--slot-z, 2);
-}
-
-.cardSlot[data-hang-phase="initial-hang"] {
-  transition:
-    transform 920ms cubic-bezier(0.22, 1, 0.36, 1) var(--hang-delay, 0ms),
-    opacity 760ms cubic-bezier(0.22, 1, 0.36, 1) var(--hang-delay, 0ms);
 }
 
 .cardSlot[data-slot-visible="false"] {
@@ -515,85 +513,134 @@
   opacity: 1;
 }
 
-/* Inner Pendulum Wrapper — Controls physical hanging tilt & settling swing around clothespin pinch point */
+/*
+ * 2. Middle Horizontal Clothesline Carriage Wrapper:
+ * Separates the initial horizontal right-to-left race along the clothesline,
+ * physical neighbor bump, and spring rebound from the slot layout transform.
+ */
+.cardSlideCarriage {
+  width: 100%;
+  will-change: transform, opacity;
+}
+
+/* Phase A: Held offscreen to the far right while the empty clothesline is displayed (~920ms) */
+.cardSlideCarriage[data-carriage-state="waiting-right"] {
+  opacity: 0;
+  transform: translate3d(var(--race-start-x, 920px), 0px, 0);
+}
+
+/* Phase B & C: Races in horizontally from the right along the rope, overshoots into a light neighbor bump, and rebounds */
+.cardSlideCarriage[data-carriage-state="racing-in"] {
+  animation: clotheslineRaceHorizontal 1160ms cubic-bezier(0.22, 1, 0.36, 1) var(--hang-delay, 0ms) both;
+}
+
+.cardSlideCarriage[data-carriage-state="settled"] {
+  opacity: 1;
+  transform: translate3d(0px, 0px, 0);
+}
+
+@keyframes clotheslineRaceHorizontal {
+  0% {
+    opacity: 0;
+    transform: translate3d(var(--race-start-x, 920px), -4px, 0);
+  }
+  14% {
+    opacity: 1;
+  }
+  60% {
+    opacity: 1;
+    /* Phase C: Reaches slot from the right and overshoots slightly left for a gentle physical neighbor bump */
+    transform: translate3d(var(--bump-overshoot-x, -18px), 2px, 0);
+  }
+  78% {
+    /* Spring rebound to the right after light neighbor contact */
+    transform: translate3d(var(--bump-rebound-x, 10px), -1px, 0);
+  }
+  90% {
+    /* Secondary diminishing horizontal settle */
+    transform: translate3d(-3px, 0px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0px, 0px, 0);
+  }
+}
+
+/*
+ * 3. Inner Pendulum Wrapper:
+ * Controls physical hanging rotation & diminishing swing around the clothespin pinch point (`50% -10px`).
+ */
 .polaroidPendulum {
   position: relative;
   width: 100%;
   max-width: 308px;
   margin-inline: auto;
-  transform-origin: 50% -8px;
+  transform-origin: 50% -10px;
   transform: rotate(var(--card-angle, 0deg));
-  transition: transform 560ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 580ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .cardSlot[data-slot-visible="true"]:hover .polaroidPendulum {
   transform: rotate(calc(var(--card-angle, 0deg) * 0.45)) translateY(-2px);
 }
 
-/* Settling swing animations for incoming and shifting cards */
+/* Phase B/C/D Rotational Pendulum Swing synchronized with horizontal right-to-left arrival */
+.polaroidPendulum[data-swing-state="race-from-right"] {
+  animation: pendulumRaceFromRight 1340ms cubic-bezier(0.22, 1, 0.36, 1) var(--hang-delay, 0ms) both;
+}
+
+/* Settling swing animations for subsequent manual Next / Prev carousel interactions */
 .polaroidPendulum[data-swing-state="enter-next"] {
-  animation: pendulumEnterNext 680ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: pendulumEnterNext 760ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .polaroidPendulum[data-swing-state="enter-prev"] {
-  animation: pendulumEnterPrev 680ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: pendulumEnterPrev 760ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .polaroidPendulum[data-swing-state="shift-next"] {
-  animation: pendulumShiftNext 580ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: pendulumShiftNext 660ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .polaroidPendulum[data-swing-state="shift-prev"] {
-  animation: pendulumShiftPrev 680ms cubic-bezier(0.22, 1, 0.36, 1);
+  animation: pendulumShiftPrev 660ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.polaroidPendulum[data-swing-state="initial-hang-left"] {
-  animation: pendulumInitialHangLeft 880ms cubic-bezier(0.22, 1, 0.36, 1) var(--hang-delay, 0ms) both;
-}
-
-.polaroidPendulum[data-swing-state="initial-hang-right"] {
-  animation: pendulumInitialHangRight 880ms cubic-bezier(0.22, 1, 0.36, 1) var(--hang-delay, 0ms) both;
-}
-
-@keyframes pendulumInitialHangLeft {
+@keyframes pendulumRaceFromRight {
   0% {
-    transform: rotate(calc(var(--card-angle, 0deg) - 9.5deg)) translateY(-8px);
+    /* Trailing aerodynamic tilt to the right while racing left along the clothesline */
+    transform: rotate(calc(var(--card-angle, 0deg) + 11.5deg));
   }
-  48% {
-    transform: rotate(calc(var(--card-angle, 0deg) + 3.4deg)) translateY(2px);
+  44% {
+    transform: rotate(calc(var(--card-angle, 0deg) + 8.5deg));
   }
-  76% {
-    transform: rotate(calc(var(--card-angle, 0deg) - 1.1deg)) translateY(0px);
+  62% {
+    /* Physical impact swing to the left as the clothespin stops at its slot */
+    transform: rotate(calc(var(--card-angle, 0deg) - 7.2deg));
+  }
+  79% {
+    /* Spring-back rebound swing to the right */
+    transform: rotate(calc(var(--card-angle, 0deg) + 3.8deg));
+  }
+  91% {
+    /* Short diminishing sway */
+    transform: rotate(calc(var(--card-angle, 0deg) - 1.2deg));
   }
   100% {
-    transform: rotate(var(--card-angle, 0deg)) translateY(0px);
-  }
-}
-
-@keyframes pendulumInitialHangRight {
-  0% {
-    transform: rotate(calc(var(--card-angle, 0deg) + 9.5deg)) translateY(-8px);
-  }
-  48% {
-    transform: rotate(calc(var(--card-angle, 0deg) - 3.4deg)) translateY(2px);
-  }
-  76% {
-    transform: rotate(calc(var(--card-angle, 0deg) + 1.1deg)) translateY(0px);
-  }
-  100% {
-    transform: rotate(var(--card-angle, 0deg)) translateY(0px);
+    /* Stable resting tilt */
+    transform: rotate(var(--card-angle, 0deg));
   }
 }
 
 @keyframes pendulumEnterNext {
   0% {
-    transform: rotate(calc(var(--card-angle, 0deg) + 6.2deg));
+    transform: rotate(calc(var(--card-angle, 0deg) + 7.2deg));
   }
-  58% {
-    transform: rotate(calc(var(--card-angle, 0deg) - 2.1deg));
+  56% {
+    transform: rotate(calc(var(--card-angle, 0deg) - 2.6deg));
   }
-  84% {
-    transform: rotate(calc(var(--card-angle, 0deg) + 0.75deg));
+  82% {
+    transform: rotate(calc(var(--card-angle, 0deg) + 0.9deg));
   }
   100% {
     transform: rotate(var(--card-angle, 0deg));
@@ -602,13 +649,13 @@
 
 @keyframes pendulumEnterPrev {
   0% {
-    transform: rotate(calc(var(--card-angle, 0deg) - 6.2deg));
+    transform: rotate(calc(var(--card-angle, 0deg) - 7.2deg));
   }
-  58% {
-    transform: rotate(calc(var(--card-angle, 0deg) + 2.1deg));
+  56% {
+    transform: rotate(calc(var(--card-angle, 0deg) + 2.6deg));
   }
-  84% {
-    transform: rotate(calc(var(--card-angle, 0deg) - 0.75deg));
+  82% {
+    transform: rotate(calc(var(--card-angle, 0deg) - 0.9deg));
   }
   100% {
     transform: rotate(var(--card-angle, 0deg));
@@ -620,10 +667,10 @@
     transform: rotate(var(--card-angle, 0deg));
   }
   42% {
-    transform: rotate(calc(var(--card-angle, 0deg) + 2.1deg));
+    transform: rotate(calc(var(--card-angle, 0deg) + 2.5deg));
   }
   78% {
-    transform: rotate(calc(var(--card-angle, 0deg) - 0.65deg));
+    transform: rotate(calc(var(--card-angle, 0deg) - 0.8deg));
   }
   100% {
     transform: rotate(var(--card-angle, 0deg));
@@ -635,10 +682,10 @@
     transform: rotate(var(--card-angle, 0deg));
   }
   42% {
-    transform: rotate(calc(var(--card-angle, 0deg) - 2.1deg));
+    transform: rotate(calc(var(--card-angle, 0deg) - 2.5deg));
   }
   78% {
-    transform: rotate(calc(var(--card-angle, 0deg) + 0.65deg));
+    transform: rotate(calc(var(--card-angle, 0deg) + 0.8deg));
   }
   100% {
     transform: rotate(var(--card-angle, 0deg));
@@ -943,6 +990,7 @@
 @media (prefers-reduced-motion: reduce) {
   .ropeContainer,
   .cardSlot,
+  .cardSlideCarriage,
   .polaroidPendulum,
   .polaroidCard,
   .photo,
@@ -952,8 +1000,10 @@
     animation: none !important;
   }
 
+  .cardSlideCarriage,
   .polaroidPendulum,
   .cardSlot[data-slot-visible="true"]:hover .polaroidPendulum {
     transform: none !important;
+    opacity: 1 !important;
   }
 }

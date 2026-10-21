@@ -10,6 +10,7 @@ import { WHY_WEST_ASSET_COPY } from "@/i18n/why-west-travel-assets";
 import {
   SplitTextReveal,
   getDirectionalMaskStyle,
+  getImageScaleSettleStyle,
   useSectionEntrance,
 } from "@/components/motion/MotionPrimitives";
 import { EgyptianEdges, MessageAccent, TravelMicrographics } from "./TravelArtwork";
@@ -30,8 +31,11 @@ const ASSETS = {
 type ImageStatus = "loading" | "ready" | "failed";
 
 /**
- * Section 3: Why West Global Tours — Coordinated 3-Part Editorial Reveal (Section 2 & 14):
- * - Viewport-triggered slower motion (960ms content reveals, 145ms benefit stagger, 1240ms center visual mask).
+ * Section 3: Why West Global Tours — Coordinated 3-Part Editorial Reveal:
+ * - Viewport-triggered slower motion (`threshold: 0.24`, `rootMargin: "0px 0px -12% 0px"`).
+ * - Center traveler & landmarks composition progressively uncovers from a thin horizontal line
+ *   (`bottom-to-top`, `1360ms`) with a subtle scale settle (`1.04` -> `1.0`).
+ * - Left service benefits stagger in at `155ms` intervals (`980ms` duration).
  */
 export function WhyWestTravelSection() {
   const { t, theme, locale } = useHero();
@@ -39,27 +43,27 @@ export function WhyWestTravelSection() {
   const assetCopy = WHY_WEST_ASSET_COPY[locale];
 
   const { ref: sectionRef, hasEntered, reducedMotion } = useSectionEntrance<HTMLElement>({
-    threshold: 0.16,
-    rootMargin: "0px 0px -10% 0px",
+    threshold: 0.24,
+    rootMargin: "0px 0px -12% 0px",
   });
 
-  const [traveler, setTraveler] = useState<ImageStatus>("loading");
-  const [landmarks, setLandmarks] = useState<ImageStatus>("loading");
+  const [traveler, setTraveler] = useState<ImageStatus>("ready");
+  const [landmarks, setLandmarks] = useState<ImageStatus>("ready");
 
   const getDirectionalSlideStyle = (
     direction: "left" | "right" | "up",
     delayMs: number,
-    durationMs = 960
+    durationMs = 980
   ): React.CSSProperties => {
     if (reducedMotion) {
       return { opacity: 1, transform: "none" };
     }
     const initialTransform =
       direction === "left"
-        ? "translate3d(-28px, 0, 0)"
+        ? "translate3d(-26px, 0, 0)"
         : direction === "right"
-        ? "translate3d(28px, 0, 0)"
-        : "translate3d(0, 26px, 0)";
+        ? "translate3d(26px, 0, 0)"
+        : "translate3d(0, 24px, 0)";
     return {
       opacity: hasEntered ? 1 : 0,
       transform: hasEntered ? "translate3d(0, 0, 0)" : initialTransform,
@@ -70,13 +74,21 @@ export function WhyWestTravelSection() {
     };
   };
 
+  // Progressive thin-line reveal from the bottom edge over 1360ms
   const centerVisualMaskStyle = getDirectionalMaskStyle(
     "bottom-to-top",
     hasEntered,
     reducedMotion,
-    160,
-    1240,
+    120,
+    1360,
     "0px"
+  );
+
+  const centerVisualScaleStyle = getImageScaleSettleStyle(
+    hasEntered,
+    reducedMotion,
+    120,
+    1440
   );
 
   return (
@@ -95,7 +107,7 @@ export function WhyWestTravelSection() {
           <MessageAccent />
           <p
             className={styles.eyebrow}
-            style={getDirectionalSlideStyle("right", 80, 920)}
+            style={getDirectionalSlideStyle("right", 120, 960)}
             data-reveal="right"
           >
             <span className={styles.eyebrowPrefix}>{copy.eyebrowPrefix}</span>{" "}
@@ -113,9 +125,9 @@ export function WhyWestTravelSection() {
                 mode="words"
                 hasEntered={hasEntered}
                 reducedMotion={reducedMotion}
-                baseDelayMs={180}
-                staggerMs={110}
-                durationMs={860}
+                baseDelayMs={220}
+                staggerMs={115}
+                durationMs={920}
               />
             </span>{" "}
             <span>
@@ -124,16 +136,16 @@ export function WhyWestTravelSection() {
                 mode="words"
                 hasEntered={hasEntered}
                 reducedMotion={reducedMotion}
-                baseDelayMs={420}
-                staggerMs={110}
-                durationMs={860}
+                baseDelayMs={460}
+                staggerMs={115}
+                durationMs={920}
               />
             </span>
           </h2>
 
           <p
             className={styles.description}
-            style={getDirectionalSlideStyle("right", 520, 960)}
+            style={getDirectionalSlideStyle("right", 560, 980)}
             data-reveal="right"
           >
             {copy.supportingText}
@@ -141,7 +153,7 @@ export function WhyWestTravelSection() {
 
           <div
             className={styles.ctaWrap}
-            style={getDirectionalSlideStyle("right", 680, 960)}
+            style={getDirectionalSlideStyle("right", 720, 980)}
             data-reveal="right"
           >
             <Link
@@ -155,59 +167,64 @@ export function WhyWestTravelSection() {
           </div>
         </div>
 
-        {/* Center Visual Column: Landmarks + Traveler Revealed Through 1.24s Directional Mask */}
+        {/* Center Visual Column: Landmarks + Traveler Uncovered From a Thin Bottom Line (1.36s) */}
         <div
           className={styles.visual}
           style={centerVisualMaskStyle}
-          data-reveal="up"
+          data-reveal="bottom-to-top-line"
+          data-reveal-state={hasEntered ? "revealed" : "masked-thin-line"}
           data-traveler-status={traveler}
           data-landmarks-status={landmarks}
         >
-          <div className={styles.atmosphere} aria-hidden="true" />
-          <TravelMicrographics showPins={landmarks === "ready"} />
-          <div className={styles.landmarks}>
-            {landmarks !== "failed" && (
-              <Image
-                src={ASSETS.landmarks}
-                alt={assetCopy.landmarks}
-                fill
-                sizes="(max-width: 599px) 390px, (max-width: 1199px) 55vw, 700px"
-                className={styles.photo}
-                data-loaded={landmarks === "ready"}
-                onLoad={() => setLandmarks("ready")}
-                onError={() => setLandmarks("failed")}
-              />
-            )}
-          </div>
-          <div className={styles.traveler}>
-            {traveler !== "failed" && (
-              <Image
-                src={ASSETS.traveler}
-                alt={assetCopy.traveler}
-                fill
-                sizes="(max-width: 599px) 320px, (max-width: 1199px) 45vw, 580px"
-                className={styles.photo}
-                data-loaded={traveler === "ready"}
-                onLoad={() => setTraveler("ready")}
-                onError={() => setTraveler("failed")}
-              />
-            )}
+          <div className="relative h-full w-full" style={centerVisualScaleStyle}>
+            <div className={styles.atmosphere} aria-hidden="true" />
+            <TravelMicrographics showPins={landmarks === "ready"} />
+            <div className={styles.landmarks}>
+              {landmarks !== "failed" && (
+                <Image
+                  src={ASSETS.landmarks}
+                  alt={assetCopy.landmarks}
+                  fill
+                  priority
+                  sizes="(max-width: 599px) 390px, (max-width: 1199px) 55vw, 700px"
+                  className={styles.photo}
+                  data-loaded={landmarks === "ready"}
+                  onLoad={() => setLandmarks("ready")}
+                  onError={() => setLandmarks("failed")}
+                />
+              )}
+            </div>
+            <div className={styles.traveler}>
+              {traveler !== "failed" && (
+                <Image
+                  src={ASSETS.traveler}
+                  alt={assetCopy.traveler}
+                  fill
+                  priority
+                  sizes="(max-width: 599px) 320px, (max-width: 1199px) 45vw, 580px"
+                  className={styles.photo}
+                  data-loaded={traveler === "ready"}
+                  onLoad={() => setTraveler("ready")}
+                  onError={() => setTraveler("failed")}
+                />
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Left Column on Desktop: Staggered Service Benefits (145ms apart) */}
+        {/* Left Column on Desktop: Staggered Service Benefits (155ms apart) */}
         <ul className={styles.benefits}>
           {WHY_WEST_TRAVEL_FEATURES.map((feature, index) => {
             const Icon = FEATURE_ICONS[feature.id];
             const localized = copy.features[feature.id];
-            const rowDelay = 120 + index * 145;
+            const rowDelay = 160 + index * 155;
             const iconStyle: React.CSSProperties = reducedMotion
               ? { opacity: 1, transform: "none" }
               : {
                   opacity: hasEntered ? 1 : 0,
                   transform: hasEntered ? "scale(1)" : "scale(0.84)",
                   transitionProperty: "opacity, transform",
-                  transitionDuration: "820ms",
+                  transitionDuration: "860ms",
                   transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
                   transitionDelay: `${rowDelay + 120}ms`,
                 };
@@ -216,7 +233,7 @@ export function WhyWestTravelSection() {
               <li
                 key={feature.id}
                 className={styles.feature}
-                style={getDirectionalSlideStyle("left", rowDelay, 960)}
+                style={getDirectionalSlideStyle("left", rowDelay, 980)}
                 data-reveal="left"
                 data-why-feature={feature.id}
                 data-verification-status={feature.verificationStatus}

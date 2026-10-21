@@ -7,6 +7,7 @@ import { DESTINATIONS_CONFIG, type DestinationAssetConfig, type DestinationId } 
 import { useHero } from "./HeroProvider";
 import {
   getDirectionalMaskStyle,
+  getImageScaleSettleStyle,
   useSectionEntrance,
   type MaskDirection,
 } from "@/components/motion/MotionPrimitives";
@@ -16,7 +17,8 @@ import {
  * - Desktop: ONE large, prominent vertical featured destination card on the left column
  *   paired alongside TWO smaller compact destination cards stacked on the right column.
  * - Mobile/Tablet: Swipeable horizontal snap carousel with interactive destination pills.
- * - Clicking any card highlights it and transitions the Hero background to that destination's video.
+ * - Initial Page Load Reveal: Uncovers each card photograph progressively from a thin line (1280ms)
+ *   with a 170ms stagger and subtle inner scale settling.
  */
 export function DestinationCards() {
   const { t, theme, activeDestination, setActiveDestination, selectDestinationForBooking } =
@@ -59,33 +61,37 @@ export function DestinationCards() {
         ? "w-full h-[180px] xl:h-[194px]"
         : "flex-shrink-0 snap-center w-[278px] sm:w-[308px] h-[178px] sm:h-[190px]";
 
-    // Slower, appreciable stagger (155ms apart) and 1180ms directional image-mask reveal
-    const delayMs = 980 + staggerIndex * 155;
+    // Deliberate initial Hero sequence stagger (940ms base + 170ms per card)
+    const delayMs = 940 + staggerIndex * 170;
     const maskDirection: MaskDirection =
-      variant === "featured" ? "bottom-to-top" : "right-to-left";
-
-    const cardEntranceStyle: React.CSSProperties = reducedMotion
-      ? { opacity: 1, transform: "none" }
-      : {
-          opacity: hasEntered ? 1 : 0,
-          transform: hasEntered
-            ? undefined
-            : variant === "featured"
-            ? "translate3d(0, 26px, 0)"
-            : "translate3d(26px, 0, 0)",
-          transitionDuration: "960ms",
-          transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
-          transitionDelay: `${delayMs}ms`,
-        };
+      variant === "featured" ? "top-to-bottom" : "bottom-to-top";
 
     const imageMaskStyle = getDirectionalMaskStyle(
       maskDirection,
       hasEntered,
       reducedMotion,
       delayMs,
-      1180,
+      1280,
       "22px"
     );
+
+    const imageScaleStyle = getImageScaleSettleStyle(
+      hasEntered,
+      reducedMotion,
+      delayMs,
+      1380
+    );
+
+    const badgeOverlayStyle: React.CSSProperties = reducedMotion
+      ? { opacity: 1, transform: "none" }
+      : {
+          opacity: hasEntered ? 1 : 0,
+          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 10px, 0)",
+          transitionProperty: "opacity, transform",
+          transitionDuration: "840ms",
+          transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+          transitionDelay: `${delayMs + 240}ms`,
+        };
 
     return (
       <button
@@ -93,10 +99,10 @@ export function DestinationCards() {
         type="button"
         data-destination-card={dest.id}
         data-card-variant={variant}
+        data-reveal-state={hasEntered ? "revealed" : "masked-thin-line"}
         onClick={() => handleCardSelect(dest.id)}
         aria-pressed={isSelected}
         aria-label={`${copy.locationBadge} — ${copy.tagline}`}
-        style={cardEntranceStyle}
         className={`group relative ${sizeClasses} rounded-[22px] overflow-hidden text-left transition-all duration-500 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#051320] ${
           isSelected
             ? "ring-2 ring-[#5EEAD4] shadow-[0_22px_52px_rgba(14,124,142,0.58)] -translate-y-1"
@@ -105,18 +111,27 @@ export function DestinationCards() {
             : "west-card-shell hover:border-[#5EEAD4]/60 hover:-translate-y-1"
         }`}
       >
-        {/* High-Resolution Destination Photograph with 1.18s Directional Mask Reveal */}
+        {/* High-Resolution Destination Photograph with 1.28s Thin-Line Progressive Reveal */}
         <div className="absolute inset-0" style={imageMaskStyle}>
-          <Image
-            src={dest.cardImageWebp}
-            alt={copy.imageAlt}
-            fill
-            sizes={
-              isFeaturedDesktop
-                ? "(max-width: 1280px) 250px, 275px"
-                : "(max-width: 1024px) 308px, 250px"
-            }
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+          <div className="relative h-full w-full" style={imageScaleStyle}>
+            <Image
+              src={dest.cardImageWebp}
+              alt={copy.imageAlt}
+              fill
+              priority
+              sizes={
+                isFeaturedDesktop
+                  ? "(max-width: 1280px) 250px, 275px"
+                  : "(max-width: 1024px) 308px, 250px"
+              }
+              className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+            />
+          </div>
+
+          {/* Layered Editorial Scrims */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 bg-gradient-to-b from-[#041220]/65 via-transparent to-[#04111E]/92"
           />
         </div>
 
@@ -129,14 +144,11 @@ export function DestinationCards() {
           `}
         />
 
-        {/* Layered Editorial Scrims for Top & Bottom Label Contrast */}
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 bg-gradient-to-b from-[#041220]/65 via-transparent to-[#04111E]/92"
-        />
-
         {/* Top Header Row: Location Pin + City/Country Badge + Order Number (01, 02, 03) */}
-        <div className="absolute inset-x-3.5 top-3.5 flex items-center justify-between gap-2">
+        <div
+          style={badgeOverlayStyle}
+          className="absolute inset-x-3.5 top-3.5 flex items-center justify-between gap-2"
+        >
           <span
             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11.5px] font-medium tracking-wide backdrop-blur-md border transition-colors ${
               isSelected
@@ -156,7 +168,7 @@ export function DestinationCards() {
         </div>
 
         {/* Bottom Glass Footer Bar: Tagline + Active Video Indicator + Arrow */}
-        <div className="absolute inset-x-3 bottom-3">
+        <div style={badgeOverlayStyle} className="absolute inset-x-3 bottom-3">
           <div
             className={`flex items-center justify-between gap-2 rounded-2xl px-3.5 py-2.5 backdrop-blur-md border transition-all duration-300 ${
               isSelected
@@ -221,7 +233,7 @@ export function DestinationCards() {
             ? { opacity: 1 }
             : {
                 opacity: hasEntered ? 1 : 0,
-                transition: "opacity 840ms ease 1420ms",
+                transition: "opacity 880ms ease 1460ms",
               }
         }
         className="mt-3.5 flex flex-wrap items-center justify-between lg:justify-end gap-3 w-full pr-1"
