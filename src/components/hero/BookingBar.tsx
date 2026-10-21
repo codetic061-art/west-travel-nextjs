@@ -15,7 +15,15 @@ import {
 } from "lucide-react";
 import { DESTINATIONS_CONFIG, type DestinationId } from "@/config/destinations";
 import { useHero, type BookingDestinationFilter } from "./HeroProvider";
+import { useSectionEntrance } from "@/components/motion/MotionPrimitives";
 
+/**
+ * Search Bar with Center-Out Expansion Entrance (Section 11):
+ * 1. Outer container begins as a narrow centered shape and expands horizontally in both directions.
+ * 2. Rounded glass surface, border, and shadow settle into place without scaling/distorting text.
+ * 3. Internal fields (Destination, Dates, Travelers) and Search CTA reveal sequentially.
+ * 4. Once expansion finishes, clip-path is cleared so popovers above the bar are never clipped.
+ */
 export function BookingBar() {
   const {
     t,
@@ -31,8 +39,25 @@ export function BookingBar() {
   const [openPopover, setOpenPopover] = useState<"destination" | "dates" | "travelers" | null>(
     null
   );
+  const [expansionFinished, setExpansionFinished] = useState(false);
   const barRef = useRef<HTMLDivElement>(null);
   const isLight = theme === "light";
+
+  const { hasEntered, reducedMotion } = useSectionEntrance<HTMLDivElement>({
+    immediate: true,
+  });
+
+  useEffect(() => {
+    if (reducedMotion) {
+      setExpansionFinished(true);
+      return;
+    }
+    if (!hasEntered) return;
+    const timer = window.setTimeout(() => {
+      setExpansionFinished(true);
+    }, 1620);
+    return () => window.clearTimeout(timer);
+  }, [hasEntered, reducedMotion]);
 
   useEffect(() => {
     function handleOutside(e: MouseEvent) {
@@ -88,12 +113,48 @@ export function BookingBar() {
     submitBookingSearch();
   };
 
+  const outerExpansionStyle: React.CSSProperties =
+    reducedMotion || expansionFinished
+      ? { opacity: 1, clipPath: "none", WebkitClipPath: "none" }
+      : {
+          opacity: hasEntered ? 1 : 0,
+          clipPath: hasEntered
+            ? "inset(0% 0% 0% 0% round 22px)"
+            : "inset(0% 44% 0% 44% round 22px)",
+          WebkitClipPath: hasEntered
+            ? "inset(0% 0% 0% 0% round 22px)"
+            : "inset(0% 44% 0% 44% round 22px)",
+          transitionProperty: "clip-path, -webkit-clip-path, opacity",
+          transitionDuration: "740ms",
+          transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+          transitionDelay: "860ms",
+        };
+
+  const getFieldRevealStyle = (delayMs: number): React.CSSProperties =>
+    reducedMotion
+      ? { opacity: 1, transform: "none" }
+      : {
+          opacity: hasEntered ? 1 : 0,
+          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 10px, 0)",
+          transitionProperty: "opacity, transform",
+          transitionDuration: "520ms",
+          transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+          transitionDelay: `${delayMs}ms`,
+        };
+
   return (
-    <div id="hero-booking-bar" ref={barRef} className="relative z-20 w-full">
+    <div
+      id="hero-booking-bar"
+      ref={barRef}
+      data-booking-bar-entered={hasEntered ? "true" : "false"}
+      data-booking-bar-expanded={expansionFinished ? "true" : "false"}
+      className="relative z-20 w-full"
+    >
       <form
         onSubmit={handleFormSubmit}
         aria-label="Trip Search and Booking Controls"
-        className={`west-glass-panel mx-auto w-full rounded-[22px] p-3 sm:p-4 transition-all duration-300 ${
+        style={outerExpansionStyle}
+        className={`west-glass-panel mx-auto w-full rounded-[22px] p-3 sm:p-4 transition-colors duration-300 ${
           isLight ? "text-slate-900" : "text-white"
         }`}
       >
@@ -102,8 +163,8 @@ export function BookingBar() {
             isLight ? "lg:divide-slate-900/15" : "lg:divide-white/15"
           }`}
         >
-          {/* 1. Destination Selector */}
-          <div className="relative px-3 py-1.5">
+          {/* 1. Destination Selector (1060ms) */}
+          <div className="relative px-3 py-1.5" style={getFieldRevealStyle(1060)}>
             <button
               type="button"
               onClick={() =>
@@ -196,8 +257,8 @@ export function BookingBar() {
             )}
           </div>
 
-          {/* 2. Travel Dates Selector */}
-          <div className="relative px-3 lg:px-5 py-1.5">
+          {/* 2. Travel Dates Selector (1145ms) */}
+          <div className="relative px-3 lg:px-5 py-1.5" style={getFieldRevealStyle(1145)}>
             <button
               type="button"
               onClick={() => setOpenPopover((prev) => (prev === "dates" ? null : "dates"))}
@@ -289,8 +350,8 @@ export function BookingBar() {
             )}
           </div>
 
-          {/* 3. Travelers Selector */}
-          <div className="relative px-3 lg:px-5 py-1.5">
+          {/* 3. Travelers Selector (1230ms) */}
+          <div className="relative px-3 lg:px-5 py-1.5" style={getFieldRevealStyle(1230)}>
             <button
               type="button"
               onClick={() =>
@@ -403,8 +464,8 @@ export function BookingBar() {
             )}
           </div>
 
-          {/* 4. Search Trips Primary Action Button */}
-          <div className="pt-2 md:pt-0 lg:pl-4 flex justify-end">
+          {/* 4. Search Trips Primary Action Button (1315ms) */}
+          <div className="pt-2 md:pt-0 lg:pl-4 flex justify-end" style={getFieldRevealStyle(1315)}>
             <button
               type="submit"
               className="group inline-flex w-full lg:w-auto items-center justify-center gap-2.5 rounded-full bg-gradient-to-r from-[#0C7A8B] via-[#118FA3] to-[#16A3B8] px-7 py-3.5 text-sm font-semibold text-white shadow-[0_10px_28px_rgba(14,124,142,0.45)] border border-[#5EEAD4]/40 transition-all duration-300 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4]"

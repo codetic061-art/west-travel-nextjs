@@ -6,6 +6,7 @@ import { useHero } from "./HeroProvider";
 import { BrandLogo } from "./BrandLogo";
 import { DESTINATIONS_CONFIG, type DestinationId } from "@/config/destinations";
 import type { SupportedLocale } from "@/i18n/hero-dictionary";
+import { useSectionEntrance } from "@/components/motion/MotionPrimitives";
 
 const LOCALES: readonly SupportedLocale[] = ["en", "tr", "es"];
 
@@ -29,6 +30,10 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
   const [destDropdownOpen, setDestDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  const { ref: headerRef, hasEntered, reducedMotion } = useSectionEntrance<HTMLElement>({
+    immediate: true,
+  });
 
   const isLight = theme === "light";
 
@@ -69,6 +74,24 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
+
+  /**
+   * Sequenced Navbar Entrance Style Helper:
+   * 1. Logo enters first (0ms, 500ms duration).
+   * 2. Nav links appear one by one with 85ms stagger (120ms -> 460ms).
+   * 3. Language selector, theme toggle, and mobile controls appear last (530ms).
+   */
+  const getNavRevealStyle = (delayMs: number, durationMs = 480): React.CSSProperties =>
+    reducedMotion
+      ? { opacity: 1, transform: "none" }
+      : {
+          opacity: hasEntered ? 1 : 0,
+          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, -10px, 0)",
+          transitionProperty: "opacity, transform",
+          transitionDuration: `${durationMs}ms`,
+          transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+          transitionDelay: `${delayMs}ms`,
+        };
 
   /**
    * Tactile, pill-shaped mechanical Sun/Moon toggle switch.
@@ -154,20 +177,31 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
   };
 
   return (
-    <header className="relative z-30 w-full px-4 sm:px-8 lg:px-12 pt-5 sm:pt-7">
+    <header
+      ref={headerRef}
+      data-navbar-entered={hasEntered ? "true" : "false"}
+      className="relative z-30 w-full px-4 sm:px-8 lg:px-12 pt-5 sm:pt-7"
+    >
       <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4">
-        {/* Top-left Official WEST TRAVEL Logo */}
-        <BrandLogo isLight={isLight} />
+        {/* 1. Top-left Official WEST TRAVEL Logo (Enters First: 0ms, 500ms) */}
+        <div style={getNavRevealStyle(0, 500)} data-nav-seq="logo">
+          <BrandLogo isLight={isLight} />
+        </div>
 
-        {/* Upper-right Compact Floating Glassmorphic Notch Navbar (Desktop) */}
+        {/* 2. Upper-right Compact Floating Glassmorphic Notch Navbar (Desktop) */}
         <nav
           aria-label="Primary Navigation"
           className={`west-glass-pill hidden lg:flex items-center gap-1 xl:gap-2 rounded-full px-5 py-2 transition-all duration-300 ${
             isLight ? "text-slate-900" : "text-white/92"
           }`}
         >
-          {/* Destinations Dropdown */}
-          <div className="relative" ref={dropdownRef}>
+          {/* Nav Item 1: Destinations Dropdown (120ms) */}
+          <div
+            className="relative"
+            ref={dropdownRef}
+            style={getNavRevealStyle(120, 460)}
+            data-nav-seq="item-0"
+          >
             <button
               type="button"
               onClick={() => setDestDropdownOpen((prev) => !prev)}
@@ -225,8 +259,11 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
             )}
           </div>
 
+          {/* Nav Item 2: Experiences (205ms) */}
           <a
             href="#hero-destination-cards"
+            style={getNavRevealStyle(205, 460)}
+            data-nav-seq="item-1"
             onClick={(e) => {
               e.preventDefault();
               const el = document.getElementById("hero-destination-cards");
@@ -241,8 +278,11 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
             {t.nav.experiences}
           </a>
 
+          {/* Nav Item 3: Our Journeys (290ms) */}
           <a
             href="#featured-trips"
+            style={getNavRevealStyle(290, 460)}
+            data-nav-seq="item-2"
             onClick={(e) => {
               e.preventDefault();
               handleScrollToJourneys();
@@ -256,8 +296,11 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
             {t.nav.ourJourneys}
           </a>
 
+          {/* Nav Item 4: About (375ms) */}
           <a
             href="#why-west-travel"
+            style={getNavRevealStyle(375, 460)}
+            data-nav-seq="item-3"
             onClick={(e) => {
               e.preventDefault();
               (document.getElementById("why-west-travel") ?? document.getElementById("hero-copy"))?.scrollIntoView({ behavior: "smooth" });
@@ -271,8 +314,11 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
             {t.nav.about}
           </a>
 
+          {/* Nav Item 5: Contact (460ms) */}
           <a
             href="#hero-booking-bar"
+            style={getNavRevealStyle(460, 460)}
+            data-nav-seq="item-4"
             onClick={(e) => {
               e.preventDefault();
               handleScrollToBooking();
@@ -286,65 +332,75 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
             {t.nav.contact}
           </a>
 
-          {/* Thin Vertical Separator */}
-          <span
-            aria-hidden="true"
-            className={`mx-1.5 h-4 w-[1px] ${isLight ? "bg-slate-900/20" : "bg-white/20"}`}
-          />
-
-          {/* Language Selector: EN / TR / ES */}
+          {/* 3. Language Selector & Theme Controls Enter Last (530ms) */}
           <div
-            role="group"
-            aria-label={t.nav.languageLabel}
-            className="flex items-center gap-0.5 px-1"
+            style={getNavRevealStyle(530, 480)}
+            data-nav-seq="controls"
+            className="flex items-center"
           >
-            {LOCALES.map((code) => {
-              const active = locale === code;
-              return (
-                <button
-                  key={code}
-                  type="button"
-                  onClick={() => setLocale(code)}
-                  aria-pressed={active}
-                  className={`rounded-full px-2 py-1 text-xs font-semibold uppercase tracking-wider transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
-                    active
-                      ? isLight
-                        ? "bg-[#0E7C8E] text-white shadow-sm"
-                        : "bg-white/20 text-white shadow-sm"
-                      : isLight
-                      ? "text-slate-700 hover:text-slate-950"
-                      : "text-white/60 hover:text-white/95"
-                  }`}
-                >
-                  {code}
-                </button>
-              );
-            })}
-          </div>
+            {/* Thin Vertical Separator */}
+            <span
+              aria-hidden="true"
+              className={`mx-1.5 h-4 w-[1px] ${isLight ? "bg-slate-900/20" : "bg-white/20"}`}
+            />
 
-          {/* Thin Vertical Separator */}
-          <span
-            aria-hidden="true"
-            className={`mx-1.5 h-4 w-[1px] ${isLight ? "bg-slate-900/20" : "bg-white/20"}`}
-          />
-
-          {/* Tactile Pill-Shaped Mechanical Sun/Moon Switch */}
-          {renderMechanicalThemeSwitch(false)}
-
-          {/* Optional Account Icon */}
-          {hasAccountRoute && (
-            <a
-              href="/account"
-              aria-label="Account"
-              className="ml-1 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 hover:bg-white/10"
+            {/* Language Selector: EN / TR / ES */}
+            <div
+              role="group"
+              aria-label={t.nav.languageLabel}
+              className="flex items-center gap-0.5 px-1"
             >
-              <User className="h-4 w-4" />
-            </a>
-          )}
+              {LOCALES.map((code) => {
+                const active = locale === code;
+                return (
+                  <button
+                    key={code}
+                    type="button"
+                    onClick={() => setLocale(code)}
+                    aria-pressed={active}
+                    className={`rounded-full px-2 py-1 text-xs font-semibold uppercase tracking-wider transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
+                      active
+                        ? isLight
+                          ? "bg-[#0E7C8E] text-white shadow-sm"
+                          : "bg-white/20 text-white shadow-sm"
+                        : isLight
+                        ? "text-slate-700 hover:text-slate-950"
+                        : "text-white/60 hover:text-white/95"
+                    }`}
+                  >
+                    {code}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Thin Vertical Separator */}
+            <span
+              aria-hidden="true"
+              className={`mx-1.5 h-4 w-[1px] ${isLight ? "bg-slate-900/20" : "bg-white/20"}`}
+            />
+
+            {/* Tactile Pill-Shaped Mechanical Sun/Moon Switch */}
+            {renderMechanicalThemeSwitch(false)}
+
+            {/* Optional Account Icon */}
+            {hasAccountRoute && (
+              <a
+                href="/account"
+                aria-label="Account"
+                className="ml-1 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 hover:bg-white/10"
+              >
+                <User className="h-4 w-4" />
+              </a>
+            )}
+          </div>
         </nav>
 
-        {/* Mobile & Tablet Compact Controls */}
-        <div className="flex items-center gap-2 lg:hidden">
+        {/* Mobile & Tablet Compact Controls (530ms) */}
+        <div
+          style={getNavRevealStyle(530, 480)}
+          className="flex items-center gap-2 lg:hidden"
+        >
           <div
             role="group"
             aria-label={t.nav.languageLabel}

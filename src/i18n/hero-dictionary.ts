@@ -67,6 +67,42 @@ export interface TravelerStoriesTranslation {
   items: Record<StoryId, TravelerStoryItemTranslation>;
 }
 
+export interface FinalCtaTranslation {
+  eyebrow: string;
+  headline: string;
+  supportingText: string;
+  primaryCta: string;
+  imageAlt: string;
+}
+
+export interface FooterTranslation {
+  brandDescription: string;
+  quickLinksTitle: string;
+  links: {
+    home: string;
+    destinations: string;
+    journeys: string;
+    about: string;
+    contact: string;
+  };
+  contactTitle: string;
+  contactInquiryCta: string;
+  contactDestinationsLabel: string;
+  contactEmailPending: string;
+  contactPhonePending: string;
+  newsletterTitle: string;
+  newsletterDescription: string;
+  newsletterInputLabel: string;
+  newsletterPlaceholder: string;
+  newsletterButton: string;
+  newsletterInvalidEmail: string;
+  newsletterPendingEndpointNotice: string;
+  newsletterSubscribedNotice: string;
+  copyright: string;
+  privacyPolicy: string;
+  termsAndConditions: string;
+}
+
 export interface HeroTranslation {
   locale: SupportedLocale;
   languageName: string;
@@ -124,6 +160,8 @@ export interface HeroTranslation {
   featuredTrips: FeaturedTripsTranslation;
   whyWestTravel: WhyWestTravelTranslation;
   travelerStories: TravelerStoriesTranslation;
+  finalCta: FinalCtaTranslation;
+  footer: FooterTranslation;
 }
 
 export const HERO_DICTIONARY: Record<SupportedLocale, HeroTranslation> = {
@@ -314,6 +352,45 @@ export const HERO_DICTIONARY: Record<SupportedLocale, HeroTranslation> = {
         },
       },
     },
+    finalCta: {
+      eyebrow: "YOUR NEXT ADVENTURE STARTS HERE",
+      headline: "Ready for Your Next Journey?",
+      supportingText:
+        "Tell us where you want to go, and we'll help you plan the details.",
+      primaryCta: "Plan My Trip",
+      imageAlt:
+        "Panoramic golden sunset over the calm Nile River in Egypt with traditional felucca sailboats and riverside temple silhouettes",
+    },
+    footer: {
+      brandDescription:
+        "Curated journeys across Egypt, Dubai, and Türkiye — combining thoughtful planning, clear trip details, and dedicated support.",
+      quickLinksTitle: "Quick Links",
+      links: {
+        home: "Home",
+        destinations: "Destinations",
+        journeys: "Our Journeys",
+        about: "About Us",
+        contact: "Contact",
+      },
+      contactTitle: "Contact Info",
+      contactInquiryCta: "Online Trip Inquiry Desk",
+      contactDestinationsLabel: "Egypt · Dubai · Türkiye",
+      contactEmailPending: "Direct email provided upon inquiry",
+      contactPhonePending: "Phone & WhatsApp dispatch upon booking",
+      newsletterTitle: "Newsletter",
+      newsletterDescription:
+        "Seasonal itinerary releases and destination notes across Egypt, Dubai, and Türkiye.",
+      newsletterInputLabel: "Email address for newsletter",
+      newsletterPlaceholder: "Enter your email address",
+      newsletterButton: "Subscribe",
+      newsletterInvalidEmail: "Please enter a valid email address.",
+      newsletterPendingEndpointNotice:
+        "Subscription form ready — backend mailing list integration is pending activation.",
+      newsletterSubscribedNotice: "Thank you for subscribing to WEST TRAVEL updates.",
+      copyright: "© 2026 WEST TRAVEL. All rights reserved.",
+      privacyPolicy: "Privacy Policy",
+      termsAndConditions: "Terms & Conditions",
+    },
   },
   tr: {
     locale: "tr",
@@ -498,6 +575,45 @@ export const HERO_DICTIONARY: Record<SupportedLocale, HeroTranslation> = {
             "Altın saatlerde sakin Nil Nehri'nde süzülen geleneksel beyaz feluka yelkenlisi",
         },
       },
+    },
+    finalCta: {
+      eyebrow: "YENİ MACERANIZ BURADA BAŞLIYOR",
+      headline: "Bir Sonraki Yolculuğunuza Hazır mısınız?",
+      supportingText:
+        "Nereye gitmek istediğinizi bize söyleyin, tüm detayları birlikte planlayalım.",
+      primaryCta: "Seyahatimi Planla",
+      imageAlt:
+        "Mısır'da sakin Nil Nehri üzerinde altın gün batımı, geleneksel feluka yelkenlileri ve antik kıyı silüetleri",
+    },
+    footer: {
+      brandDescription:
+        "Mısır, Dubai ve Türkiye genelinde özenli planlama, net tur detayları ve özel destekle hazırlanan seçkin yolculuklar.",
+      quickLinksTitle: "Hızlı Bağlantılar",
+      links: {
+        home: "Ana Sayfa",
+        destinations: "Destinasyonlar",
+        journeys: "Yolculuklarımız",
+        about: "Hakkımızda",
+        contact: "İletişim",
+      },
+      contactTitle: "İletişim Bilgileri",
+      contactInquiryCta: "Çevrimiçi Seyahat Planlama Masası",
+      contactDestinationsLabel: "Mısır · Dubai · Türkiye",
+      contactEmailPending: "Talep sonrası doğrudan e-posta paylaşılır",
+      contactPhonePending: "Rezervasyon sonrası telefon ve WhatsApp desteği",
+      newsletterTitle: "Bülten",
+      newsletterDescription:
+        "Mısır, Dubai ve Türkiye için dönemsel rota bültenleri ve seyahat notları.",
+      newsletterInputLabel: "Bülten için e-posta adresi",
+      newsletterPlaceholder: "E-posta adresinizi girin",
+      newsletterButton: "Abone Ol",
+      newsletterInvalidEmail: "Lütfen geçerli bir e-posta adresi girin.",
+      newsletterPendingEndpointNotice:
+        "Abonelik formu hazır — e-posta listesi servisi entegrasyonu bekleniyor.",
+      newsletterSubscribedNotice: "WEST TRAVEL bültenine kaydolduğunuz için teşekkürler.",
+      copyright: "© 2026 WEST TRAVEL. Tüm hakları saklıdır.",
+      privacyPolicy: "Gizlilik Politikası",
+      termsAndConditions: "Kullanım Koşulları",
     },
   },
   es: {
@@ -684,6 +800,45 @@ export const HERO_DICTIONARY: Record<SupportedLocale, HeroTranslation> = {
             "Faluca tradicional de vela blanca navegando por el tranquilo río Nilo al atardecer",
         },
       },
+    },
+    finalCta: {
+      eyebrow: "TU PRÓXIMA AVENTURA COMIENZA AQUÍ",
+      headline: "¿Listo para Tu Próximo Viaje?",
+      supportingText:
+        "Cuéntanos a dónde quieres ir y te ayudaremos a planificar cada detalle.",
+      primaryCta: "Planificar Mi Viaje",
+      imageAlt:
+        "Puesta de sol dorada sobre el río Nilo en Egipto con falucas tradicionales de vela blanca y siluetas de templos antiguos",
+    },
+    footer: {
+      brandDescription:
+        "Viajes seleccionados por Egipto, Dubái y Türkiye — combinando planificación cuidadosa, detalles claros y soporte dedicado.",
+      quickLinksTitle: "Enlaces Rápidos",
+      links: {
+        home: "Inicio",
+        destinations: "Destinos",
+        journeys: "Nuestros Viajes",
+        about: "Nosotros",
+        contact: "Contacto",
+      },
+      contactTitle: "Contacto",
+      contactInquiryCta: "Mesa de Consulta de Viajes",
+      contactDestinationsLabel: "Egipto · Dubái · Türkiye",
+      contactEmailPending: "Correo directo facilitado al consultar",
+      contactPhonePending: "Atención telefónica y WhatsApp al reservar",
+      newsletterTitle: "Boletín",
+      newsletterDescription:
+        "Lanzamientos de itinerarios de temporada y notas de destinos por Egipto, Dubái y Türkiye.",
+      newsletterInputLabel: "Correo electrónico para el boletín",
+      newsletterPlaceholder: "Ingresa tu correo electrónico",
+      newsletterButton: "Suscribirse",
+      newsletterInvalidEmail: "Por favor, ingresa un correo electrónico válido.",
+      newsletterPendingEndpointNotice:
+        "Formulario listo — pendiente de conexión con el servicio de boletín.",
+      newsletterSubscribedNotice: "Gracias por suscribirte a las novedades de WEST TRAVEL.",
+      copyright: "© 2026 WEST TRAVEL. Todos los derechos reservados.",
+      privacyPolicy: "Política de Privacidad",
+      termsAndConditions: "Términos y Condiciones",
     },
   },
 };

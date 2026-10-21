@@ -11,6 +11,8 @@ html.dark {
   --west-surface-trips: radial-gradient(ellipse 70% 45% at 50% 0%, rgba(14, 124, 142, 0.12), transparent 70%), linear-gradient(180deg, #051320 0%, #071a2b 42%, #09203a 100%);
   --west-surface-why: radial-gradient(ellipse 40% 48% at 50% 46%, rgba(95, 196, 201, 0.07), transparent 72%), linear-gradient(180deg, #0b2433 0%, #0d2a38 60%, #0a2230 100%);
   --west-surface-why-base: #0c2735;
+  --west-surface-cta: radial-gradient(ellipse 65% 50% at 50% 50%, rgba(14, 124, 142, 0.10), transparent 72%), linear-gradient(180deg, #051320 0%, #061726 55%, #071929 100%);
+  --west-surface-footer: linear-gradient(180deg, #071929 0%, #051320 100%);
   --west-section-divider: rgba(95, 196, 201, 0.28);
   --west-glass-bg: rgba(7, 25, 40, 0.58);
   --west-glass-bg-strong: rgba(6, 22, 36, 0.72);
@@ -29,6 +31,8 @@ html.light {
   --west-surface-trips: radial-gradient(ellipse 70% 42% at 50% 0%, rgba(229, 169, 60, 0.07), transparent 70%), linear-gradient(180deg, #fbf8f2 0%, #f8f3ea 55%, #f3ecdf 100%);
   --west-surface-why: radial-gradient(ellipse 38% 46% at 50% 46%, rgba(77, 170, 179, 0.08), transparent 72%), linear-gradient(180deg, #fdfbf6 0%, #f9f5ec 60%, #f4eee1 100%);
   --west-surface-why-base: #faf7f0;
+  --west-surface-cta: linear-gradient(180deg, #f3ead8 0%, #f7f2e7 52%, #faf7f0 100%);
+  --west-surface-footer: linear-gradient(180deg, #faf7f0 0%, #f4efe3 100%);
   --west-section-divider: rgba(205, 170, 110, 0.55);
   --west-glass-bg: rgba(255, 252, 247, 0.52);
   --west-glass-bg-strong: rgba(255, 252, 247, 0.62);

@@ -86,7 +86,7 @@
   text-wrap: balance;
   overflow-wrap: break-word;
 }
-.heading span { display: block; }
+.heading > span { display: block; }
 .description { margin: 1.65rem 0 0; max-width: 38ch; color: var(--body); font-size: clamp(0.9375rem, 1.27vw, 1.25rem); line-height: 1.65; }
 .ctaWrap { margin-top: 1.75rem; }
 .cta {
@@ -133,7 +133,8 @@
 .section[data-theme-mode="dark"] .landmarks { opacity: 0.68; }
 .section[data-theme-mode="dark"] .traveler { filter: brightness(0.88) saturate(0.85); }
 /* Micrographics share the visual box's coordinates; strokes are set in CSS so they can thicken as the box shrinks. */
-.micro { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; overflow: visible; pointer-events: none; --micro-stroke: 1.5; }
+.micro { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; overflow: visible; pointer-events: none; --micro-stroke: 1.5; opacity: 0; transition: opacity 720ms ease 280ms; }
+.section[data-entered="true"] .micro { opacity: 1; }
 .routePath { stroke: var(--route); stroke-width: var(--micro-stroke); stroke-linecap: round; stroke-dasharray: 0.1 6.5; opacity: .78; }
 .plane { fill: var(--plane); opacity: .82; }
 .pinGold, .pinTeal { opacity: .92; }
@@ -141,15 +142,16 @@
 .pinTeal { color: var(--pin-teal); }
 .pinGold path, .pinTeal path { fill: currentColor; }
 .pinCore { fill: var(--surface); }
-.pinPulse { fill: none; stroke: currentColor; stroke-width: 1.1; opacity: .45; transform-box: fill-box; transform-origin: center; animation: pinPulse 3.6s ease-out infinite; }
-.pinTeal .pinPulse { animation-delay: 1.8s; }
+/* Restrained 2-pulse entrance settle (no continuous infinite animation per Section 14) */
+.pinPulse { fill: none; stroke: currentColor; stroke-width: 1.1; opacity: .35; transform-box: fill-box; transform-origin: center; animation: pinPulse 2.4s ease-out 2; }
+.pinTeal .pinPulse { animation-delay: 0.6s; }
 .clouds { fill: none; stroke: var(--cloud); stroke-width: calc(var(--micro-stroke, 1.5) * .85); stroke-linejoin: round; stroke-linecap: round; opacity: .5; }
 .messageAccent { position: absolute; top: -4.75rem; right: 4%; width: clamp(96px, 7.5vw, 132px); height: auto; display: none; pointer-events: none; }
 .section[data-theme-mode="dark"] .routePath { opacity: .62; }
 .section[data-theme-mode="dark"] .clouds { opacity: .38; }
 @keyframes pinPulse {
   0% { transform: scale(.6); opacity: .5; }
-  70%, 100% { transform: scale(1.6); opacity: 0; }
+  70%, 100% { transform: scale(1.45); opacity: .25; }
 }
 .edge { position: absolute; top: 4%; height: 88%; width: 58px; color: var(--sand); opacity: 0.12; pointer-events: none; display: none; }
 .left { left: 0; }
@@ -192,7 +194,7 @@
   .messageAccent { display: block; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .photo, .cta, .cta svg { transition: none; }
+  .photo, .cta, .cta svg, .micro { transition: none; opacity: 1; }
   .pinPulse { animation: none; opacity: .35; }
   .cta:hover svg { transform: none; }
 }

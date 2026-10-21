@@ -5,6 +5,11 @@ import Image from "next/image";
 import { MapPin, ArrowRight, ArrowDown, Play, Layers } from "lucide-react";
 import { DESTINATIONS_CONFIG, type DestinationAssetConfig, type DestinationId } from "@/config/destinations";
 import { useHero } from "./HeroProvider";
+import {
+  getDirectionalMaskStyle,
+  useSectionEntrance,
+  type MaskDirection,
+} from "@/components/motion/MotionPrimitives";
 
 /**
  * Asymmetric Editorial Destination Cards Composition:
@@ -17,6 +22,10 @@ export function DestinationCards() {
   const { t, theme, activeDestination, setActiveDestination, selectDestinationForBooking } =
     useHero();
   const isLight = theme === "light";
+
+  const { ref: cardsRef, hasEntered, reducedMotion } = useSectionEntrance<HTMLDivElement>({
+    immediate: true,
+  });
 
   const featuredDest = DESTINATIONS_CONFIG.find((d) => d.editorialRole === "featured")!;
   const compactDests = DESTINATIONS_CONFIG.filter((d) => d.editorialRole === "compact");
@@ -35,7 +44,11 @@ export function DestinationCards() {
     el?.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
-  const renderCard = (dest: DestinationAssetConfig, variant: "featured" | "compact" | "mobile") => {
+  const renderCard = (
+    dest: DestinationAssetConfig,
+    variant: "featured" | "compact" | "mobile",
+    staggerIndex = 0
+  ) => {
     const copy = t.destinations[dest.id];
     const isSelected = activeDestination === dest.id;
     const isFeaturedDesktop = variant === "featured";
@@ -47,6 +60,31 @@ export function DestinationCards() {
         ? "w-full h-[180px] xl:h-[194px]"
         : "flex-shrink-0 snap-center w-[278px] sm:w-[308px] h-[178px] sm:h-[190px]";
 
+    const delayMs = 760 + staggerIndex * 95;
+    const maskDirection: MaskDirection =
+      variant === "featured" ? "bottom-to-top" : "right-to-left";
+
+    const cardEntranceStyle: React.CSSProperties = reducedMotion
+      ? { opacity: 1, transform: "none" }
+      : {
+          opacity: hasEntered ? 1 : 0,
+          transform: hasEntered
+            ? undefined
+            : variant === "featured"
+            ? "translate3d(0, 22px, 0)"
+            : "translate3d(22px, 0, 0)",
+          transitionDelay: `${delayMs}ms`,
+        };
+
+    const imageMaskStyle = getDirectionalMaskStyle(
+      maskDirection,
+      hasEntered,
+      reducedMotion,
+      delayMs,
+      780,
+      "22px"
+    );
+
     return (
       <button
         key={`${variant}-${dest.id}`}
@@ -56,7 +94,8 @@ export function DestinationCards() {
         onClick={() => handleCardSelect(dest.id)}
         aria-pressed={isSelected}
         aria-label={`${copy.locationBadge} — ${copy.tagline}`}
-        className={`group relative ${sizeClasses} rounded-[22px] overflow-hidden text-left transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#051320] ${
+        style={cardEntranceStyle}
+        className={`group relative ${sizeClasses} rounded-[22px] overflow-hidden text-left transition-all duration-500 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4] focus-visible:ring-offset-2 focus-visible:ring-offset-[#051320] ${
           isSelected
             ? "ring-2 ring-[#5EEAD4] shadow-[0_22px_52px_rgba(14,124,142,0.58)] -translate-y-1"
             : isLight
@@ -64,18 +103,20 @@ export function DestinationCards() {
             : "west-card-shell hover:border-[#5EEAD4]/60 hover:-translate-y-1"
         }`}
       >
-        {/* High-Resolution Destination Photograph */}
-        <Image
-          src={dest.cardImageWebp}
-          alt={copy.imageAlt}
-          fill
-          sizes={
-            isFeaturedDesktop
-              ? "(max-width: 1280px) 250px, 275px"
-              : "(max-width: 1024px) 308px, 250px"
-          }
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
-        />
+        {/* High-Resolution Destination Photograph with Directional Mask Reveal */}
+        <div className="absolute inset-0" style={imageMaskStyle}>
+          <Image
+            src={dest.cardImageWebp}
+            alt={copy.imageAlt}
+            fill
+            sizes={
+              isFeaturedDesktop
+                ? "(max-width: 1280px) 250px, 275px"
+                : "(max-width: 1024px) 308px, 250px"
+            }
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+          />
+        </div>
 
         {/* Top Specular Glass Rim */}
         <div
@@ -154,27 +195,38 @@ export function DestinationCards() {
   return (
     <div
       id="hero-destination-cards"
+      ref={cardsRef}
       aria-label={t.nav.destinations}
       className="flex flex-col items-end justify-center w-full lg:w-auto"
     >
       {/* Desktop Asymmetric Editorial Grid: 1 Large Featured Card (Left) + 2 Compact Cards (Right) */}
       <div className="hidden lg:grid lg:grid-cols-[246px_228px] xl:grid-cols-[266px_246px] items-center gap-4">
         {/* Left Column: ONE Large Featured Card (02 Istanbul - Türkiye, offset vertically between the right stack) */}
-        <div className="w-full">{renderCard(featuredDest, "featured")}</div>
+        <div className="w-full">{renderCard(featuredDest, "featured", 0)}</div>
 
         {/* Right Column: TWO Smaller Destination Cards (01 Cairo - Egypt & 03 Dubai - UAE) */}
         <div className="flex flex-col gap-4 w-full">
-          {compactDests.map((dest) => renderCard(dest, "compact"))}
+          {compactDests.map((dest, idx) => renderCard(dest, "compact", idx + 1))}
         </div>
       </div>
 
       {/* Mobile & Tablet Intelligent Horizontal Snap Carousel */}
       <div className="flex lg:hidden gap-3.5 w-full overflow-x-auto no-scrollbar pb-2 snap-x snap-mandatory">
-        {DESTINATIONS_CONFIG.map((dest) => renderCard(dest, "mobile"))}
+        {DESTINATIONS_CONFIG.map((dest, idx) => renderCard(dest, "mobile", idx))}
       </div>
 
       {/* Bottom Row Below Cards: Active Panoramic Reset Pill + Scroll Indicator */}
-      <div className="mt-3.5 flex flex-wrap items-center justify-between lg:justify-end gap-3 w-full pr-1">
+      <div
+        style={
+          reducedMotion
+            ? { opacity: 1 }
+            : {
+                opacity: hasEntered ? 1 : 0,
+                transition: "opacity 600ms ease 1020ms",
+              }
+        }
+        className="mt-3.5 flex flex-wrap items-center justify-between lg:justify-end gap-3 w-full pr-1"
+      >
         {activeDestination && (
           <button
             type="button"

@@ -3,10 +3,15 @@
 import React from "react";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useHero } from "./HeroProvider";
+import { SplitTextReveal, useSectionEntrance } from "@/components/motion/MotionPrimitives";
 
 export function HeroCopy() {
   const { t, theme, activeDestination, selectDestinationForBooking } = useHero();
   const isLight = theme === "light";
+
+  const { ref: copyRef, hasEntered, reducedMotion } = useSectionEntrance<HTMLDivElement>({
+    immediate: true,
+  });
 
   const handleExploreClick = () => {
     if (!activeDestination) {
@@ -18,13 +23,30 @@ export function HeroCopy() {
     }
   };
 
+  const getSequenceStyle = (delayMs: number, durationMs = 680): React.CSSProperties =>
+    reducedMotion
+      ? { opacity: 1, transform: "none" }
+      : {
+          opacity: hasEntered ? 1 : 0,
+          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 18px, 0)",
+          transitionProperty: "opacity, transform",
+          transitionDuration: `${durationMs}ms`,
+          transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+          transitionDelay: `${delayMs}ms`,
+        };
+
   return (
     <div
       id="hero-copy"
+      ref={copyRef}
+      data-hero-copy-entered={hasEntered ? "true" : "false"}
       className="flex flex-col items-start justify-center text-left max-w-2xl pt-4 lg:pt-6"
     >
-      {/* Eyebrow with Warm Sunset Gold Line */}
-      <div className="animate-fade-up-1 mb-4 sm:mb-5 inline-flex items-center gap-3.5">
+      {/* 1. Eyebrow with Warm Sunset Gold Line (160ms) */}
+      <div
+        style={getSequenceStyle(160, 620)}
+        className="mb-4 sm:mb-5 inline-flex items-center gap-3.5"
+      >
         <span
           aria-hidden="true"
           className="h-[1.5px] w-9 sm:w-12 bg-gradient-to-r from-[#E5A93C] to-[#F4C266]"
@@ -34,21 +56,46 @@ export function HeroCopy() {
         </span>
       </div>
 
-      {/* Dominant Editorial Serif Headline */}
-      <h1 className="animate-fade-up-2 font-serif text-4xl sm:text-6xl lg:text-[4.25rem] xl:text-[4.85rem] font-semibold leading-[1.04] tracking-[-0.015em] text-white drop-shadow-[0_8px_28px_rgba(0,0,0,0.55)]">
-        <span className="block">{t.hero.headlineLine1}</span>
-        <span className="block mt-1 bg-gradient-to-r from-[#F9E6B3] via-[#F4C97A] to-[#E5A93C] bg-clip-text text-transparent">
-          {t.hero.headlineLine2}
+      {/* 2. Dominant Editorial Serif Headline with Masked Character-by-Character Reveal */}
+      <h1 className="font-serif text-4xl sm:text-6xl lg:text-[4.25rem] xl:text-[4.85rem] font-semibold leading-[1.04] tracking-[-0.015em] text-white drop-shadow-[0_8px_28px_rgba(0,0,0,0.55)]">
+        <span className="block">
+          <SplitTextReveal
+            text={t.hero.headlineLine1}
+            mode="chars"
+            hasEntered={hasEntered}
+            reducedMotion={reducedMotion}
+            baseDelayMs={230}
+            staggerMs={24}
+            durationMs={600}
+          />
+        </span>
+        <span className="block mt-1">
+          <SplitTextReveal
+            text={t.hero.headlineLine2}
+            mode="chars"
+            hasEntered={hasEntered}
+            reducedMotion={reducedMotion}
+            baseDelayMs={490}
+            staggerMs={28}
+            durationMs={620}
+            unitClassName="bg-gradient-to-r from-[#F9E6B3] via-[#F4C97A] to-[#E5A93C] bg-clip-text text-transparent"
+          />
         </span>
       </h1>
 
-      {/* Supporting Copy */}
-      <p className="animate-fade-up-3 mt-5 sm:mt-6 max-w-lg text-base sm:text-lg md:text-[19px] font-normal leading-relaxed text-white/92 drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]">
+      {/* 3. Supporting Copy (620ms) */}
+      <p
+        style={getSequenceStyle(620, 680)}
+        className="mt-5 sm:mt-6 max-w-lg text-base sm:text-lg md:text-[19px] font-normal leading-relaxed text-white/92 drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]"
+      >
         {t.hero.supportingText}
       </p>
 
-      {/* Primary Teal Pill CTA */}
-      <div className="animate-fade-up-4 mt-7 sm:mt-8 flex flex-wrap items-center gap-4">
+      {/* 4. Primary Teal Pill CTA (730ms) */}
+      <div
+        style={getSequenceStyle(730, 680)}
+        className="mt-7 sm:mt-8 flex flex-wrap items-center gap-4"
+      >
         <button
           type="button"
           onClick={handleExploreClick}

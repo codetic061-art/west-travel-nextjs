@@ -13,6 +13,11 @@ import {
   type TravelerStoryRecord,
 } from "@/config/traveler-stories";
 import {
+  SplitTextReveal,
+  getDirectionalMaskStyle,
+  useSectionEntrance,
+} from "@/components/motion/MotionPrimitives";
+import {
   ClotheslineRope,
   LowerLeftGizaArtwork,
   LowerRightPostmark,
@@ -95,6 +100,11 @@ export function TravelerStoriesSection({
   const totalStories = stories.length;
   const hasSampleEntries = stories.some((s) => s.isSampleData);
 
+  const { ref: sectionRef, hasEntered, reducedMotion } = useSectionEntrance<HTMLElement>({
+    threshold: 0.14,
+    rootMargin: "0px 0px -8% 0px",
+  });
+
   // Monotonic step counter drives one-by-one circular replacement so every card DOM node
   // keeps its stable key as it enters from the right, shifts across the 4 slots, and exits left.
   const [stepCount, setStepCount] = useState<number>(0);
@@ -103,7 +113,6 @@ export function TravelerStoriesSection({
   );
   const [motionDirection, setMotionDirection] = useState<MotionDirection>("idle");
   const [isRopeFlexing, setIsRopeFlexing] = useState<boolean>(false);
-  const [reducedMotion, setReducedMotion] = useState<boolean>(false);
   const [failedImages, setFailedImages] = useState<Record<string, boolean>>({});
 
   const swingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -130,20 +139,12 @@ export function TravelerStoriesSection({
     return () => window.removeEventListener("resize", updateViewportCounts);
   }, []);
 
-  // Track prefers-reduced-motion
   useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mq.matches);
-    const handleChange = (e: MediaQueryListEvent) => {
-      setReducedMotion(e.matches);
-      if (e.matches) {
-        setMotionDirection("idle");
-        setIsRopeFlexing(false);
-      }
-    };
-    mq.addEventListener("change", handleChange);
-    return () => mq.removeEventListener("change", handleChange);
-  }, []);
+    if (reducedMotion) {
+      setMotionDirection("idle");
+      setIsRopeFlexing(false);
+    }
+  }, [reducedMotion]);
 
   useEffect(() => {
     return () => {
@@ -236,6 +237,18 @@ export function TravelerStoriesSection({
     }
   };
 
+  const getHeaderRevealStyle = (delayMs: number): React.CSSProperties =>
+    reducedMotion
+      ? { opacity: 1, transform: "none" }
+      : {
+          opacity: hasEntered ? 1 : 0,
+          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 16px, 0)",
+          transitionProperty: "opacity, transform",
+          transitionDuration: "680ms",
+          transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+          transitionDelay: `${delayMs}ms`,
+        };
+
   // Render slots from -1 (left offscreen buffer) through visibleCount (right offscreen buffer)
   const slotIndices: number[] = [];
   for (let k = stepCount - 1; k <= stepCount + visibleCount; k += 1) {
@@ -244,9 +257,11 @@ export function TravelerStoriesSection({
 
   return (
     <section
+      ref={sectionRef}
       id={TRAVELER_STORIES_SECTION_CONFIG.sectionId}
       aria-labelledby="traveler-stories-heading"
       data-theme-mode={theme}
+      data-entered={hasEntered ? "true" : "false"}
       data-active-story-index={activeIndex}
       data-review-dataset={
         hasSampleEntries
@@ -265,17 +280,25 @@ export function TravelerStoriesSection({
       <LowerRightPostmark />
 
       <div className={styles.container}>
-        {/* Section Heading & Introductory Copy */}
+        {/* Section Heading & Introductory Copy with Scroll-Triggered Reveal */}
         <header className={styles.header}>
-          <p className={styles.eyebrow}>
+          <p className={styles.eyebrow} style={getHeaderRevealStyle(0)}>
             <span className={styles.eyebrowRule} aria-hidden="true" />
             <span>{copy.eyebrow || TRAVELER_STORIES_SECTION_CONFIG.eyebrow}</span>
             <span className={styles.eyebrowRuleRight} aria-hidden="true" />
           </p>
           <h2 id="traveler-stories-heading" className={styles.heading}>
-            {copy.heading || TRAVELER_STORIES_SECTION_CONFIG.heading}
+            <SplitTextReveal
+              text={copy.heading || TRAVELER_STORIES_SECTION_CONFIG.heading}
+              mode="chars"
+              hasEntered={hasEntered}
+              reducedMotion={reducedMotion}
+              baseDelayMs={65}
+              staggerMs={22}
+              durationMs={600}
+            />
           </h2>
-          <p className={styles.subtitle}>
+          <p className={styles.subtitle} style={getHeaderRevealStyle(180)}>
             {copy.supportingText || TRAVELER_STORIES_SECTION_CONFIG.supportingText}
           </p>
         </header>
@@ -283,6 +306,7 @@ export function TravelerStoriesSection({
         {/* Physical Clothesline Stage & Hanging Polaroid Carousel */}
         <div
           className={styles.clotheslineStage}
+          style={getHeaderRevealStyle(230)}
           role="region"
           aria-roledescription="carousel"
           aria-label={copy.carouselAriaLabel}
@@ -356,6 +380,15 @@ export function TravelerStoriesSection({
                   ? story.imageJpg
                   : story.imageWebp;
 
+                const photoMaskStyle = getDirectionalMaskStyle(
+                  "top-to-bottom",
+                  hasEntered,
+                  reducedMotion,
+                  260 + Math.max(0, slotOffset) * 85,
+                  760,
+                  "2px"
+                );
+
                 return (
                   <article
                     key={`rope-item-${absoluteStepKey}`}
@@ -377,8 +410,8 @@ export function TravelerStoriesSection({
 
                       {/* Compact Near-Square Polaroid Paper Frame */}
                       <div className={styles.polaroidCard}>
-                        {/* Landscape Destination Photograph */}
-                        <div className={styles.photoFrame}>
+                        {/* Landscape Destination Photograph with Directional Top-to-Bottom Reveal */}
+                        <div className={styles.photoFrame} style={photoMaskStyle}>
                           <Image
                             src={imageSrc}
                             alt={localizedItem.imageAlt}
