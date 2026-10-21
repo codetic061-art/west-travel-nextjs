@@ -76,8 +76,15 @@ export function TripInquiryDrawer() {
     if (inquiryDrawerPrefill) {
       setFormState((prev) => {
         const nextDestination =
-          inquiryDrawerPrefill.destinationId ?? prev.destinationId;
-        let nextTrip = inquiryDrawerPrefill.tripId ?? prev.tripId;
+          inquiryDrawerPrefill.destination ?? prev.destinationId;
+        const matchedJourney = inquiryDrawerPrefill.journeySlug
+          ? FEATURED_TRIPS_CONFIG.find(
+              (trip) => trip.slug === inquiryDrawerPrefill.journeySlug
+            )
+          : undefined;
+        let nextTrip = matchedJourney
+          ? matchedJourney.id
+          : prev.tripId;
 
         if (nextDestination && nextTrip) {
           const tripConfig = FEATURED_TRIPS_CONFIG.find(
