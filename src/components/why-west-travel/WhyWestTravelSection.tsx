@@ -1,12 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, CalendarCheck, Globe2, Headphones, ShieldCheck } from "lucide-react";
 import { useHero } from "@/components/hero/HeroProvider";
 import { WHY_WEST_TRAVEL_FEATURES, WHY_WEST_TRAVEL_SECTION_CONFIG } from "@/config/why-west-travel";
 import { WHY_WEST_ASSET_COPY } from "@/i18n/why-west-travel-assets";
+import {
+  SplitTextReveal,
+  getDirectionalMaskStyle,
+  useSectionEntrance,
+} from "@/components/motion/MotionPrimitives";
 import { EgyptianEdges, MessageAccent, TravelMicrographics } from "./TravelArtwork";
 import styles from "./WhyWestTravelSection.module.css";
 
@@ -25,53 +30,58 @@ const ASSETS = {
 
 type ImageStatus = "loading" | "ready" | "failed";
 
-/** Visible SSR content enhanced with one-time, per-element entrance animations. */
-function useEntrance() {
-  const ref = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    const root = ref.current;
-    if (!root || typeof IntersectionObserver === "undefined") return;
-    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const animations: Animation[] = [];
-    const observer = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (!entry.isIntersecting) continue;
-        observer.unobserve(entry.target);
-        if (motion.matches) continue;
-        const element = entry.target as HTMLElement;
-        if (typeof element.animate !== "function") continue;
-        const direction = element.dataset.reveal;
-        const from = direction === "left" ? "translateX(-14px)" : direction === "right" ? "translateX(14px)" : "translateY(10px)";
-        animations.push(element.animate(
-          [{ opacity: 0, transform: from }, { opacity: 1, transform: "none" }],
-          { duration: 650, delay: Number(element.dataset.delay ?? 0), easing: "cubic-bezier(0.22, 1, 0.36, 1)", fill: "backwards" }
-        ));
-      }
-    }, { threshold: 0.12 });
-
-    root.querySelectorAll<HTMLElement>("[data-reveal]").forEach((element) => observer.observe(element));
-    const handleMotion = () => {
-      if (motion.matches) animations.forEach((animation) => animation.cancel());
-    };
-    motion.addEventListener("change", handleMotion);
-    return () => {
-      observer.disconnect();
-      animations.forEach((animation) => animation.cancel());
-      motion.removeEventListener("change", handleMotion);
-    };
-  }, []);
-
-  return ref;
-}
-
+/**
+ * Section 3: Why West Travel — Coordinated 3-Part Editorial Reveal (Section 14):
+ * - Left: Service benefits enter with a subtle stagger from the left; circular icons settle shortly after.
+ * - Center: Traveler-and-landmark composition reveals through a controlled vertical mask + organic brush mask.
+ * - Right: Eyebrow, word-by-word serif heading, supporting text, and "Learn More" CTA appear from the right.
+ * - Decorative SVGs use a restrained opacity/route reveal without continuous oscillation.
+ */
 export function WhyWestTravelSection() {
   const { t, theme, locale } = useHero();
   const copy = t.whyWestTravel;
   const assetCopy = WHY_WEST_ASSET_COPY[locale];
-  const sectionRef = useEntrance();
+
+  const { ref: sectionRef, hasEntered, reducedMotion } = useSectionEntrance<HTMLElement>({
+    threshold: 0.14,
+    rootMargin: "0px 0px -8% 0px",
+  });
+
   const [traveler, setTraveler] = useState<ImageStatus>("loading");
   const [landmarks, setLandmarks] = useState<ImageStatus>("loading");
+
+  const getDirectionalSlideStyle = (
+    direction: "left" | "right" | "up",
+    delayMs: number,
+    durationMs = 700
+  ): React.CSSProperties => {
+    if (reducedMotion) {
+      return { opacity: 1, transform: "none" };
+    }
+    const initialTransform =
+      direction === "left"
+        ? "translate3d(-24px, 0, 0)"
+        : direction === "right"
+        ? "translate3d(24px, 0, 0)"
+        : "translate3d(0, 22px, 0)";
+    return {
+      opacity: hasEntered ? 1 : 0,
+      transform: hasEntered ? "translate3d(0, 0, 0)" : initialTransform,
+      transitionProperty: "opacity, transform",
+      transitionDuration: `${durationMs}ms`,
+      transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+      transitionDelay: `${delayMs}ms`,
+    };
+  };
+
+  const centerVisualMaskStyle = getDirectionalMaskStyle(
+    "bottom-to-top",
+    hasEntered,
+    reducedMotion,
+    110,
+    880,
+    "0px"
+  );
 
   return (
     <section
@@ -79,28 +89,84 @@ export function WhyWestTravelSection() {
       id={WHY_WEST_TRAVEL_SECTION_CONFIG.sectionId}
       aria-labelledby="why-west-travel-heading"
       data-theme-mode={theme}
+      data-entered={hasEntered ? "true" : "false"}
       className={styles.section}
     >
       <EgyptianEdges />
       <div className={styles.layout}>
+        {/* Right Column on Desktop: Brand Message & "Learn More" CTA */}
         <div className={styles.message}>
           <MessageAccent />
-          <p className={styles.eyebrow} data-reveal="right">
-            <span className={styles.eyebrowPrefix}>{copy.eyebrowPrefix}</span>{" "}<span>{copy.eyebrowHighlight}</span>
+          <p
+            className={styles.eyebrow}
+            style={getDirectionalSlideStyle("right", 40)}
+            data-reveal="right"
+          >
+            <span className={styles.eyebrowPrefix}>{copy.eyebrowPrefix}</span>{" "}
+            <span>{copy.eyebrowHighlight}</span>
           </p>
-          <h2 id="why-west-travel-heading" className={styles.heading} data-reveal="right" data-delay="70">
-            <span>{copy.headingLine1}</span>{" "}<span>{copy.headingLine2}</span>
+
+          <h2
+            id="why-west-travel-heading"
+            className={styles.heading}
+            data-reveal="right"
+          >
+            <span>
+              <SplitTextReveal
+                text={copy.headingLine1}
+                mode="words"
+                hasEntered={hasEntered}
+                reducedMotion={reducedMotion}
+                baseDelayMs={110}
+                staggerMs={55}
+                durationMs={620}
+              />
+            </span>{" "}
+            <span>
+              <SplitTextReveal
+                text={copy.headingLine2}
+                mode="words"
+                hasEntered={hasEntered}
+                reducedMotion={reducedMotion}
+                baseDelayMs={230}
+                staggerMs={55}
+                durationMs={620}
+              />
+            </span>
           </h2>
-          <p className={styles.description} data-reveal="right" data-delay="140">{copy.supportingText}</p>
-          <div className={styles.ctaWrap} data-reveal="right" data-delay="210">
-            <Link href={WHY_WEST_TRAVEL_SECTION_CONFIG.primaryCtaHref} className={styles.cta} data-why-west-cta="learn-more">
+
+          <p
+            className={styles.description}
+            style={getDirectionalSlideStyle("right", 280)}
+            data-reveal="right"
+          >
+            {copy.supportingText}
+          </p>
+
+          <div
+            className={styles.ctaWrap}
+            style={getDirectionalSlideStyle("right", 380)}
+            data-reveal="right"
+          >
+            <Link
+              href={WHY_WEST_TRAVEL_SECTION_CONFIG.primaryCtaHref}
+              className={styles.cta}
+              data-why-west-cta="learn-more"
+            >
               <span>{copy.primaryCta}</span>
               <ArrowRight aria-hidden="true" />
             </Link>
           </div>
         </div>
 
-        <div className={styles.visual} data-reveal="up" data-delay="90" data-traveler-status={traveler} data-landmarks-status={landmarks}>
+        {/* Center Visual Column: Landmarks + Traveler Revealed Through Controlled Directional Mask */}
+        <div
+          className={styles.visual}
+          style={centerVisualMaskStyle}
+          data-reveal="up"
+          data-traveler-status={traveler}
+          data-landmarks-status={landmarks}
+        >
           <div className={styles.atmosphere} aria-hidden="true" />
           <TravelMicrographics showPins={landmarks === "ready"} />
           <div className={styles.landmarks}>
@@ -133,13 +199,38 @@ export function WhyWestTravelSection() {
           </div>
         </div>
 
+        {/* Left Column on Desktop: Staggered Service Benefits */}
         <ul className={styles.benefits}>
           {WHY_WEST_TRAVEL_FEATURES.map((feature, index) => {
             const Icon = FEATURE_ICONS[feature.id];
             const localized = copy.features[feature.id];
+            const rowDelay = 60 + index * 85;
+            const iconStyle: React.CSSProperties = reducedMotion
+              ? { opacity: 1, transform: "none" }
+              : {
+                  opacity: hasEntered ? 1 : 0,
+                  transform: hasEntered ? "scale(1)" : "scale(0.86)",
+                  transitionProperty: "opacity, transform",
+                  transitionDuration: "540ms",
+                  transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
+                  transitionDelay: `${rowDelay + 75}ms`,
+                };
+
             return (
-              <li key={feature.id} className={styles.feature} data-reveal="left" data-delay={index * 65} data-why-feature={feature.id} data-verification-status={feature.verificationStatus}>
-                <span className={styles.icon}><Icon aria-hidden="true" />{feature.id === "support" && <span className={styles.supportLabel}>24/7</span>}</span>
+              <li
+                key={feature.id}
+                className={styles.feature}
+                style={getDirectionalSlideStyle("left", rowDelay)}
+                data-reveal="left"
+                data-why-feature={feature.id}
+                data-verification-status={feature.verificationStatus}
+              >
+                <span className={styles.icon} style={iconStyle}>
+                  <Icon aria-hidden="true" />
+                  {feature.id === "support" && (
+                    <span className={styles.supportLabel}>24/7</span>
+                  )}
+                </span>
                 <div className={styles.featureCopy}>
                   <h3>{localized.title}</h3>
                   <p>{localized.description}</p>

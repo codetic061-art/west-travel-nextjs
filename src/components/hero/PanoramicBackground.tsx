@@ -11,6 +11,7 @@ export function PanoramicBackground() {
   const [pointerOffset, setPointerOffset] = useState({ x: 0, y: 0 });
   const [reducedMotion, setReducedMotion] = useState(false);
   const [saveData, setSaveData] = useState(false);
+  const [hasEntered, setHasEntered] = useState(false);
   const [videoReadyFor, setVideoReadyFor] = useState<DestinationId | null>(null);
   const [videoErrorFor, setVideoErrorFor] = useState<DestinationId | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -18,7 +19,16 @@ export function PanoramicBackground() {
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     setReducedMotion(mediaQuery.matches);
-    const handler = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    if (mediaQuery.matches) {
+      setHasEntered(true);
+    } else {
+      const raf = window.requestAnimationFrame(() => setHasEntered(true));
+      return () => window.cancelAnimationFrame(raf);
+    }
+    const handler = (e: MediaQueryListEvent) => {
+      setReducedMotion(e.matches);
+      if (e.matches) setHasEntered(true);
+    };
     mediaQuery.addEventListener("change", handler);
 
     // Check Network Information API for data-saver mode on mobile
@@ -84,24 +94,27 @@ export function PanoramicBackground() {
     videoReadyFor === activeDestination &&
     videoErrorFor !== activeDestination;
 
+  const scaleValue = reducedMotion ? 1 : hasEntered ? 1.03 : 1.07;
+
   return (
     <div
       aria-hidden="true"
       data-active-destination={activeDestination ?? "panoramic"}
       data-video-playing={isVideoVisible ? "true" : "false"}
+      data-bg-entered={hasEntered ? "true" : "false"}
       className="pointer-events-none absolute inset-0 overflow-hidden select-none bg-[#04111D]"
     >
       <div
         className={`relative h-full w-full transition-opacity duration-700 ease-out ${
-          activeDestination ? "opacity-25" : "opacity-100"
+          activeDestination ? "opacity-25" : hasEntered || reducedMotion ? "opacity-100" : "opacity-0"
         } ${isLight ? "brightness-[1.06] saturate-[1.04]" : "brightness-100"}`}
       >
         <div
-          className="absolute inset-0 transition-transform duration-700 ease-out motion-reduce:transition-none"
+          className="absolute inset-0 transition-transform duration-1000 ease-out motion-reduce:transition-none"
           style={{
             transform: reducedMotion
               ? undefined
-              : `translate3d(${pointerOffset.x * -0.4}px, ${pointerOffset.y * -0.3}px, 0) scale(1.03)`,
+              : `translate3d(${pointerOffset.x * -0.4}px, ${pointerOffset.y * -0.3}px, 0) scale(${scaleValue})`,
           }}
         >
           {/* One continuous dusk scene: open dunes and calm sky on the left (copy side), then Giza,

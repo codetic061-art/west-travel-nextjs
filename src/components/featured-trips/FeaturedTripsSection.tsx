@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useRef, useState, useCallback } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import {
@@ -10,6 +10,7 @@ import {
 } from "@/config/featured-trips";
 import { useHero } from "@/components/hero/HeroProvider";
 import { JourneyCard } from "./JourneyCard";
+import { SplitTextReveal, useSectionEntrance } from "@/components/motion/MotionPrimitives";
 
 export interface FeaturedTripsSectionProps {
   /**
@@ -38,61 +39,13 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
     journeys.find((j) => j.columnPosition === "center") ?? journeys[2] ?? journeys[0];
   const rightCards = journeys.filter((j) => j.columnPosition === "right");
 
-  const sectionRef = useRef<HTMLElement | null>(null);
   const mobileCarouselRef = useRef<HTMLDivElement | null>(null);
+  const { ref: sectionRef, hasEntered, reducedMotion } = useSectionEntrance<HTMLElement>({
+    threshold: 0.12,
+    rootMargin: "0px 0px -8% 0px",
+  });
 
-  const [hasEntered, setHasEntered] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
   const [activeIndex, setActiveIndex] = useState<number>(0);
-
-  // Detect prefers-reduced-motion
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReducedMotion(mq.matches);
-    if (mq.matches) {
-      setHasEntered(true);
-    }
-    const handleChange = (e: MediaQueryListEvent) => {
-      setReducedMotion(e.matches);
-      if (e.matches) {
-        setHasEntered(true);
-      }
-    };
-    mq.addEventListener("change", handleChange);
-    return () => mq.removeEventListener("change", handleChange);
-  }, []);
-
-  // Single-trigger IntersectionObserver so entrance animation plays once on viewport entry
-  useEffect(() => {
-    if (reducedMotion || hasEntered) return;
-    const node = sectionRef.current;
-    if (!node) return;
-
-    if (typeof IntersectionObserver === "undefined") {
-      setHasEntered(true);
-      return;
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setHasEntered(true);
-            observer.disconnect();
-            break;
-          }
-        }
-      },
-      {
-        root: null,
-        rootMargin: "0px 0px -8% 0px",
-        threshold: 0.12,
-      }
-    );
-
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [reducedMotion, hasEntered]);
 
   // Synchronize mobile carousel scroll position with pagination controls
   const scrollToMobileIndex = useCallback(
@@ -213,20 +166,27 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
             />
           </div>
 
-          {/* Main Editorial Serif Heading: Find Your Next Journey */}
+          {/* Main Editorial Serif Heading: Find Your Next Journey (Masked Character Reveal) */}
           <h2
             id="featured-trips-heading"
-            style={getHeaderEntranceStyle(65)}
             className={`mt-3 font-serif text-3xl sm:text-5xl lg:text-[3.35rem] font-semibold leading-[1.12] tracking-[-0.015em] ${
               isLight ? "text-[#081C2E]" : "text-white"
             }`}
           >
-            {copy.heading || FEATURED_TRIPS_SECTION_CONFIG.heading}
+            <SplitTextReveal
+              text={copy.heading || FEATURED_TRIPS_SECTION_CONFIG.heading}
+              mode="chars"
+              hasEntered={hasEntered}
+              reducedMotion={reducedMotion}
+              baseDelayMs={65}
+              staggerMs={20}
+              durationMs={600}
+            />
           </h2>
 
           {/* Supporting Text: Explore curated trips across Egypt, Dubai and Türkiye. */}
           <p
-            style={getHeaderEntranceStyle(125)}
+            style={getHeaderEntranceStyle(180)}
             className={`mt-3.5 text-sm sm:text-base lg:text-[17px] font-normal leading-relaxed ${
               isLight ? "text-[#546576]" : "text-slate-300/85"
             }`}
@@ -235,7 +195,7 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
           </p>
 
           {/* Mandatory Section-Level CTA — Explore All Trips → */}
-          <div style={getHeaderEntranceStyle(185)} className="mt-6 flex justify-center">
+          <div style={getHeaderEntranceStyle(250)} className="mt-6 flex justify-center">
             <Link
               href={FEATURED_TRIPS_SECTION_CONFIG.exploreAllHref}
               data-section-cta="explore-all-trips"

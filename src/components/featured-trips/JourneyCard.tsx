@@ -6,6 +6,10 @@ import Link from "next/link";
 import { MapPin, Calendar, FileText, ArrowRight, Compass, Info } from "lucide-react";
 import type { FeaturedJourneyRecord } from "@/config/featured-trips";
 import type { FeaturedTripsTranslation } from "@/i18n/hero-dictionary";
+import {
+  getDirectionalMaskStyle,
+  type MaskDirection,
+} from "@/components/motion/MotionPrimitives";
 
 export interface JourneyCardProps {
   journey: FeaturedJourneyRecord;
@@ -25,7 +29,8 @@ export interface JourneyCardProps {
  * - Reveals expanded journey description (when real content exists) and itinerary metadata
  *   on desktop hover, keyboard focus-within, or touch tap interaction.
  * - Coordinates asymmetric entrance motion (left column from left, center from below,
- *   right column from right) and a delayed downward settle animation for the CTA button.
+ *   right column from right), directional image mask reveals, and a delayed settle animation
+ *   for the CTA button.
  */
 export function JourneyCard({
   journey,
@@ -42,27 +47,41 @@ export function JourneyCard({
   const isFeaturedSize = variant === "desktop-featured" || variant === "tablet-featured";
   const isMobile = variant === "mobile";
 
-  // Calculate entrance animation vector & stagger timing based on columnPosition and stack index
-  const getEntranceTiming = () => {
+  // Calculate entrance animation vector, directional mask, & stagger timing
+  const getEntranceTiming = (): {
+    cardDelayMs: number;
+    initialTransform: string;
+    maskDirection: MaskDirection;
+  } => {
+    if (isMobile) {
+      return {
+        cardDelayMs: 120 + journey.carouselIndex * 70,
+        initialTransform: "translate3d(0, 22px, 0)",
+        maskDirection: "bottom-to-top",
+      };
+    }
     if (journey.columnPosition === "left") {
       return {
-        cardDelayMs: journey.columnStackIndex === 0 ? 110 : 240,
-        initialTransform: "translate3d(-44px, 0, 0)",
+        cardDelayMs: journey.columnStackIndex === 0 ? 115 : 240,
+        initialTransform: "translate3d(-38px, 0, 0)",
+        maskDirection: "left-to-right",
       };
     }
     if (journey.columnPosition === "center") {
       return {
         cardDelayMs: 175,
-        initialTransform: "translate3d(0, 42px, 0)",
+        initialTransform: "translate3d(0, 38px, 0)",
+        maskDirection: "bottom-to-top",
       };
     }
     return {
-      cardDelayMs: journey.columnStackIndex === 0 ? 145 : 275,
-      initialTransform: "translate3d(44px, 0, 0)",
+      cardDelayMs: journey.columnStackIndex === 0 ? 145 : 270,
+      initialTransform: "translate3d(38px, 0, 0)",
+      maskDirection: "right-to-left",
     };
   };
 
-  const { cardDelayMs, initialTransform } = getEntranceTiming();
+  const { cardDelayMs, initialTransform, maskDirection } = getEntranceTiming();
   const ctaDelayMs = cardDelayMs + 165;
 
   const cardEntranceStyle: React.CSSProperties = reducedMotion
@@ -76,11 +95,20 @@ export function JourneyCard({
         transitionDelay: `${cardDelayMs}ms`,
       };
 
+  const imageMaskStyle = getDirectionalMaskStyle(
+    maskDirection,
+    hasEntered,
+    reducedMotion,
+    cardDelayMs + 30,
+    820,
+    "20px"
+  );
+
   const ctaEntranceStyle: React.CSSProperties = reducedMotion
     ? { opacity: 1, transform: "none" }
     : {
         opacity: hasEntered ? 1 : 0,
-        transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, -10px, 0)",
+        transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 10px, 0)",
         transitionProperty: "opacity, transform, background-color, border-color, box-shadow",
         transitionDuration: "620ms",
         transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
@@ -124,25 +152,28 @@ export function JourneyCard({
       data-column-position={journey.columnPosition}
       data-featured-center={journey.isFeaturedCenter ? "true" : "false"}
       data-card-variant={variant}
+      data-mask-direction={maskDirection}
       onClick={() => onSelectCard?.(journey.carouselIndex)}
       style={cardEntranceStyle}
       className={`group relative w-full ${heightClasses} rounded-[20px] overflow-hidden select-none transition-all duration-500 ease-out focus-within:ring-2 focus-within:ring-[#2DD4BF] focus-within:ring-offset-2 ${
         isLight ? "focus-within:ring-offset-[#FAF8F3]" : "focus-within:ring-offset-[#061523]"
       } ${cardSurfaceClasses}`}
     >
-      {/* Scenic Travel Photograph with Smooth Scale on Hover/Focus */}
-      <Image
-        src={journey.imageWebp}
-        alt={journey.imageAlt}
-        fill
-        sizes={
-          isFeaturedSize
-            ? "(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 440px"
-            : "(max-width: 768px) 90vw, (max-width: 1200px) 32vw, 390px"
-        }
-        className="object-cover brightness-[1.06] saturate-[1.05] transition-transform duration-700 ease-out group-hover:scale-[1.06] group-focus-within:scale-[1.04]"
-        style={{ objectPosition: journey.objectPosition }}
-      />
+      {/* Scenic Travel Photograph with Directional Mask Reveal & Smooth Scale on Hover/Focus */}
+      <div className="absolute inset-0" style={imageMaskStyle}>
+        <Image
+          src={journey.imageWebp}
+          alt={journey.imageAlt}
+          fill
+          sizes={
+            isFeaturedSize
+              ? "(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 440px"
+              : "(max-width: 768px) 90vw, (max-width: 1200px) 32vw, 390px"
+          }
+          className="object-cover brightness-[1.06] saturate-[1.05] transition-transform duration-700 ease-out group-hover:scale-[1.06] group-focus-within:scale-[1.04]"
+          style={{ objectPosition: journey.objectPosition }}
+        />
+      </div>
 
       {/* Subtle Top Readability Vignette for Location Pin Label */}
       <div
