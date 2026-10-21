@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { ChevronDown, Sun, Moon, Menu, X, Compass, User } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { ChevronDown, Sun, Moon, Menu, X, Compass, User, ArrowRight } from "lucide-react";
 import { useHero } from "./HeroProvider";
 import { BrandLogo } from "./BrandLogo";
 import { DESTINATIONS_CONFIG, type DestinationId } from "@/config/destinations";
@@ -15,9 +17,17 @@ interface FloatingNavbarProps {
    * Account icon is rendered only when an existing account feature/route supports it.
    */
   hasAccountRoute?: boolean;
+  /**
+   * Optional callback used by the Destination Discovery page so selecting a destination
+   * from the navbar dropdown immediately synchronizes the page's active destination state.
+   */
+  onSelectDiscoveryDestination?: (id: DestinationId) => void;
 }
 
-export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps) {
+export function FloatingNavbar({
+  hasAccountRoute = false,
+  onSelectDiscoveryDestination,
+}: FloatingNavbarProps) {
   const {
     locale,
     setLocale,
@@ -28,6 +38,8 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
     selectDestinationForBooking,
     openInquiryDrawer,
   } = useHero();
+  const pathname = usePathname();
+  const router = useRouter();
   const [destDropdownOpen, setDestDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -37,6 +49,8 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
   });
 
   const isLight = theme === "light";
+  const isHomePage = pathname === "/";
+  const isDiscoveryPage = pathname === "/destinations" || pathname === "/trips";
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -52,25 +66,26 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
     selectDestinationForBooking(id);
     setDestDropdownOpen(false);
     setMobileMenuOpen(false);
-    const el = document.getElementById("hero-destination-cards");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+    if (onSelectDiscoveryDestination) {
+      onSelectDiscoveryDestination(id);
+      return;
     }
+
+    if (isHomePage) {
+      const el = document.getElementById("hero-destination-cards");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+      return;
+    }
+
+    router.push(`/destinations?destination=${id}`);
   };
 
   const handleOpenContactDrawer = (triggerEl?: HTMLElement | null) => {
     setMobileMenuOpen(false);
     openInquiryDrawer(undefined, triggerEl);
-  };
-
-  const handleScrollToJourneys = () => {
-    setMobileMenuOpen(false);
-    const el =
-      document.getElementById("featured-trips") ??
-      document.getElementById("hero-booking-bar");
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
   };
 
   /**
@@ -200,7 +215,9 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
               aria-expanded={destDropdownOpen}
               aria-haspopup="true"
               className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13.5px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
-                isLight
+                isDiscoveryPage
+                  ? "bg-[#0E7C8E]/20 text-[#0E7C8E] dark:text-[#5EEAD4]"
+                  : isLight
                   ? "hover:bg-white/50 hover:text-slate-950"
                   : "hover:bg-white/10 hover:text-white"
               }`}
@@ -216,7 +233,7 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
             {destDropdownOpen && (
               <div
                 role="menu"
-                className={`west-glass-popover absolute left-0 mt-3 w-64 rounded-2xl p-2 transition-all ${
+                className={`west-glass-popover absolute left-0 mt-3 w-72 rounded-2xl p-2 transition-all ${
                   isLight ? "text-slate-900" : "text-white"
                 }`}
               >
@@ -247,64 +264,94 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
                     </button>
                   );
                 })}
+
+                <div className="mt-1.5 pt-1.5 border-t border-current/10">
+                  <Link
+                    href="/destinations"
+                    role="menuitem"
+                    onClick={() => setDestDropdownOpen(false)}
+                    data-nav-link="explore-all-destinations"
+                    className={`flex w-full items-center justify-between rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-colors ${
+                      isLight
+                        ? "bg-[#0E7C8E]/12 text-[#0E7C8E] hover:bg-[#0E7C8E]/20"
+                        : "bg-[#2DD4BF]/15 text-[#5EEAD4] hover:bg-[#2DD4BF]/25"
+                    }`}
+                  >
+                    <span>{t.nav.allDestinations}</span>
+                    <ArrowRight className="h-3.5 w-3.5" />
+                  </Link>
+                </div>
               </div>
             )}
           </div>
 
           {/* Nav Item 2: Experiences (285ms) */}
-          <a
-            href="#hero-destination-cards"
-            style={getNavRevealStyle(285, 840)}
-            data-nav-seq="item-1"
-            onClick={(e) => {
-              e.preventDefault();
-              const el = document.getElementById("hero-destination-cards");
-              el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-            }}
-            className={`rounded-full px-3 py-1.5 text-[13.5px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
-              isLight
-                ? "hover:bg-white/50 hover:text-slate-950"
-                : "hover:bg-white/10 hover:text-white"
-            }`}
-          >
-            {t.nav.experiences}
-          </a>
+          {isHomePage ? (
+            <a
+              href="#hero-destination-cards"
+              style={getNavRevealStyle(285, 840)}
+              data-nav-seq="item-1"
+              onClick={(e) => {
+                e.preventDefault();
+                const el = document.getElementById("hero-destination-cards");
+                el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+              }}
+              className={`rounded-full px-3 py-1.5 text-[13.5px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
+                isLight
+                  ? "hover:bg-white/50 hover:text-slate-950"
+                  : "hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              {t.nav.experiences}
+            </a>
+          ) : (
+            <Link
+              href="/destinations"
+              style={getNavRevealStyle(285, 840)}
+              data-nav-seq="item-1"
+              className={`rounded-full px-3 py-1.5 text-[13.5px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
+                isLight
+                  ? "hover:bg-white/50 hover:text-slate-950"
+                  : "hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              {t.nav.experiences}
+            </Link>
+          )}
 
-          {/* Nav Item 3: Our Journeys (420ms) */}
-          <a
-            href="#featured-trips"
+          {/* Nav Item 3: Our Journeys (420ms) — Opens Destination Discovery / Journeys */}
+          <Link
+            href="/destinations"
             style={getNavRevealStyle(420, 840)}
             data-nav-seq="item-2"
-            onClick={(e) => {
-              e.preventDefault();
-              handleScrollToJourneys();
-            }}
+            data-nav-link="our-journeys"
             className={`rounded-full px-3 py-1.5 text-[13.5px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
-              isLight
+              isDiscoveryPage
+                ? "bg-[#0E7C8E]/20 text-[#0E7C8E] dark:text-[#5EEAD4]"
+                : isLight
                 ? "hover:bg-white/50 hover:text-slate-950"
                 : "hover:bg-white/10 hover:text-white"
             }`}
           >
             {t.nav.ourJourneys}
-          </a>
+          </Link>
 
-          {/* Nav Item 4: About (555ms) */}
-          <a
-            href="#why-west-travel"
+          {/* Nav Item 4: About (555ms) — Opens Dedicated About Us Page */}
+          <Link
+            href="/about"
             style={getNavRevealStyle(555, 840)}
             data-nav-seq="item-3"
-            onClick={(e) => {
-              e.preventDefault();
-              (document.getElementById("why-west-travel") ?? document.getElementById("hero-copy"))?.scrollIntoView({ behavior: "smooth" });
-            }}
+            data-nav-link="about-us"
             className={`rounded-full px-3 py-1.5 text-[13.5px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
-              isLight
+              pathname === "/about"
+                ? "bg-[#0E7C8E]/20 text-[#0E7C8E] dark:text-[#5EEAD4]"
+                : isLight
                 ? "hover:bg-white/50 hover:text-slate-950"
                 : "hover:bg-white/10 hover:text-white"
             }`}
           >
             {t.nav.about}
-          </a>
+          </Link>
 
           {/* Nav Item 5: Contact (690ms) — Opens the Trip Inquiry Drawer */}
           <a
@@ -463,30 +510,48 @@ export function FloatingNavbar({ hasAccountRoute = false }: FloatingNavbarProps)
           </div>
 
           <div className="flex flex-wrap gap-2 border-t border-current/10 pt-3">
-            {[
-              { label: t.nav.experiences, target: "hero-destination-cards", isDrawer: false },
-              { label: t.nav.ourJourneys, target: "featured-trips", isDrawer: false },
-              { label: t.nav.about, target: "why-west-travel", isDrawer: false },
-              { label: t.nav.contact, target: "trip-inquiry-drawer", isDrawer: true },
-            ].map((item) => (
-              <button
-                key={item.label}
-                type="button"
-                onClick={(e) => {
-                  setMobileMenuOpen(false);
-                  if (item.isDrawer) {
-                    handleOpenContactDrawer(e.currentTarget);
-                  } else {
-                    document.getElementById(item.target)?.scrollIntoView({ behavior: "smooth" });
-                  }
-                }}
-                className={`rounded-full px-4 py-2 text-xs font-medium ${
-                  isLight ? "bg-white/60 hover:bg-white/80" : "bg-white/10 hover:bg-white/15"
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
+            <Link
+              href="/destinations"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`rounded-full px-4 py-2 text-xs font-medium ${
+                isLight ? "bg-white/60 hover:bg-white/80" : "bg-white/10 hover:bg-white/15"
+              }`}
+            >
+              {t.nav.allDestinations}
+            </Link>
+
+            <Link
+              href="/destinations#destination-journeys"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`rounded-full px-4 py-2 text-xs font-medium ${
+                isLight ? "bg-white/60 hover:bg-white/80" : "bg-white/10 hover:bg-white/15"
+              }`}
+            >
+              {t.nav.ourJourneys}
+            </Link>
+
+            <Link
+              href="/about"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`rounded-full px-4 py-2 text-xs font-medium ${
+                isLight ? "bg-white/60 hover:bg-white/80" : "bg-white/10 hover:bg-white/15"
+              }`}
+            >
+              {t.nav.about}
+            </Link>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                setMobileMenuOpen(false);
+                handleOpenContactDrawer(e.currentTarget);
+              }}
+              className={`rounded-full px-4 py-2 text-xs font-medium ${
+                isLight ? "bg-white/60 hover:bg-white/80" : "bg-white/10 hover:bg-white/15"
+              }`}
+            >
+              {t.nav.contact}
+            </button>
           </div>
         </div>
       )}

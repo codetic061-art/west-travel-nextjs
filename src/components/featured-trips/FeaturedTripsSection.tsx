@@ -27,7 +27,7 @@ export interface FeaturedTripsSectionProps {
  * - Desktop: 5-card asymmetric layout (2 stacked left, 1 tall featured center, 2 stacked right).
  */
 export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTripsSectionProps) {
-  const { t, theme } = useHero();
+  const { t, theme, locale } = useHero();
   const isLight = theme === "light";
   const copy = t.featuredTrips;
 
@@ -219,6 +219,7 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
                 key={`desktop-left-${journey.id}`}
                 journey={journey}
                 copy={copy}
+                locale={locale}
                 isLight={isLight}
                 hasEntered={hasEntered}
                 reducedMotion={reducedMotion}
@@ -234,6 +235,7 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
               key={`desktop-center-${centerCard.id}`}
               journey={centerCard}
               copy={copy}
+              locale={locale}
               isLight={isLight}
               hasEntered={hasEntered}
               reducedMotion={reducedMotion}
@@ -249,6 +251,7 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
                 key={`desktop-right-${journey.id}`}
                 journey={journey}
                 copy={copy}
+                locale={locale}
                 isLight={isLight}
                 hasEntered={hasEntered}
                 reducedMotion={reducedMotion}
@@ -270,6 +273,7 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
               key={`tablet-center-${centerCard.id}`}
               journey={centerCard}
               copy={copy}
+              locale={locale}
               isLight={isLight}
               hasEntered={hasEntered}
               reducedMotion={reducedMotion}
@@ -283,6 +287,7 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
               key={`tablet-compact-${journey.id}`}
               journey={journey}
               copy={copy}
+              locale={locale}
               isLight={isLight}
               hasEntered={hasEntered}
               reducedMotion={reducedMotion}
@@ -311,6 +316,7 @@ export function FeaturedTripsSection({ journeys: customJourneys }: FeaturedTrips
                 <JourneyCard
                   journey={journey}
                   copy={copy}
+                  locale={locale}
                   isLight={isLight}
                   hasEntered={hasEntered}
                   reducedMotion={reducedMotion}

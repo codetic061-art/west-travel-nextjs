@@ -5,7 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Calendar, FileText, ArrowRight, Compass, Info } from "lucide-react";
 import type { FeaturedJourneyRecord } from "@/config/featured-trips";
-import type { FeaturedTripsTranslation } from "@/i18n/hero-dictionary";
+import type { FeaturedTripsTranslation, SupportedLocale } from "@/i18n/hero-dictionary";
+import { DESTINATION_DISCOVERY_DICTIONARY } from "@/i18n/destination-discovery-dictionary";
 import {
   getDirectionalMaskStyle,
   getImageScaleSettleStyle,
@@ -15,6 +16,7 @@ import {
 export interface JourneyCardProps {
   journey: FeaturedJourneyRecord;
   copy: FeaturedTripsTranslation;
+  locale?: SupportedLocale;
   isLight: boolean;
   hasEntered: boolean;
   reducedMotion: boolean;
@@ -24,15 +26,17 @@ export interface JourneyCardProps {
 }
 
 /**
- * Individual bookable Journey Card for the WEST GLOBAL TOURS Featured Trips section.
- * - Image Reveal from a Thin Line: Instead of sliding the entire card from above/sides or fading from 0 opacity,
- *   the card's photograph starts masked as a narrow 2.5% horizontal strip (`top-to-bottom` or `bottom-to-top`)
- *   and progressively uncovers over `1320ms` (`1.32s`) with a subtle inner scale settle (`1.05` -> `1.0`).
- * - Text overlays and the CTA button reveal in a coordinated sequence (`+260ms` and `+420ms`) as the image uncovers.
+ * Individual bookable Journey Card for WEST GLOBAL TOURS (reused across Homepage Featured Trips
+ * and the Destination Discovery page).
+ * - Image Reveal from a Thin Line: The card's photograph starts masked as a narrow 2.5% horizontal strip
+ *   (`top-to-bottom` or `bottom-to-top`) and progressively uncovers over `1320ms` (`1.32s`) with a subtle
+ *   inner scale settle (`1.05` -> `1.0`).
+ * - Supports EN / TR / ES localized journey titles, descriptions, locations, and corridor labels.
  */
 export function JourneyCard({
   journey,
   copy,
+  locale = "en",
   isLight,
   hasEntered,
   reducedMotion,
@@ -44,6 +48,17 @@ export function JourneyCard({
 
   const isFeaturedSize = variant === "desktop-featured" || variant === "tablet-featured";
   const isMobile = variant === "mobile";
+
+  const localizedJourney =
+    DESTINATION_DISCOVERY_DICTIONARY[locale]?.journeys[journey.slug];
+
+  const resolvedTitle = localizedJourney?.title ?? journey.title;
+  const resolvedLocation = localizedJourney?.locationLabel ?? journey.locationLabel;
+  const resolvedDescription = localizedJourney?.description ?? journey.description;
+  const resolvedCorridor =
+    localizedJourney?.corridorLabel ?? journey.itineraryMetadata.corridorLabel;
+  const resolvedInquiryFormat =
+    localizedJourney?.inquiryFormatLabel ?? journey.itineraryMetadata.inquiryFormatLabel;
 
   const getEntranceTiming = (): {
     cardDelayMs: number;
@@ -150,6 +165,7 @@ export function JourneyCard({
   return (
     <article
       data-journey-card={journey.id}
+      data-journey-destination={journey.destinationId}
       data-column-position={journey.columnPosition}
       data-featured-center={journey.isFeaturedCenter ? "true" : "false"}
       data-card-variant={variant}
@@ -223,7 +239,7 @@ export function JourneyCard({
             <MapPin className="h-3 w-3 text-white stroke-[2.2]" />
           </span>
           <span className="text-xs sm:text-[13px] font-medium tracking-wide text-white/95">
-            {journey.locationLabel}
+            {resolvedLocation}
           </span>
         </div>
 
@@ -236,7 +252,7 @@ export function JourneyCard({
           aria-expanded={touchExpanded}
           aria-label={`${
             touchExpanded ? copy.hideDetailsLabel : copy.moreDetailsLabel
-          } — ${journey.title}`}
+          } — ${resolvedTitle}`}
           className="md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 inline-flex items-center gap-1 rounded-full bg-[#061C2E]/75 hover:bg-[#0E7C8E]/85 border border-white/25 px-2.5 py-1 text-[11px] font-medium text-white/90 backdrop-blur-md transition-all duration-300 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4]"
         >
           <Info className="h-3 w-3 text-[#5EEAD4]" />
@@ -258,7 +274,7 @@ export function JourneyCard({
               : "text-[1.32rem] sm:text-[1.42rem] xl:text-[1.52rem] leading-[1.18]"
           }`}
         >
-          {journey.title}
+          {resolvedTitle}
         </h3>
 
         <div
@@ -269,7 +285,7 @@ export function JourneyCard({
           }`}
         >
           <div className="overflow-hidden">
-            {journey.description && (
+            {resolvedDescription && (
               <p
                 className={`text-white/88 font-normal leading-relaxed ${
                   isFeaturedSize
@@ -277,17 +293,17 @@ export function JourneyCard({
                     : "text-[11.5px] sm:text-xs line-clamp-2"
                 }`}
               >
-                {journey.description}
+                {resolvedDescription}
               </p>
             )}
 
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
               <span className="inline-flex items-center gap-1 rounded-full bg-white/12 border border-white/20 px-2.5 py-0.5 text-[10.5px] font-medium text-[#A5F3FC]">
                 <Compass className="h-2.5 w-2.5 text-[#2DD4BF] shrink-0" />
-                <span>{journey.itineraryMetadata.corridorLabel}</span>
+                <span>{resolvedCorridor}</span>
               </span>
               <span className="inline-flex items-center rounded-full bg-[#0E7C8E]/35 border border-[#2DD4BF]/35 px-2 py-0.5 text-[10px] font-medium text-white/90">
-                {journey.itineraryMetadata.inquiryFormatLabel}
+                {resolvedInquiryFormat}
               </span>
             </div>
           </div>
@@ -319,7 +335,7 @@ export function JourneyCard({
               onClick={(e) => e.stopPropagation()}
               data-journey-cta={journey.slug}
               data-featured-size={isFeaturedSize ? "true" : "false"}
-              aria-label={`${copy.cardCta}: ${journey.title}`}
+              aria-label={`${copy.cardCta}: ${resolvedTitle}`}
               className={`west-journey-card-cta group/cta inline-flex items-center justify-center rounded-full border backdrop-blur-md font-medium text-white transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4] ${
                 journey.isFeaturedCenter
                   ? "border-[#2DD4BF]/85 bg-[#082B3F]/75 shadow-[0_0_18px_rgba(45,212,191,0.28)] hover:bg-[#0E7C8E] hover:border-[#67E8F9] hover:shadow-[0_0_24px_rgba(45,212,191,0.5)]"

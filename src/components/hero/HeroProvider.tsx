@@ -8,6 +8,7 @@ export type ThemeMode = "dark" | "light";
 export type BookingDestinationFilter = DestinationId | "all" | "";
 
 const THEME_STORAGE_KEY = "west-travel-theme";
+const LOCALE_STORAGE_KEY = "west-travel-locale";
 
 export interface BookingQueryState {
   destination: BookingDestinationFilter;
@@ -58,7 +59,7 @@ export function HeroProvider({
 }) {
   const existingContext = useContext(HeroContext);
 
-  const [locale, setLocale] = useState<SupportedLocale>(initialLocale);
+  const [locale, setLocaleState] = useState<SupportedLocale>(initialLocale);
   const [theme, setThemeState] = useState<ThemeMode>(initialTheme);
   const [hasHydrated, setHasHydrated] = useState(false);
   const [activeDestination, setActiveDestination] = useState<DestinationId | null>(null);
@@ -78,13 +79,17 @@ export function HeroProvider({
     useState<InquiryDrawerPrefill | null>(null);
   const inquiryTriggerRef = useRef<HTMLElement | null>(null);
 
-  // Read persisted theme after hydration to prevent SSR/Client mismatch
+  // Read persisted theme and locale after hydration to prevent SSR/Client mismatch
   useEffect(() => {
     if (existingContext) return;
     try {
-      const saved = window.localStorage.getItem(THEME_STORAGE_KEY);
-      if (saved === "light" || saved === "dark") {
-        setThemeState(saved);
+      const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+      if (savedTheme === "light" || savedTheme === "dark") {
+        setThemeState(savedTheme);
+      }
+      const savedLocale = window.localStorage.getItem(LOCALE_STORAGE_KEY);
+      if (savedLocale === "en" || savedLocale === "tr" || savedLocale === "es") {
+        setLocaleState(savedLocale);
       }
     } catch {
       // Ignore storage access errors in restricted environments
@@ -117,7 +122,18 @@ export function HeroProvider({
   useEffect(() => {
     if (existingContext) return;
     document.documentElement.lang = locale;
-  }, [locale, existingContext]);
+    if (hasHydrated) {
+      try {
+        window.localStorage.setItem(LOCALE_STORAGE_KEY, locale);
+      } catch {
+        // Ignore storage write errors
+      }
+    }
+  }, [locale, hasHydrated, existingContext]);
+
+  const setLocale = (nextLocale: SupportedLocale) => {
+    setLocaleState(nextLocale);
+  };
 
   const setTheme = (nextTheme: ThemeMode) => {
     setThemeState(nextTheme);
