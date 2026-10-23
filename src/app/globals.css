@@ -14,11 +14,14 @@ html.dark {
   --west-surface-cta: radial-gradient(ellipse 65% 50% at 50% 50%, rgba(14, 124, 142, 0.10), transparent 72%), linear-gradient(180deg, #051320 0%, #061726 55%, #071929 100%);
   --west-surface-footer: linear-gradient(180deg, #071929 0%, #051320 100%);
   --west-section-divider: rgba(95, 196, 201, 0.28);
-  --west-glass-bg: rgba(7, 25, 40, 0.58);
+  --west-glass-bg: rgba(7, 25, 40, 0.54);
   --west-glass-bg-strong: rgba(6, 22, 36, 0.72);
   --west-glass-popover: rgba(7, 26, 44, 0.90);
   --west-glass-border: rgba(255, 255, 255, 0.18);
-  --west-glass-shadow: 0 20px 50px rgba(2, 10, 18, 0.58), inset 0 1px 1px rgba(255, 255, 255, 0.18);
+  --west-glass-shadow: 0 18px 44px rgba(2, 10, 18, 0.52), inset 0 1px 1px rgba(255, 255, 255, 0.18);
+  --west-navbar-glass-bg: rgba(7, 25, 40, 0.52);
+  --west-navbar-glass-border: rgba(255, 255, 255, 0.18);
+  --west-navbar-glass-shadow: 0 14px 36px rgba(2, 10, 18, 0.48), inset 0 1px 1px rgba(255, 255, 255, 0.18);
   --west-card-border: rgba(255, 255, 255, 0.28);
   --west-card-shadow: 0 22px 48px rgba(2, 9, 17, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.25);
 }
@@ -34,11 +37,14 @@ html.light {
   --west-surface-cta: linear-gradient(180deg, #f3ead8 0%, #f7f2e7 52%, #faf7f0 100%);
   --west-surface-footer: linear-gradient(180deg, #faf7f0 0%, #f4efe3 100%);
   --west-section-divider: rgba(205, 170, 110, 0.55);
-  --west-glass-bg: rgba(255, 252, 247, 0.52);
-  --west-glass-bg-strong: rgba(255, 252, 247, 0.62);
-  --west-glass-popover: rgba(255, 253, 250, 0.84);
-  --west-glass-border: rgba(255, 255, 255, 0.72);
-  --west-glass-shadow: 0 18px 44px rgba(8, 28, 46, 0.20), inset 0 1px 1.5px rgba(255, 255, 255, 0.92);
+  --west-glass-bg: rgba(255, 253, 249, 0.24);
+  --west-glass-bg-strong: rgba(255, 252, 247, 0.56);
+  --west-glass-popover: rgba(255, 253, 250, 0.88);
+  --west-glass-border: rgba(255, 255, 255, 0.42);
+  --west-glass-shadow: 0 12px 32px rgba(8, 28, 46, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.62);
+  --west-navbar-glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 252, 246, 0.14) 100%);
+  --west-navbar-glass-border: rgba(255, 255, 255, 0.36);
+  --west-navbar-glass-shadow: 0 10px 28px rgba(6, 20, 34, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.52);
   --west-card-border: rgba(255, 255, 255, 0.78);
   --west-card-shadow: 0 20px 44px rgba(10, 28, 46, 0.28), inset 0 1px 1.5px rgba(255, 255, 255, 0.9);
 }
@@ -47,8 +53,16 @@ html.light {
   background: var(--west-glass-bg);
   border: 1px solid var(--west-glass-border);
   box-shadow: var(--west-glass-shadow);
-  backdrop-filter: blur(20px) saturate(165%);
-  -webkit-backdrop-filter: blur(20px) saturate(165%);
+  backdrop-filter: blur(18px) saturate(145%);
+  -webkit-backdrop-filter: blur(18px) saturate(145%);
+}
+
+.west-navbar-liquid-glass {
+  background: var(--west-navbar-glass-bg);
+  border: 1px solid var(--west-navbar-glass-border);
+  box-shadow: var(--west-navbar-glass-shadow);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
 }
 
 .west-glass-panel {

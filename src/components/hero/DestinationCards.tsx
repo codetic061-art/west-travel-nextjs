@@ -3,7 +3,11 @@
 import React from "react";
 import Image from "next/image";
 import { MapPin, ArrowRight, ArrowDown, Play, Layers } from "lucide-react";
-import { DESTINATIONS_CONFIG, type DestinationAssetConfig, type DestinationId } from "@/config/destinations";
+import {
+  DESTINATIONS_CONFIG,
+  type DestinationAssetConfig,
+  type DestinationId,
+} from "@/config/destinations";
 import { useHero } from "./HeroProvider";
 import {
   getDirectionalMaskStyle,
@@ -19,25 +23,37 @@ import {
  * - Mobile/Tablet: Swipeable horizontal snap carousel with interactive destination pills.
  * - Initial Page Load Reveal: Uncovers each card photograph progressively from a thin line (1280ms)
  *   with a 170ms stagger and subtle inner scale settling.
+ * - Synchronized with the Hero background 3-second poster -> video stage, active progress indicator,
+ *   and booking bar destination state.
  */
 export function DestinationCards() {
-  const { t, theme, activeDestination, setActiveDestination, selectDestinationForBooking } =
-    useHero();
+  const {
+    t,
+    theme,
+    activeDestination,
+    setActiveDestination,
+    selectDestinationForBooking,
+  } = useHero();
   const isLight = theme === "light";
 
-  const { ref: cardsRef, hasEntered, reducedMotion } = useSectionEntrance<HTMLDivElement>({
-    immediate: true,
-  });
+  const { ref: cardsRef, hasEntered, reducedMotion } =
+    useSectionEntrance<HTMLDivElement>({
+      immediate: true,
+    });
 
-  const featuredDest = DESTINATIONS_CONFIG.find((d) => d.editorialRole === "featured")!;
-  const compactDests = DESTINATIONS_CONFIG.filter((d) => d.editorialRole === "compact");
+  const featuredDest = DESTINATIONS_CONFIG.find(
+    (d) => d.editorialRole === "featured"
+  )!;
+  const compactDests = DESTINATIONS_CONFIG.filter(
+    (d) => d.editorialRole === "compact"
+  );
+
+  const activeConfig = activeDestination
+    ? DESTINATIONS_CONFIG.find((d) => d.id === activeDestination) ?? null
+    : null;
 
   const handleCardSelect = (id: DestinationId) => {
-    if (activeDestination === id) {
-      setActiveDestination(null);
-    } else {
-      selectDestinationForBooking(id);
-    }
+    selectDestinationForBooking(id);
   };
 
   const handleScrollDown = () => {
@@ -86,7 +102,9 @@ export function DestinationCards() {
       ? { opacity: 1, transform: "none" }
       : {
           opacity: hasEntered ? 1 : 0,
-          transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 10px, 0)",
+          transform: hasEntered
+            ? "translate3d(0, 0, 0)"
+            : "translate3d(0, 10px, 0)",
           transitionProperty: "opacity, transform",
           transitionDuration: "840ms",
           transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
@@ -99,6 +117,7 @@ export function DestinationCards() {
         type="button"
         data-destination-card={dest.id}
         data-card-variant={variant}
+        data-card-selected={isSelected ? "true" : "false"}
         data-reveal-state={hasEntered ? "revealed" : "masked-thin-line"}
         onClick={() => handleCardSelect(dest.id)}
         aria-pressed={isSelected}
@@ -140,7 +159,13 @@ export function DestinationCards() {
           aria-hidden="true"
           className={`
             absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent to-transparent
-            ${isSelected ? "via-[#5EEAD4] opacity-100" : isLight ? "via-white/95 opacity-90" : "via-white/60 opacity-80"}
+            ${
+              isSelected
+                ? "via-[#5EEAD4] opacity-100"
+                : isLight
+                ? "via-white/95 opacity-90"
+                : "via-white/60 opacity-80"
+            }
           `}
         />
 
@@ -211,22 +236,27 @@ export function DestinationCards() {
       id="hero-destination-cards"
       ref={cardsRef}
       aria-label={t.nav.destinations}
+      data-active-hero-destination={activeDestination ?? "panoramic"}
       className="flex flex-col items-end justify-center w-full lg:w-auto"
     >
       {/* Desktop Asymmetric Editorial Grid: 1 Large Featured Card (Left) + 2 Compact Cards (Right) */}
       <div className="hidden lg:grid lg:grid-cols-[246px_228px] xl:grid-cols-[266px_246px] items-center gap-4">
         <div className="w-full">{renderCard(featuredDest, "featured", 0)}</div>
         <div className="flex flex-col gap-4 w-full">
-          {compactDests.map((dest, idx) => renderCard(dest, "compact", idx + 1))}
+          {compactDests.map((dest, idx) =>
+            renderCard(dest, "compact", idx + 1)
+          )}
         </div>
       </div>
 
       {/* Mobile & Tablet Intelligent Horizontal Snap Carousel */}
       <div className="flex lg:hidden gap-3.5 w-full overflow-x-auto no-scrollbar pb-2 snap-x snap-mandatory">
-        {DESTINATIONS_CONFIG.map((dest, idx) => renderCard(dest, "mobile", idx))}
+        {DESTINATIONS_CONFIG.map((dest, idx) =>
+          renderCard(dest, "mobile", idx)
+        )}
       </div>
 
-      {/* Bottom Row Below Cards: Active Panoramic Reset Pill + Scroll Indicator */}
+      {/* Bottom Row Below Cards: Synchronized Progress Indicator + Panoramic Reset Pill + Scroll Indicator */}
       <div
         style={
           reducedMotion
@@ -238,6 +268,36 @@ export function DestinationCards() {
         }
         className="mt-3.5 flex flex-wrap items-center justify-between lg:justify-end gap-3 w-full pr-1"
       >
+        {/* Synchronized Destination Progress Indicator (01 Egypt · 02 Türkiye · 03 Dubai) */}
+        <div
+          data-hero-progress-indicator={activeConfig?.orderNumber ?? "all"}
+          className="inline-flex items-center gap-1.5 rounded-full bg-[#061A2C]/55 border border-white/20 px-2.5 py-1 backdrop-blur-md"
+        >
+          {DESTINATIONS_CONFIG.map((dest) => {
+            const isCurrent = activeDestination === dest.id;
+            return (
+              <button
+                key={`hero-step-${dest.id}`}
+                type="button"
+                data-hero-progress-step={dest.id}
+                aria-label={`${t.destinations[dest.id].name} (${dest.orderNumber})`}
+                aria-pressed={isCurrent}
+                onClick={() => handleCardSelect(dest.id)}
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[10.5px] font-semibold transition-all duration-300 ${
+                  isCurrent
+                    ? "bg-[#0E7C8E] text-white ring-1 ring-[#5EEAD4]"
+                    : "text-white/65 hover:text-white"
+                }`}
+              >
+                <span>{dest.orderNumber}</span>
+              </button>
+            );
+          })}
+          <span className="ml-1 font-mono text-[10px] tracking-widest text-[#F4C266]">
+            {activeConfig ? `${activeConfig.orderNumber}/03` : "03/03"}
+          </span>
+        </div>
+
         {activeDestination && (
           <button
             type="button"

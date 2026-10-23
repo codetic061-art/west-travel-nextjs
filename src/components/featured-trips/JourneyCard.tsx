@@ -21,7 +21,13 @@ export interface JourneyCardProps {
   hasEntered: boolean;
   reducedMotion: boolean;
   isSpotlightActive?: boolean;
-  variant: "desktop-compact" | "desktop-featured" | "tablet-featured" | "tablet-compact" | "mobile";
+  variant:
+    | "desktop-compact"
+    | "desktop-featured"
+    | "tablet-featured"
+    | "tablet-compact"
+    | "mobile"
+    | "discovery-compact";
   onSelectCard?: (index: number) => void;
 }
 
@@ -31,7 +37,8 @@ export interface JourneyCardProps {
  * - Image Reveal from a Thin Line: The card's photograph starts masked as a narrow 2.5% horizontal strip
  *   (`top-to-bottom` or `bottom-to-top`) and progressively uncovers over `1320ms` (`1.32s`) with a subtle
  *   inner scale settle (`1.05` -> `1.0`).
- * - Supports EN / TR / ES localized journey titles, descriptions, locations, and corridor labels.
+ * - Supports `"discovery-compact"` for a slightly smaller, scalable footprint on the Destination Discovery page
+ *   while keeping Homepage Featured Trips variants untouched.
  */
 export function JourneyCard({
   journey,
@@ -47,6 +54,7 @@ export function JourneyCard({
   const [touchExpanded, setTouchExpanded] = useState(false);
 
   const isFeaturedSize = variant === "desktop-featured" || variant === "tablet-featured";
+  const isDiscoveryCompact = variant === "discovery-compact";
   const isMobile = variant === "mobile";
 
   const localizedJourney =
@@ -64,9 +72,9 @@ export function JourneyCard({
     cardDelayMs: number;
     maskDirection: MaskDirection;
   } => {
-    if (isMobile) {
+    if (isMobile || isDiscoveryCompact) {
       return {
-        cardDelayMs: 140 + journey.carouselIndex * 150,
+        cardDelayMs: 110 + (journey.carouselIndex % 5) * 120,
         maskDirection: "top-to-bottom",
       };
     }
@@ -99,7 +107,7 @@ export function JourneyCard({
     reducedMotion,
     cardDelayMs,
     1320,
-    "20px"
+    isDiscoveryCompact ? "18px" : "20px"
   );
 
   // Subtle scale settling (1.05 -> 1.0 over 1420ms) inside the expanding mask
@@ -141,23 +149,26 @@ export function JourneyCard({
       ? "h-[360px]"
       : variant === "tablet-compact"
       ? "h-[252px]"
+      : variant === "discovery-compact"
+      ? "h-[256px] sm:h-[268px] lg:h-[278px]"
       : "h-[396px] sm:h-[416px]";
 
-  const cardSurfaceClasses = journey.isFeaturedCenter
-    ? isLight
-      ? "bg-[#092136] border border-[#22D3EE]/80 ring-1 ring-[#22D3EE]/60 shadow-[0_22px_52px_rgba(10,32,54,0.22),0_0_26px_rgba(34,211,238,0.30)] hover:shadow-[0_28px_60px_rgba(10,32,54,0.30),0_0_34px_rgba(34,211,238,0.42)]"
-      : "bg-[#071A2C] border border-[#2DD4BF]/75 ring-1 ring-[#2DD4BF]/50 shadow-[0_26px_58px_rgba(2,8,16,0.82),0_0_28px_rgba(45,212,191,0.24)] hover:shadow-[0_30px_64px_rgba(2,8,16,0.92),0_0_36px_rgba(45,212,191,0.36)]"
-    : isLight
-    ? `bg-[#0B2236] border ${
-        isSpotlightActive
-          ? "border-[#0E7C8E] ring-2 ring-[#149BB0]/55 shadow-[0_22px_48px_rgba(14,124,142,0.24)]"
-          : "border-white/90 shadow-[0_16px_38px_rgba(11,30,49,0.15)] hover:border-[#149BB0]/65 hover:shadow-[0_22px_48px_rgba(11,30,49,0.24)]"
-      }`
-    : `bg-[#07192A] border ${
-        isSpotlightActive
-          ? "border-[#2DD4BF]/80 ring-2 ring-[#2DD4BF]/45 shadow-[0_24px_52px_rgba(2,9,18,0.85)]"
-          : "border-white/15 shadow-[0_20px_44px_rgba(2,9,18,0.72)] hover:border-[#2DD4BF]/55 hover:shadow-[0_26px_54px_rgba(2,9,18,0.88)]"
-      }`;
+  const cardSurfaceClasses =
+    journey.isFeaturedCenter && !isDiscoveryCompact
+      ? isLight
+        ? "bg-[#092136] border border-[#22D3EE]/80 ring-1 ring-[#22D3EE]/60 shadow-[0_22px_52px_rgba(10,32,54,0.22),0_0_26px_rgba(34,211,238,0.30)] hover:shadow-[0_28px_60px_rgba(10,32,54,0.30),0_0_34px_rgba(34,211,238,0.42)]"
+        : "bg-[#071A2C] border border-[#2DD4BF]/75 ring-1 ring-[#2DD4BF]/50 shadow-[0_26px_58px_rgba(2,8,16,0.82),0_0_28px_rgba(45,212,191,0.24)] hover:shadow-[0_30px_64px_rgba(2,8,16,0.92),0_0_36px_rgba(45,212,191,0.36)]"
+      : isLight
+      ? `bg-[#0B2236] border ${
+          isSpotlightActive
+            ? "border-[#0E7C8E] ring-2 ring-[#149BB0]/55 shadow-[0_22px_48px_rgba(14,124,142,0.24)]"
+            : "border-white/90 shadow-[0_14px_32px_rgba(11,30,49,0.14)] hover:border-[#149BB0]/65 hover:shadow-[0_20px_42px_rgba(11,30,49,0.22)]"
+        }`
+      : `bg-[#07192A] border ${
+          isSpotlightActive
+            ? "border-[#2DD4BF]/80 ring-2 ring-[#2DD4BF]/45 shadow-[0_24px_52px_rgba(2,9,18,0.85)]"
+            : "border-white/15 shadow-[0_18px_38px_rgba(2,9,18,0.68)] hover:border-[#2DD4BF]/55 hover:shadow-[0_24px_48px_rgba(2,9,18,0.84)]"
+        }`;
 
   const durationText = journey.durationLabel ?? copy.durationPlaceholder;
   const priceOrQuoteText = journey.startingPriceLabel ?? copy.quotePlaceholder;
@@ -172,7 +183,9 @@ export function JourneyCard({
       data-mask-direction={maskDirection}
       data-reveal-state={hasEntered ? "revealed" : "masked-thin-line"}
       onClick={() => onSelectCard?.(journey.carouselIndex)}
-      className={`group relative w-full ${heightClasses} rounded-[20px] overflow-hidden select-none transition-all duration-500 ease-out focus-within:ring-2 focus-within:ring-[#2DD4BF] focus-within:ring-offset-2 ${
+      className={`group relative w-full ${heightClasses} ${
+        isDiscoveryCompact ? "rounded-[18px]" : "rounded-[20px]"
+      } overflow-hidden select-none transition-all duration-500 ease-out focus-within:ring-2 focus-within:ring-[#2DD4BF] focus-within:ring-offset-2 ${
         isLight ? "focus-within:ring-offset-[#FAF8F3]" : "focus-within:ring-offset-[#061523]"
       } ${cardSurfaceClasses}`}
     >
@@ -186,7 +199,7 @@ export function JourneyCard({
             sizes={
               isFeaturedSize
                 ? "(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 440px"
-                : "(max-width: 768px) 90vw, (max-width: 1200px) 32vw, 390px"
+                : "(max-width: 768px) 90vw, (max-width: 1200px) 32vw, 360px"
             }
             className="object-cover brightness-[1.06] saturate-[1.05] transition-transform duration-700 ease-out group-hover:scale-[1.06] group-focus-within:scale-[1.04]"
             style={{ objectPosition: journey.objectPosition }}
@@ -196,12 +209,12 @@ export function JourneyCard({
         {/* Scrims live inside the progressive mask so they uncover together with the photograph */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#041322]/42 via-[#041322]/12 to-transparent"
+          className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#041322]/42 via-[#041322]/12 to-transparent"
         />
 
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-[58%] bg-gradient-to-t from-[#03111F]/95 via-[#051B2E]/58 to-transparent transition-opacity duration-500"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-[#03111F]/95 via-[#051B2E]/62 to-transparent transition-opacity duration-500"
         />
 
         <div
@@ -218,7 +231,7 @@ export function JourneyCard({
       <div
         aria-hidden="true"
         className={`pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent to-transparent ${
-          journey.isFeaturedCenter
+          journey.isFeaturedCenter && !isDiscoveryCompact
             ? "via-[#67E8F9]/90 opacity-95"
             : isLight
             ? "via-[#D4B475]/85 opacity-85"
@@ -229,7 +242,9 @@ export function JourneyCard({
       {/* Top Row: Location Pin + Location Label */}
       <div
         style={overlayContentStyle}
-        className="absolute inset-x-4 sm:inset-x-5 top-4 flex items-center justify-between gap-2 z-10"
+        className={`absolute inset-x-3.5 sm:inset-x-4 ${
+          isDiscoveryCompact ? "top-3.5" : "top-4"
+        } flex items-center justify-between gap-2 z-10`}
       >
         <div className="inline-flex items-center gap-1.5 text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.65)]">
           <span
@@ -238,7 +253,7 @@ export function JourneyCard({
           >
             <MapPin className="h-3 w-3 text-white stroke-[2.2]" />
           </span>
-          <span className="text-xs sm:text-[13px] font-medium tracking-wide text-white/95">
+          <span className="text-xs font-medium tracking-wide text-white/95">
             {resolvedLocation}
           </span>
         </div>
@@ -265,12 +280,16 @@ export function JourneyCard({
       {/* Bottom Content Stack */}
       <div
         style={overlayContentStyle}
-        className="absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end p-4 sm:p-5"
+        className={`absolute inset-x-0 bottom-0 z-10 flex flex-col justify-end ${
+          isDiscoveryCompact ? "p-3.5 sm:p-4" : "p-4 sm:p-5"
+        }`}
       >
         <h3
           className={`font-serif font-medium tracking-[-0.01em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] transition-transform duration-500 ease-out ${
             isFeaturedSize
               ? "text-[1.65rem] sm:text-[1.85rem] xl:text-[2.05rem] leading-[1.15]"
+              : isDiscoveryCompact
+              ? "text-[1.22rem] sm:text-[1.32rem] leading-[1.18]"
               : "text-[1.32rem] sm:text-[1.42rem] xl:text-[1.52rem] leading-[1.18]"
           }`}
         >
@@ -279,8 +298,8 @@ export function JourneyCard({
 
         <div
           className={`grid transition-all duration-500 ease-out ${
-            touchExpanded || isMobile
-              ? "grid-rows-[1fr] opacity-100 mt-2"
+            touchExpanded || isMobile || isDiscoveryCompact
+              ? "grid-rows-[1fr] opacity-100 mt-1.5"
               : "grid-rows-[0fr] opacity-0 mt-0 group-hover:grid-rows-[1fr] group-hover:opacity-100 group-hover:mt-2.5 group-focus-within:grid-rows-[1fr] group-focus-within:opacity-100 group-focus-within:mt-2.5"
           }`}
         >
@@ -297,8 +316,8 @@ export function JourneyCard({
               </p>
             )}
 
-            <div className="mt-2 flex flex-wrap items-center gap-1.5">
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/12 border border-white/20 px-2.5 py-0.5 text-[10.5px] font-medium text-[#A5F3FC]">
+            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+              <span className="inline-flex items-center gap-1 rounded-full bg-white/12 border border-white/20 px-2 py-0.5 text-[10px] font-medium text-[#A5F3FC]">
                 <Compass className="h-2.5 w-2.5 text-[#2DD4BF] shrink-0" />
                 <span>{resolvedCorridor}</span>
               </span>
@@ -309,8 +328,8 @@ export function JourneyCard({
           </div>
         </div>
 
-        <div className="mt-3 flex items-end justify-between gap-2.5 sm:gap-3 pt-1">
-          <dl className="flex flex-col gap-1 min-w-0 flex-1 text-[11.5px] sm:text-xs text-white/85">
+        <div className="mt-2.5 flex items-end justify-between gap-2.5 sm:gap-3 pt-1">
+          <dl className="flex flex-col gap-0.5 min-w-0 flex-1 text-[11px] sm:text-[11.5px] text-white/85">
             <div className="flex items-center gap-1.5">
               <dt className="sr-only">Duration</dt>
               <Calendar
@@ -337,7 +356,7 @@ export function JourneyCard({
               data-featured-size={isFeaturedSize ? "true" : "false"}
               aria-label={`${copy.cardCta}: ${resolvedTitle}`}
               className={`west-journey-card-cta group/cta inline-flex items-center justify-center rounded-full border backdrop-blur-md font-medium text-white transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4] ${
-                journey.isFeaturedCenter
+                journey.isFeaturedCenter && !isDiscoveryCompact
                   ? "border-[#2DD4BF]/85 bg-[#082B3F]/75 shadow-[0_0_18px_rgba(45,212,191,0.28)] hover:bg-[#0E7C8E] hover:border-[#67E8F9] hover:shadow-[0_0_24px_rgba(45,212,191,0.5)]"
                   : "border-[#2DD4BF]/70 bg-[#072235]/65 shadow-[0_0_14px_rgba(20,155,176,0.2)] hover:bg-[#0E7C8E]/90 hover:border-[#5EEAD4] hover:shadow-[0_0_20px_rgba(45,212,191,0.42)]"
               }`}

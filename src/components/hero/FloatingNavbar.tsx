@@ -51,6 +51,7 @@ export function FloatingNavbar({
   const isLight = theme === "light";
   const isHomePage = pathname === "/";
   const isDiscoveryPage = pathname === "/destinations" || pathname === "/trips";
+  const homeLabel = t.footer.links.home;
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -89,10 +90,10 @@ export function FloatingNavbar({
   };
 
   /**
-   * Slower, Deliberate Navbar Entrance Sequence (Section 2):
+   * Slower, Deliberate Navbar Entrance Sequence:
    * 1. Logo enters first (0ms, 860ms duration).
-   * 2. Nav links appear one by one with 135ms stagger (150ms -> 690ms, 840ms duration).
-   * 3. Language selector, theme toggle, and mobile controls appear last (840ms, 860ms duration).
+   * 2. Nav links appear one by one with stagger.
+   * 3. Language selector, theme toggle, and mobile controls appear last.
    */
   const getNavRevealStyle = (delayMs: number, durationMs = 840): React.CSSProperties =>
     reducedMotion
@@ -128,7 +129,7 @@ export function FloatingNavbar({
           compact ? "h-[30px] w-[58px]" : "h-[32px] w-[62px]"
         } ${
           isLight
-            ? "bg-gradient-to-r from-amber-200/85 via-sky-100/80 to-slate-200/85 border border-white/85 shadow-[inset_0_1.5px_4px_rgba(15,23,42,0.16),0_0_16px_rgba(245,158,11,0.28)] focus-visible:ring-offset-white"
+            ? "bg-gradient-to-r from-amber-200/75 via-sky-100/65 to-slate-200/75 border border-white/65 shadow-[inset_0_1.5px_4px_rgba(15,23,42,0.14),0_0_14px_rgba(245,158,11,0.22)] focus-visible:ring-offset-[#051320]"
             : "bg-gradient-to-r from-[#04101C]/95 via-[#072034]/95 to-[#0B2D45]/95 border border-white/25 shadow-[inset_0_2px_5px_rgba(0,0,0,0.68),0_0_16px_rgba(45,212,191,0.22)] focus-visible:ring-offset-[#051320]"
         }`}
       >
@@ -147,7 +148,7 @@ export function FloatingNavbar({
             className={`theme-switch-icon h-3.5 w-3.5 ${
               !isLight
                 ? "scale-95 rotate-0 text-teal-200 opacity-30"
-                : "scale-90 rotate-45 text-slate-600/75 opacity-70 group-hover:opacity-95"
+                : "scale-90 rotate-45 text-slate-700/75 opacity-70 group-hover:opacity-95"
             }`}
           />
         </span>
@@ -187,26 +188,40 @@ export function FloatingNavbar({
     <header
       ref={headerRef}
       data-navbar-entered={hasEntered ? "true" : "false"}
+      data-navbar-theme={theme}
       className="relative z-30 w-full px-4 sm:px-8 lg:px-12 pt-5 sm:pt-7"
     >
       <div className="mx-auto flex max-w-[1440px] items-center justify-between gap-4">
-        {/* 1. Top-left Official WEST GLOBAL TOURS Logo (Enters First: 0ms, 860ms) */}
+        {/* 1. Top-left Official WEST GLOBAL TOURS Logo — Clickable to Homepage (/), No Opaque Background Patch */}
         <div style={getNavRevealStyle(0, 860)} data-nav-seq="logo">
-          <BrandLogo isLight={isLight} />
+          <BrandLogo isLight={isLight} variant="navbar" />
         </div>
 
-        {/* 2. Upper-right Compact Floating Glassmorphic Notch Navbar (Desktop) */}
+        {/* 2. Upper-right Compact Floating Liquid-Glass Navbar (Desktop) */}
         <nav
           aria-label="Primary Navigation"
-          className={`west-glass-pill hidden lg:flex items-center gap-1 xl:gap-2 rounded-full px-5 py-2 transition-all duration-300 ${
-            isLight ? "text-slate-900" : "text-white/92"
-          }`}
+          className="west-navbar-liquid-glass hidden lg:flex items-center gap-1 xl:gap-1.5 rounded-full px-4 xl:px-5 py-2 text-white/95 transition-all duration-300"
         >
-          {/* Nav Item 1: Destinations Dropdown (150ms) */}
+          {/* Nav Item 0: Home Link (Restored across all pages in EN / TR / ES) */}
+          <Link
+            href="/"
+            style={getNavRevealStyle(110, 840)}
+            data-nav-seq="item-home"
+            data-nav-link="home"
+            className={`rounded-full px-3 py-1.5 text-[13.5px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
+              isHomePage
+                ? "bg-white/18 text-white font-semibold shadow-[inset_0_1px_0.5px_rgba(255,255,255,0.35)]"
+                : "text-white/90 hover:bg-white/14 hover:text-white"
+            }`}
+          >
+            {homeLabel}
+          </Link>
+
+          {/* Nav Item 1: Destinations Dropdown */}
           <div
             className="relative"
             ref={dropdownRef}
-            style={getNavRevealStyle(150, 840)}
+            style={getNavRevealStyle(210, 840)}
             data-nav-seq="item-0"
           >
             <button
@@ -216,15 +231,13 @@ export function FloatingNavbar({
               aria-haspopup="true"
               className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[13.5px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
                 isDiscoveryPage
-                  ? "bg-[#0E7C8E]/20 text-[#0E7C8E] dark:text-[#5EEAD4]"
-                  : isLight
-                  ? "hover:bg-white/50 hover:text-slate-950"
-                  : "hover:bg-white/10 hover:text-white"
+                  ? "bg-[#0E7C8E]/45 text-[#5EEAD4] font-semibold border border-[#5EEAD4]/35"
+                  : "text-white/90 hover:bg-white/14 hover:text-white"
               }`}
             >
               <span>{t.nav.destinations}</span>
               <ChevronDown
-                className={`h-3.5 w-3.5 opacity-75 transition-transform duration-200 ${
+                className={`h-3.5 w-3.5 opacity-80 transition-transform duration-200 ${
                   destDropdownOpen ? "rotate-180" : ""
                 }`}
               />
@@ -285,101 +298,81 @@ export function FloatingNavbar({
             )}
           </div>
 
-          {/* Nav Item 2: Experiences (285ms) */}
+          {/* Nav Item 2: Experiences */}
           {isHomePage ? (
             <a
               href="#hero-destination-cards"
-              style={getNavRevealStyle(285, 840)}
+              style={getNavRevealStyle(320, 840)}
               data-nav-seq="item-1"
               onClick={(e) => {
                 e.preventDefault();
                 const el = document.getElementById("hero-destination-cards");
                 el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
               }}
-              className={`rounded-full px-3 py-1.5 text-[13.5px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
-                isLight
-                  ? "hover:bg-white/50 hover:text-slate-950"
-                  : "hover:bg-white/10 hover:text-white"
-              }`}
+              className="rounded-full px-3 py-1.5 text-[13.5px] font-medium text-white/90 hover:bg-white/14 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF]"
             >
               {t.nav.experiences}
             </a>
           ) : (
             <Link
               href="/destinations"
-              style={getNavRevealStyle(285, 840)}
+              style={getNavRevealStyle(320, 840)}
               data-nav-seq="item-1"
-              className={`rounded-full px-3 py-1.5 text-[13.5px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
-                isLight
-                  ? "hover:bg-white/50 hover:text-slate-950"
-                  : "hover:bg-white/10 hover:text-white"
-              }`}
+              className="rounded-full px-3 py-1.5 text-[13.5px] font-medium text-white/90 hover:bg-white/14 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF]"
             >
               {t.nav.experiences}
             </Link>
           )}
 
-          {/* Nav Item 3: Our Journeys (420ms) — Opens Destination Discovery / Journeys */}
+          {/* Nav Item 3: Our Journeys */}
           <Link
-            href="/destinations"
-            style={getNavRevealStyle(420, 840)}
+            href="/destinations#destination-journeys"
+            style={getNavRevealStyle(430, 840)}
             data-nav-seq="item-2"
             data-nav-link="our-journeys"
-            className={`rounded-full px-3 py-1.5 text-[13.5px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
-              isDiscoveryPage
-                ? "bg-[#0E7C8E]/20 text-[#0E7C8E] dark:text-[#5EEAD4]"
-                : isLight
-                ? "hover:bg-white/50 hover:text-slate-950"
-                : "hover:bg-white/10 hover:text-white"
-            }`}
+            className="rounded-full px-3 py-1.5 text-[13.5px] font-medium text-white/90 hover:bg-white/14 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF]"
           >
             {t.nav.ourJourneys}
           </Link>
 
-          {/* Nav Item 4: About (555ms) — Opens Dedicated About Us Page */}
+          {/* Nav Item 4: About */}
           <Link
             href="/about"
-            style={getNavRevealStyle(555, 840)}
+            style={getNavRevealStyle(540, 840)}
             data-nav-seq="item-3"
             data-nav-link="about-us"
             className={`rounded-full px-3 py-1.5 text-[13.5px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
               pathname === "/about"
-                ? "bg-[#0E7C8E]/20 text-[#0E7C8E] dark:text-[#5EEAD4]"
-                : isLight
-                ? "hover:bg-white/50 hover:text-slate-950"
-                : "hover:bg-white/10 hover:text-white"
+                ? "bg-[#0E7C8E]/45 text-[#5EEAD4] font-semibold border border-[#5EEAD4]/35"
+                : "text-white/90 hover:bg-white/14 hover:text-white"
             }`}
           >
             {t.nav.about}
           </Link>
 
-          {/* Nav Item 5: Contact (690ms) — Opens the Trip Inquiry Drawer */}
+          {/* Nav Item 5: Contact */}
           <a
             href="#trip-inquiry-drawer"
-            style={getNavRevealStyle(690, 840)}
+            style={getNavRevealStyle(650, 840)}
             data-nav-seq="item-4"
             onClick={(e) => {
               e.preventDefault();
               handleOpenContactDrawer(e.currentTarget);
             }}
-            className={`rounded-full px-3 py-1.5 text-[13.5px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
-              isLight
-                ? "hover:bg-white/50 hover:text-slate-950"
-                : "hover:bg-white/10 hover:text-white"
-            }`}
+            className="rounded-full px-3 py-1.5 text-[13.5px] font-medium text-white/90 hover:bg-white/14 hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF]"
           >
             {t.nav.contact}
           </a>
 
-          {/* 3. Language Selector & Theme Controls Enter Last (830ms) */}
+          {/* 3. Language Selector & Theme Controls Enter Last */}
           <div
-            style={getNavRevealStyle(830, 860)}
+            style={getNavRevealStyle(780, 860)}
             data-nav-seq="controls"
             className="flex items-center"
           >
             <span
               aria-hidden="true"
-              className={`mx-1.5 h-4 w-[1px] ${isLight ? "bg-slate-900/20" : "bg-white/20"}`}
+              className="mx-1.5 h-4 w-[1px] bg-white/25"
             />
 
             <div
@@ -397,12 +390,8 @@ export function FloatingNavbar({
                     aria-pressed={active}
                     className={`rounded-full px-2 py-1 text-xs font-semibold uppercase tracking-wider transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
                       active
-                        ? isLight
-                          ? "bg-[#0E7C8E] text-white shadow-sm"
-                          : "bg-white/20 text-white shadow-sm"
-                        : isLight
-                        ? "text-slate-700 hover:text-slate-950"
-                        : "text-white/60 hover:text-white/95"
+                        ? "bg-[#0E7C8E] text-white shadow-sm"
+                        : "text-white/70 hover:text-white"
                     }`}
                   >
                     {code}
@@ -413,7 +402,7 @@ export function FloatingNavbar({
 
             <span
               aria-hidden="true"
-              className={`mx-1.5 h-4 w-[1px] ${isLight ? "bg-slate-900/20" : "bg-white/20"}`}
+              className="mx-1.5 h-4 w-[1px] bg-white/25"
             />
 
             {renderMechanicalThemeSwitch(false)}
@@ -430,17 +419,15 @@ export function FloatingNavbar({
           </div>
         </nav>
 
-        {/* Mobile & Tablet Compact Controls (830ms) */}
+        {/* Mobile & Tablet Compact Liquid-Glass Controls */}
         <div
-          style={getNavRevealStyle(830, 860)}
+          style={getNavRevealStyle(780, 860)}
           className="flex items-center gap-2 lg:hidden"
         >
           <div
             role="group"
             aria-label={t.nav.languageLabel}
-            className={`west-glass-pill flex items-center rounded-full px-2 py-1 ${
-              isLight ? "text-slate-900" : "text-white"
-            }`}
+            className="west-navbar-liquid-glass flex items-center rounded-full px-2 py-1 text-white"
           >
             {LOCALES.map((code) => (
               <button
@@ -451,7 +438,7 @@ export function FloatingNavbar({
                 className={`rounded-full px-2 py-0.5 text-[11px] font-semibold uppercase ${
                   locale === code
                     ? "bg-[#0E7C8E] text-white"
-                    : "opacity-70 hover:opacity-100"
+                    : "text-white/75 hover:text-white"
                 }`}
               >
                 {code}
@@ -466,9 +453,7 @@ export function FloatingNavbar({
             onClick={() => setMobileMenuOpen((prev) => !prev)}
             aria-expanded={mobileMenuOpen}
             aria-label={mobileMenuOpen ? t.nav.closeMenuLabel : t.nav.openMenuLabel}
-            className={`west-glass-pill flex h-9 w-9 items-center justify-center rounded-full transition-colors ${
-              isLight ? "text-slate-900" : "text-white"
-            }`}
+            className="west-navbar-liquid-glass flex h-9 w-9 items-center justify-center rounded-full text-white transition-colors"
           >
             {mobileMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
           </button>
@@ -510,6 +495,21 @@ export function FloatingNavbar({
           </div>
 
           <div className="flex flex-wrap gap-2 border-t border-current/10 pt-3">
+            <Link
+              href="/"
+              data-mobile-nav-link="home"
+              onClick={() => setMobileMenuOpen(false)}
+              className={`rounded-full px-4 py-2 text-xs font-semibold ${
+                isHomePage
+                  ? "bg-[#0E7C8E] text-white"
+                  : isLight
+                  ? "bg-white/60 hover:bg-white/80"
+                  : "bg-white/10 hover:bg-white/15"
+              }`}
+            >
+              {homeLabel}
+            </Link>
+
             <Link
               href="/destinations"
               onClick={() => setMobileMenuOpen(false)}
