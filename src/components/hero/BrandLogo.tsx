@@ -7,25 +7,34 @@ import { COMPANY_IDENTITY_CONFIG } from "@/config/final-cta-footer";
 
 interface BrandLogoProps {
   isLight?: boolean;
+  /**
+   * When rendered on the floating Navbar over dark/cinematic Hero or Destination imagery,
+   * `variant="navbar"` keeps the logo free of any opaque white background patch and keeps
+   * the wordmark crisp and legible against varying imagery.
+   * When rendered in the Footer (`SiteFooter`), `isLight` adapts the wordmark color to the light footer surface.
+   */
+  variant?: "navbar" | "footer";
 }
 
 /**
  * Official WEST GLOBAL TOURS crest emblem and wordmark.
- * Renders the supplied official Luxury Globe Travel Emblem asset with graceful fallback.
+ * Renders the supplied official Luxury Globe Travel Emblem asset with graceful fallback
+ * and zero opaque white rectangle behind the logo in Light Mode.
  */
-export function BrandLogo({ isLight = false }: BrandLogoProps) {
+export function BrandLogo({ isLight = false, variant = "footer" }: BrandLogoProps) {
   const [imgError, setImgError] = useState(false);
   const [usePngFallback, setUsePngFallback] = useState(false);
+
+  const isNavbar = variant === "navbar";
 
   return (
     <Link
       href="/"
+      data-brand-logo-link="home"
       aria-label={`${COMPANY_IDENTITY_CONFIG.brandName} Home`}
-      className={`group inline-flex items-center gap-3 rounded-full pr-4 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] transition-all duration-300 ${
-        isLight ? "west-glass-pill px-3.5 py-1.5" : ""
-      }`}
+      className="group inline-flex items-center gap-3 rounded-full py-1 pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] transition-all duration-300"
     >
-      <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full overflow-hidden shadow-[0_4px_14px_rgba(0,0,0,0.28)] ring-1 ring-[#E5A93C]/55">
+      <span className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full overflow-hidden shadow-[0_4px_14px_rgba(0,0,0,0.28)] ring-1 ring-[#E5A93C]/65">
         {!imgError ? (
           <Image
             src={
@@ -57,7 +66,7 @@ export function BrandLogo({ isLight = false }: BrandLogoProps) {
               cx="32"
               cy="32"
               r="24"
-              stroke={isLight ? "#071A2C" : "#F8FAFC"}
+              stroke={!isNavbar && isLight ? "#071A2C" : "#F8FAFC"}
               strokeWidth="1.6"
               strokeOpacity="0.9"
             />
@@ -72,7 +81,7 @@ export function BrandLogo({ isLight = false }: BrandLogoProps) {
             />
             <path
               d="M8 44L23.5 22L33.5 35.5L41 25.5L56 44"
-              stroke={isLight ? "#071A2C" : "#FFFFFF"}
+              stroke={!isNavbar && isLight ? "#071A2C" : "#FFFFFF"}
               strokeWidth="2.4"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -89,14 +98,22 @@ export function BrandLogo({ isLight = false }: BrandLogoProps) {
       <span className="flex flex-col leading-none">
         <span
           className={`text-xs sm:text-[13.5px] font-bold uppercase tracking-[0.22em] transition-colors ${
-            isLight ? "text-slate-900" : "text-white"
+            isNavbar
+              ? "text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)]"
+              : isLight
+              ? "text-slate-900"
+              : "text-white"
           }`}
         >
           WEST GLOBAL
         </span>
         <span
           className={`mt-1 text-[9.5px] sm:text-[10px] font-semibold uppercase tracking-[0.32em] ${
-            isLight ? "text-[#0E7C8E]" : "text-[#F4C266]"
+            isNavbar
+              ? "text-[#F4C266] drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)]"
+              : isLight
+              ? "text-[#0E7C8E]"
+              : "text-[#F4C266]"
           }`}
         >
           TOURS

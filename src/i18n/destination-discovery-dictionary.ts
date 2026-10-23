@@ -27,6 +27,7 @@ export interface DestinationDiscoveryLocaleCopy {
   backToHomeLabel: string;
   railAriaLabel: string;
   activeSelectionBadge: string;
+  nextPreviewBadge: string;
   otherDestinationsHeading: string;
   previewSelectLabel: string;
   prevDestinationLabel: string;
@@ -37,6 +38,9 @@ export interface DestinationDiscoveryLocaleCopy {
   journeysSectionAllHeading: string;
   journeysSectionSupporting: string;
   filterAllDestinationsLabel: string;
+  viewAllTripsCta: string;
+  showingAllTripsLabel: string;
+  filterBySelectedDestinationCta: string;
   journeysCountSingular: string;
   journeysCountPlural: string;
   requestCustomQuoteCta: string;
@@ -73,17 +77,21 @@ export const DESTINATION_DISCOVERY_DICTIONARY: Record<
     backToHomeLabel: "Back to Home",
     railAriaLabel: "Destination selector progress rail",
     activeSelectionBadge: "Active Destination",
+    nextPreviewBadge: "Up Next",
     otherDestinationsHeading: "Switch Destination",
     previewSelectLabel: "Select destination",
     prevDestinationLabel: "Previous destination",
     nextDestinationLabel: "Next destination",
-    videoAtmosphereLabel: "Cinematic Backdrop",
+    videoAtmosphereLabel: "Live Video Backdrop",
     journeysSectionEyebrow: "CURATED ITINERARIES",
     journeysSectionHeadingPrefix: "Journeys in",
-    journeysSectionAllHeading: "All Curated Journeys Across Egypt, Türkiye & Dubai",
+    journeysSectionAllHeading: "All Curated Trips Across Egypt, Türkiye & Dubai",
     journeysSectionSupporting:
-      "Select a destination above or filter below to inspect confirmed geographic corridors and request a tailored quotation.",
+      "Inspect confirmed geographic corridors for the active destination or expand the full catalog to view all five curated trips.",
     filterAllDestinationsLabel: "All 3 Destinations",
+    viewAllTripsCta: "View All Trips",
+    showingAllTripsLabel: "Showing all 5 configured journeys",
+    filterBySelectedDestinationCta: "Show Only Selected Destination",
     journeysCountSingular: "Curated Journey",
     journeysCountPlural: "Curated Journeys",
     requestCustomQuoteCta: "Plan a Custom Route",
@@ -94,7 +102,7 @@ export const DESTINATION_DISCOVERY_DICTIONARY: Record<
       description:
         "We do not display placeholder prices or unconfirmed schedules. Share your preferred dates and group size with our team to receive a tailored itinerary quotation.",
       primaryCta: "Request a Tailored Quotation",
-      secondaryCta: "View All Destinations",
+      secondaryCta: "View All Trips",
     },
     journeyDetail: {
       backToDiscoveryLabel: "Back to Destination Discovery",
@@ -198,17 +206,21 @@ export const DESTINATION_DISCOVERY_DICTIONARY: Record<
     backToHomeLabel: "Ana Sayfaya Dön",
     railAriaLabel: "Destinasyon seçici ilerleme çubuğu",
     activeSelectionBadge: "Aktif Destinasyon",
+    nextPreviewBadge: "Sıradaki",
     otherDestinationsHeading: "Destinasyon Değiştir",
     previewSelectLabel: "Destinasyon seçin",
     prevDestinationLabel: "Önceki destinasyon",
     nextDestinationLabel: "Sonraki destinasyon",
-    videoAtmosphereLabel: "Sinematik Atmosfer",
+    videoAtmosphereLabel: "Canlı Video Atmosferi",
     journeysSectionEyebrow: "SEÇKİN ROTALAR",
     journeysSectionHeadingPrefix: "Seçili Destinasyon Turları:",
     journeysSectionAllHeading: "Mısır, Türkiye ve Dubai Genelindeki Tüm Seçkin Turlar",
     journeysSectionSupporting:
-      "Doğrulanmış rota koridorlarını incelemek ve size özel fiyat teklifi istemek için yukarıdan bir destinasyon seçin.",
+      "Seçili destinasyonun doğrulanmış rota koridorlarını inceleyin veya beş seçkin turun tamamını görmek için tüm listeyi açın.",
     filterAllDestinationsLabel: "Tüm 3 Destinasyon",
+    viewAllTripsCta: "Tüm Turları Gör",
+    showingAllTripsLabel: "Yapılandırılmış 5 turun tamamı gösteriliyor",
+    filterBySelectedDestinationCta: "Yalnızca Seçili Destinasyonu Göster",
     journeysCountSingular: "Seçkin Tur",
     journeysCountPlural: "Seçkin Tur",
     requestCustomQuoteCta: "Özel Rota Planla",
@@ -219,7 +231,7 @@ export const DESTINATION_DISCOVERY_DICTIONARY: Record<
       description:
         "Tahmini fiyatlar veya doğrulanmamış tarihler göstermiyoruz. Tercih ettiğiniz tarihleri ve kişi sayısını ekibimizle paylaşarak size özel rota teklifi alabilirsiniz.",
       primaryCta: "Özel Teklif Talep Et",
-      secondaryCta: "Tüm Destinasyonları Gör",
+      secondaryCta: "Tüm Turları Gör",
     },
     journeyDetail: {
       backToDiscoveryLabel: "Destinasyon Keşfine Dön",
@@ -323,17 +335,21 @@ export const DESTINATION_DISCOVERY_DICTIONARY: Record<
     backToHomeLabel: "Volver al Inicio",
     railAriaLabel: "Barra de progreso del selector de destinos",
     activeSelectionBadge: "Destino Activo",
+    nextPreviewBadge: "Siguiente",
     otherDestinationsHeading: "Cambiar Destino",
     previewSelectLabel: "Seleccionar destino",
     prevDestinationLabel: "Destino anterior",
     nextDestinationLabel: "Siguiente destino",
-    videoAtmosphereLabel: "Atmósfera Cinematográfica",
+    videoAtmosphereLabel: "Video de Fondo Activo",
     journeysSectionEyebrow: "ITINERARIOS SELECCIONADOS",
     journeysSectionHeadingPrefix: "Viajes en",
     journeysSectionAllHeading: "Todos los Viajes Seleccionados en Egipto, Türkiye y Dubái",
     journeysSectionSupporting:
-      "Selecciona un destino arriba o filtra abajo para explorar los corredores geográficos confirmados y solicitar una cotización a medida.",
+      "Explora los corredores geográficos confirmados del destino activo o despliega el catálogo completo para ver los cinco viajes seleccionados.",
     filterAllDestinationsLabel: "Los 3 Destinos",
+    viewAllTripsCta: "Ver Todos los Viajes",
+    showingAllTripsLabel: "Mostrando los 5 viajes configurados",
+    filterBySelectedDestinationCta: "Mostrar Solo el Destino Activo",
     journeysCountSingular: "Viaje Seleccionado",
     journeysCountPlural: "Viajes Seleccionados",
     requestCustomQuoteCta: "Planificar Ruta a Medida",
@@ -344,7 +360,7 @@ export const DESTINATION_DISCOVERY_DICTIONARY: Record<
       description:
         "No mostramos precios ficticios ni horarios no confirmados. Comparte tus fechas preferidas y el tamaño de tu grupo para recibir una cotización personalizada.",
       primaryCta: "Solicitar Cotización a Medida",
-      secondaryCta: "Ver Todos los Destinos",
+      secondaryCta: "Ver Todos los Viajes",
     },
     journeyDetail: {
       backToDiscoveryLabel: "Volver a Destinos",

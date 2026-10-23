@@ -26,6 +26,7 @@ export interface DestinationAssetConfig {
   secondaryPreviewWebp: string;
   secondaryPreviewJpg: string;
   videoMp4: string;
+  videoMp4SecondaryPath: string;
   canvaAsset: CanvaVideoAssetMetadata;
   videoSourceNote: string;
   videoLicense: string;
@@ -41,9 +42,9 @@ export interface DestinationAssetConfig {
 /**
  * Centralized, typed destination configuration for the three primary
  * WEST GLOBAL TOURS destinations in strict order:
- * 01 — Egypt
- * 02 — Türkiye
- * 03 — Dubai
+ * 01 — Egypt   (Canva Design DAHYpsUn6_I)
+ * 02 — Türkiye (Canva Design DAHYp4Nj-j4)
+ * 03 — Dubai   (Canva Design DAHYpw4T34I)
  *
  * Editorial card layout on Homepage Hero desktop:
  * - Featured large vertical card: Istanbul - Türkiye (02) on the left column
@@ -64,17 +65,18 @@ export const DESTINATIONS_CONFIG: readonly DestinationAssetConfig[] = [
     cardImageJpg: "/images/west-travel/egypt-card.jpg",
     secondaryPreviewWebp: "/images/west-travel/cairo-luxor-card.webp",
     secondaryPreviewJpg: "/images/west-travel/cairo-luxor-card.jpg",
-    videoMp4: "/videos/west-travel/hero-egypt.mp4",
+    videoMp4: "/videos/hero-egypt.mp4",
+    videoMp4SecondaryPath: "/videos/west-travel/hero-egypt.mp4",
     canvaAsset: {
       designId: "DAHYpsUn6_I",
       watchUrl: "https://www.canva.com/design/DAHYpsUn6_I/8ov-RLJict6P46zGXQaD4w/watch",
-      exportJobId: "0e73fa6e-3b8d-463f-86bf-98b2af723062",
-      posterExportJobId: "1d09657d-2c50-4439-b0da-473b40c46af3",
-      dimensions: { width: 1920, height: 1080 },
+      exportJobId: "835021ab-18c7-4f16-bb3c-1376a3ae27d5",
+      posterExportJobId: "4702f5c2-e050-4396-98e6-f3c9a788d9a9",
+      dimensions: { width: 1280, height: 720 },
       exportStatus: "canva_mp4_exported_local_verified",
     },
     videoSourceNote:
-      "Canva design DAHYpsUn6_I (Video 1 — Egypt) exported via Canva MP4 API (job 0e73fa6e-3b8d-463f-86bf-98b2af723062) with verified local H.264 MP4 asset at /videos/west-travel/hero-egypt.mp4",
+      "Canva design DAHYpsUn6_I (Video 1 — Egypt) exported via Canva MP4 API (job 835021ab-18c7-4f16-bb3c-1376a3ae27d5) with verified local H.264 MP4 asset at /videos/hero-egypt.mp4 and /videos/west-travel/hero-egypt.mp4",
     videoLicense: "WEST GLOBAL TOURS supplied Canva design asset (DAHYpsUn6_I)",
     objectPosition: "52% 48%",
     sliceObjectPosition: "46% 52%",
@@ -97,17 +99,18 @@ export const DESTINATIONS_CONFIG: readonly DestinationAssetConfig[] = [
     cardImageJpg: "/images/west-travel/turkiye-card.jpg",
     secondaryPreviewWebp: "/images/west-travel/istanbul-bosphorus-card.webp",
     secondaryPreviewJpg: "/images/west-travel/istanbul-bosphorus-card.jpg",
-    videoMp4: "/videos/west-travel/hero-turkiye.mp4",
+    videoMp4: "/videos/hero-turkiye.mp4",
+    videoMp4SecondaryPath: "/videos/west-travel/hero-turkiye.mp4",
     canvaAsset: {
       designId: "DAHYp4Nj-j4",
       watchUrl: "https://www.canva.com/design/DAHYp4Nj-j4/g75cfpa-a1htT74SABedzg/watch",
-      exportJobId: "afbf904e-63a2-4e7a-b0ee-2db5a0df5fef",
-      posterExportJobId: "694a1de5-7997-4435-9353-eafddbe106d6",
-      dimensions: { width: 1920, height: 1080 },
+      exportJobId: "a7df0b94-f44e-4298-969a-d94e1690838f",
+      posterExportJobId: "6d5dfef2-6fd6-4579-be66-79a1ff019ace",
+      dimensions: { width: 1280, height: 720 },
       exportStatus: "canva_mp4_exported_local_verified",
     },
     videoSourceNote:
-      "Canva design DAHYp4Nj-j4 (Video 2 — Türkiye) exported via Canva MP4 API (job afbf904e-63a2-4e7a-b0ee-2db5a0df5fef) with verified local H.264 MP4 asset at /videos/west-travel/hero-turkiye.mp4",
+      "Canva design DAHYp4Nj-j4 (Video 2 — Türkiye) exported via Canva MP4 API (job a7df0b94-f44e-4298-969a-d94e1690838f) with verified local H.264 MP4 asset at /videos/hero-turkiye.mp4 and /videos/west-travel/hero-turkiye.mp4",
     videoLicense: "WEST GLOBAL TOURS supplied Canva design asset (DAHYp4Nj-j4)",
     objectPosition: "54% 50%",
     sliceObjectPosition: "54% 52%",
@@ -130,17 +133,18 @@ export const DESTINATIONS_CONFIG: readonly DestinationAssetConfig[] = [
     cardImageJpg: "/images/west-travel/dubai-card.jpg",
     secondaryPreviewWebp: "/images/traveler-stories/story-dubai-skyline.webp",
     secondaryPreviewJpg: "/images/traveler-stories/story-dubai-skyline.jpg",
-    videoMp4: "/videos/west-travel/hero-dubai.mp4",
+    videoMp4: "/videos/hero-dubai.mp4",
+    videoMp4SecondaryPath: "/videos/west-travel/hero-dubai.mp4",
     canvaAsset: {
       designId: "DAHYpw4T34I",
       watchUrl: "https://www.canva.com/design/DAHYpw4T34I/0DPZSRcjpzdJb8AtdNfOpA/watch",
-      exportJobId: "59890b8f-1ed9-4034-a833-7806c806b209",
-      posterExportJobId: "d1bf4f01-a498-456e-84fe-93bbaab51d0d",
-      dimensions: { width: 1920, height: 1080 },
+      exportJobId: "7b02a25b-7ca1-4ce8-895f-a6f9383942e7",
+      posterExportJobId: "8580c904-6d40-4d53-bd46-68120abd3ee1",
+      dimensions: { width: 1280, height: 720 },
       exportStatus: "canva_mp4_exported_local_verified",
     },
     videoSourceNote:
-      "Canva design DAHYpw4T34I (Video 3 — Dubai) exported via Canva MP4 API (job 59890b8f-1ed9-4034-a833-7806c806b209) with verified local H.264 MP4 asset at /videos/west-travel/hero-dubai.mp4",
+      "Canva design DAHYpw4T34I (Video 3 — Dubai) exported via Canva MP4 API (job 7b02a25b-7ca1-4ce8-895f-a6f9383942e7) with verified local H.264 MP4 asset at /videos/hero-dubai.mp4 and /videos/west-travel/hero-dubai.mp4",
     videoLicense: "WEST GLOBAL TOURS supplied Canva design asset (DAHYpw4T34I)",
     objectPosition: "58% 44%",
     sliceObjectPosition: "36% 42%",
@@ -158,7 +162,10 @@ export function getDestinationById(id: string | null | undefined): DestinationAs
   return DESTINATIONS_CONFIG.find((dest) => dest.id === normalized || dest.slug === normalized);
 }
 
-export function resolveDestinationId(input: string | null | undefined, fallback: DestinationId = "egypt"): DestinationId {
+export function resolveDestinationId(
+  input: string | null | undefined,
+  fallback: DestinationId = "egypt"
+): DestinationId {
   const found = getDestinationById(input);
   return found ? found.id : fallback;
 }

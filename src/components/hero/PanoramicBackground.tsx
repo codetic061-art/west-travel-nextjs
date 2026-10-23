@@ -1,28 +1,34 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { DESTINATIONS_CONFIG, type DestinationId } from "@/config/destinations";
+import { DESTINATIONS_CONFIG } from "@/config/destinations";
+import {
+  POSTER_HOLD_DURATION_MS,
+  useDestinationVideoSequence,
+} from "@/hooks/useDestinationVideoSequence";
 import { useHero } from "./HeroProvider";
 
 /**
- * Cohesive Panoramic Background & Interactive Destination Video Stage:
- * - Default state: One continuous dusk panorama across Egypt, Türkiye, and Dubai.
- * - Selected state (Egypt, Türkiye, or Dubai):
- *   1. Immediately crossfades to the destination's static poster (`posterImageWebp` / `heroImageWebp`).
- *   2. Mounts and loads ONLY the selected destination's `<video>` (`hero-egypt.mp4`, `hero-turkiye.mp4`, or `hero-dubai.mp4`).
- *   3. Smoothly crossfades the muted, inline, looping video above the poster once playback starts.
- *   4. Falls back cleanly to the poster on autoplay restriction, video error, `prefers-reduced-motion`, or `saveData`.
+ * Cohesive Panoramic Background & Interactive 3-Second Poster-to-Video Stage:
+ * - Default state (`activeDestination === null`): Continuous dusk panorama across Egypt, Türkiye, and Dubai.
+ * - Selected state (`"egypt"`, `"turkiye"`, or `"dubai"`):
+ *   1. Immediately displays the selected destination's poster image (`hero-egypt-poster.jpg`,
+ *      `hero-turkiye-poster.jpg`, or `hero-dubai-poster.jpg`).
+ *   2. Keeps that poster visible for **exactly 3 seconds (`3000ms`)**.
+ *   3. Loads ONLY the selected destination's `<video>` (`hero-egypt.mp4`, `hero-turkiye.mp4`,
+ *      or `hero-dubai.mp4`) with `preload="metadata"`, `muted`, `playsInline`, and `loop`.
+ *   4. After the 3-second interval — and once the video has reached a playable state —
+ *      reveals the video with a smooth 880ms crossfade.
+ *   5. If the video is still loading after 3 seconds, keeps showing the poster until playback
+ *      is ready so no blank or black video frame is ever shown.
+ *   6. Resets the 3-second timer and repeats the sequence whenever the destination changes.
  */
 export function PanoramicBackground() {
   const { t, theme, activeDestination } = useHero();
   const [pointerOffset, setPointerOffset] = useState({ x: 0, y: 0 });
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [saveData, setSaveData] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
-  const [videoReadyFor, setVideoReadyFor] = useState<DestinationId | null>(null);
-  const [videoErrorFor, setVideoErrorFor] = useState<DestinationId | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -38,19 +44,6 @@ export function PanoramicBackground() {
       if (e.matches) setHasEntered(true);
     };
     mediaQuery.addEventListener("change", handler);
-
-    // Check Network Information API for data-saver mode on mobile
-    const nav = navigator as Navigator & {
-      connection?: { saveData?: boolean; effectiveType?: string };
-    };
-    if (
-      nav.connection?.saveData ||
-      nav.connection?.effectiveType === "slow-2g" ||
-      nav.connection?.effectiveType === "2g"
-    ) {
-      setSaveData(true);
-    }
-
     return () => mediaQuery.removeEventListener("change", handler);
   }, []);
 
@@ -65,71 +58,57 @@ export function PanoramicBackground() {
     return () => window.removeEventListener("mousemove", handleMove);
   }, [reducedMotion]);
 
-  const shouldPlayVideo = Boolean(activeDestination && !reducedMotion && !saveData);
-
-  // Trigger lazy playback ONLY for the selected destination video
-  useEffect(() => {
-    setVideoReadyFor(null);
-    setVideoErrorFor(null);
-
-    if (!activeDestination || !shouldPlayVideo) {
-      if (videoRef.current) {
-        videoRef.current.pause();
-      }
-      return;
-    }
-
-    const vid = videoRef.current;
-    if (!vid) return;
-
-    try {
-      vid.load();
-      const playPromise = vid.play();
-      if (playPromise !== undefined) {
-        playPromise
-          .then(() => {
-            setVideoReadyFor(activeDestination);
-          })
-          .catch(() => {
-            setVideoErrorFor(activeDestination);
-          });
-      }
-    } catch {
-      setVideoErrorFor(activeDestination);
-    }
-  }, [activeDestination, shouldPlayVideo]);
+  const {
+    activeConfig,
+    videoRef,
+    shouldLoadVideo,
+    isPosterHoldActive,
+    isPosterHoldElapsed,
+    isVideoPlayable,
+    isVideoRevealed,
+    isWaitingForVideoAfterHold,
+    isPosterFallbackActive,
+    posterHoldDurationMs,
+    sequenceTick,
+    handleVideoLoadedData,
+    handleVideoCanPlay,
+    handleVideoPlaying,
+    handleVideoError,
+  } = useDestinationVideoSequence({
+    activeDestinationId: activeDestination,
+    reducedMotion,
+    posterHoldDurationMs: POSTER_HOLD_DURATION_MS,
+  });
 
   const isLight = theme === "light";
-  const activeConfig = activeDestination
-    ? DESTINATIONS_CONFIG.find((d) => d.id === activeDestination) ?? null
-    : null;
-
-  const isVideoVisible =
-    Boolean(activeDestination) &&
-    shouldPlayVideo &&
-    videoReadyFor === activeDestination &&
-    videoErrorFor !== activeDestination;
-
-  const isPosterFallbackActive =
-    Boolean(activeDestination) && (!shouldPlayVideo || videoErrorFor === activeDestination);
-
   const scaleValue = reducedMotion ? 1 : hasEntered ? 1.03 : 1.07;
 
   return (
     <div
       aria-hidden="true"
       data-active-destination={activeDestination ?? "panoramic"}
+      data-active-poster-src={activeConfig ? activeConfig.posterImageJpg : "none"}
       data-active-video-src={activeConfig ? activeConfig.videoMp4 : "none"}
       data-active-canva-design={activeConfig ? activeConfig.canvaAsset.designId : "none"}
-      data-video-playing={isVideoVisible ? "true" : "false"}
+      data-poster-hold-duration-ms={posterHoldDurationMs}
+      data-poster-hold-active={isPosterHoldActive ? "true" : "false"}
+      data-poster-hold-elapsed={isPosterHoldElapsed ? "true" : "false"}
+      data-video-playable={isVideoPlayable ? "true" : "false"}
+      data-video-playing={isVideoRevealed ? "true" : "false"}
+      data-waiting-for-video={isWaitingForVideoAfterHold ? "true" : "false"}
       data-poster-fallback={isPosterFallbackActive ? "true" : "false"}
+      data-sequence-tick={sequenceTick}
       data-bg-entered={hasEntered ? "true" : "false"}
       className="pointer-events-none absolute inset-0 overflow-hidden select-none bg-[#04111D]"
     >
-      {/* 1. Base Panoramic Backdrop (Egypt, Istanbul & Dubai horizon) */}
+      {/* 1. Base Panoramic Backdrop (Egypt, Istanbul & Dubai horizon when no single destination is active) */}
       <div
         className={`relative h-full w-full transition-opacity duration-700 ease-out ${
-          activeDestination ? "opacity-20" : hasEntered || reducedMotion ? "opacity-100" : "opacity-0"
+          activeDestination
+            ? "opacity-20"
+            : hasEntered || reducedMotion
+            ? "opacity-100"
+            : "opacity-0"
         } ${isLight ? "brightness-[1.06] saturate-[1.04]" : "brightness-100"}`}
       >
         <div
@@ -152,19 +131,20 @@ export function PanoramicBackground() {
         </div>
       </div>
 
-      {/* 2. Interactive Destination Spotlight Poster Crossfade Layer (Immediate display while video loads) */}
+      {/* 2. Immediate Destination Poster Layer (Shown immediately on selection and held for 3 full seconds, or longer if video is still buffering) */}
       {DESTINATIONS_CONFIG.map((dest) => {
         const isActive = activeDestination === dest.id;
         return (
           <div
             key={dest.id}
             data-destination-poster={dest.id}
+            data-poster-src={dest.posterImageJpg}
             className={`absolute inset-0 transition-opacity duration-700 ease-out ${
               isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
             } ${isLight ? "brightness-[1.05]" : "brightness-100"}`}
           >
             <Image
-              src={dest.posterImageWebp || dest.heroImageWebp}
+              src={dest.posterImageJpg}
               alt={t.destinations[dest.id].imageAlt}
               fill
               sizes="100vw"
@@ -178,30 +158,32 @@ export function PanoramicBackground() {
         );
       })}
 
-      {/* 3. Single Lazy-Loaded Background Video Element for the Active Destination Only */}
-      {activeConfig && shouldPlayVideo && (
+      {/* 3. Single Lazy-Loaded Background Video Element for the Active Destination Only (Revealed with smooth 880ms crossfade after 3-second poster hold + playable state) */}
+      {activeConfig && shouldLoadVideo && (
         <div
-          className={`absolute inset-0 z-10 transition-opacity duration-700 ease-out ${
-            isVideoVisible ? "opacity-100" : "opacity-0"
+          data-hero-video-layer={activeConfig.id}
+          className={`absolute inset-0 z-10 transition-opacity duration-[880ms] ease-in-out ${
+            isVideoRevealed ? "opacity-100" : "opacity-0"
           } ${isLight ? "brightness-[1.04]" : "brightness-100"}`}
         >
           <video
             ref={videoRef}
-            key={activeConfig.id}
-            poster={activeConfig.posterImageJpg || activeConfig.heroImageJpg}
+            key={`${activeConfig.id}-${sequenceTick}`}
+            src={activeConfig.videoMp4}
+            poster={activeConfig.posterImageJpg}
             muted
             playsInline
             loop
-            autoPlay
             preload="metadata"
-            onLoadedData={() => setVideoReadyFor(activeConfig.id)}
-            onCanPlay={() => setVideoReadyFor(activeConfig.id)}
-            onPlaying={() => setVideoReadyFor(activeConfig.id)}
-            onError={() => setVideoErrorFor(activeConfig.id)}
+            onLoadedData={handleVideoLoadedData}
+            onCanPlay={handleVideoCanPlay}
+            onPlaying={handleVideoPlaying}
+            onError={handleVideoError}
             className="h-full w-full object-cover"
             style={{ objectPosition: activeConfig.objectPosition }}
           >
             <source src={activeConfig.videoMp4} type="video/mp4" />
+            <source src={activeConfig.videoMp4SecondaryPath} type="video/mp4" />
           </video>
         </div>
       )}
@@ -209,7 +191,11 @@ export function PanoramicBackground() {
       {/* 4. Readability Scrims (Preserves Hero text, CTA, navigation, and search controls contrast) */}
       <div
         className="absolute inset-0 z-20 transition-colors duration-500"
-        style={{ background: `linear-gradient(90deg, rgba(4,17,29,${isLight ? 0.36 : 0.46}) 0%, rgba(4,17,29,0.12) 38%, transparent 56%)` }}
+        style={{
+          background: `linear-gradient(90deg, rgba(4,17,29,${
+            isLight ? 0.36 : 0.46
+          }) 0%, rgba(4,17,29,0.12) 38%, transparent 56%)`,
+        }}
       />
       <div
         className="absolute inset-0 z-20 hidden lg:block"
@@ -220,15 +206,25 @@ export function PanoramicBackground() {
       />
       <div
         className="absolute inset-x-0 top-0 z-20 h-[18%]"
-        style={{ background: `linear-gradient(to bottom, rgba(4,17,29,${isLight ? 0.22 : 0.32}), transparent)` }}
+        style={{
+          background: `linear-gradient(to bottom, rgba(4,17,29,${
+            isLight ? 0.22 : 0.32
+          }), transparent)`,
+        }}
       />
       <div
         className="absolute inset-0 z-20 lg:hidden"
-        style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(4,17,29,0.18) 35%, rgba(4,17,29,0.30) 62%, transparent 82%)" }}
+        style={{
+          background:
+            "linear-gradient(to bottom, transparent 0%, rgba(4,17,29,0.18) 35%, rgba(4,17,29,0.30) 62%, transparent 82%)",
+        }}
       />
       <div
         className="absolute inset-x-0 bottom-0 z-20 h-[24%]"
-        style={{ background: "linear-gradient(to bottom, transparent, rgba(5,19,32,0.62) 58%, #051320)" }}
+        style={{
+          background:
+            "linear-gradient(to bottom, transparent, rgba(5,19,32,0.62) 58%, #051320)",
+        }}
       />
     </div>
   );

@@ -1,30 +1,31 @@
 "use client";
 
 import React, { useId, useRef, useState } from "react";
-import Link from "next/link";
-import { ArrowRight, ChevronDown, HelpCircle, MessageSquare } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { ABOUT_FAQ_ITEMS_CONFIG, type AboutFaqTopicId } from "@/config/about-us";
 import type { AboutUsLocaleCopy } from "@/i18n/about-us-dictionary";
 import { useSectionEntrance } from "@/components/motion/MotionPrimitives";
+import {
+  AboutFaqHeaderRule,
+  AboutFaqMicrographics,
+} from "./AboutTravelMicrographics";
 
 export interface AboutFaqAccordionProps {
   copy: AboutUsLocaleCopy["faq"];
   isLight: boolean;
-  onOpenInquiry: (triggerEl?: HTMLElement | null) => void;
 }
 
 /**
- * PART 4 — Accessible FAQ Accordion for the About Us Page:
- * - Semantic heading hierarchy (`<h2>` section title, `<h3>` question headings).
- * - Full keyboard navigation (`ArrowDown`, `ArrowUp`, `Home`, `End`, `Enter`, `Space`).
- * - Proper `aria-expanded`, `aria-controls`, and `role="region"` attributes.
- * - Smooth expansion and collapse that respects `prefers-reduced-motion`.
- * - Localized across English (`en`), Turkish (`tr`), and Spanish (`es`).
+ * PART 5 — Accessible FAQ Accordion for the About Us Page with Refined Travel Micrographics:
+ * - Enriched with `<AboutFaqMicrographics />` (2D airplane silhouette, fine dotted flight path,
+ *   location pins, outline travel-memory camera icon, and warm-gold dividers) positioned in the
+ *   header and outer margin whitespace so they never sit behind FAQ text.
+ * - Preserves existing FAQ questions, answers, keyboard accessibility, and EN/TR/ES translations
+ *   without adding new navigation links or button actions.
  */
 export function AboutFaqAccordion({
   copy,
   isLight,
-  onOpenInquiry,
 }: AboutFaqAccordionProps) {
   const baseId = useId().replace(/:/g, "");
   const confirmedItems = ABOUT_FAQ_ITEMS_CONFIG.filter((item) => item.isConfirmedForDisplay);
@@ -44,16 +45,6 @@ export function AboutFaqAccordion({
     setOpenIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
     );
-  };
-
-  const allExpanded = openIds.length === confirmedItems.length;
-
-  const handleToggleAll = () => {
-    if (allExpanded) {
-      setOpenIds([]);
-    } else {
-      setOpenIds(confirmedItems.map((i) => i.id));
-    }
   };
 
   const handleTriggerKeyDown = (
@@ -84,16 +75,22 @@ export function AboutFaqAccordion({
       id="about-faq"
       aria-labelledby="about-faq-heading"
       data-entered={hasEntered ? "true" : "false"}
-      className="relative w-full py-16 sm:py-20 lg:py-24"
+      className="relative w-full overflow-hidden py-16 sm:py-20 lg:py-24"
     >
-      <div className="mx-auto w-full max-w-[1060px] px-4 sm:px-8 lg:px-12">
+      {/* 2D Travel Micrographics in Header & Outer Margin Whitespace (Part 5, Item 11) */}
+      <AboutFaqMicrographics
+        hasEntered={hasEntered}
+        reducedMotion={reducedMotion}
+      />
+
+      <div className="relative z-10 mx-auto w-full max-w-[1060px] px-4 sm:px-8 lg:px-12">
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-[#E2D8C5] dark:border-white/10 pb-7">
-          <div className="max-w-2xl">
+        <div className="border-b border-[#E2D8C5] dark:border-white/10 pb-7">
+          <div className="max-w-xl">
             <div className="inline-flex items-center gap-3">
               <span
                 aria-hidden="true"
-                className="h-[1px] w-8 bg-[#C89648] dark:bg-[#F4C266]"
+                className="h-px w-8 bg-[#C89648] dark:bg-[#F4C266]"
               />
               <span className="text-xs font-semibold uppercase tracking-[0.24em] text-[#0E7C8E] dark:text-[#2DD4BF]">
                 {copy.eyebrow}
@@ -114,20 +111,9 @@ export function AboutFaqAccordion({
             >
               {copy.supportingText}
             </p>
-          </div>
 
-          <button
-            type="button"
-            onClick={handleToggleAll}
-            data-faq-toggle-all=""
-            className={`self-start sm:self-auto shrink-0 rounded-full border px-4 py-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
-              isLight
-                ? "border-[#D5C7AE] bg-white text-[#081C2E] hover:border-[#0E7C8E] hover:text-[#0E7C8E]"
-                : "border-white/15 bg-[#092032] text-white/85 hover:border-[#2DD4BF] hover:text-[#5EEAD4]"
-            }`}
-          >
-            {allExpanded ? copy.collapseAllLabel : copy.expandAllLabel}
-          </button>
+            <AboutFaqHeaderRule />
+          </div>
         </div>
 
         {/* Accessible Accordion List */}
@@ -219,71 +205,12 @@ export function AboutFaqAccordion({
                       >
                         {itemCopy.answer}
                       </p>
-
-                      {itemCopy.actionLabel && (
-                        <div className="mt-3.5">
-                          {item.opensInquiryDrawer ? (
-                            <button
-                              type="button"
-                              onClick={(e) => onOpenInquiry(e.currentTarget)}
-                              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#0E7C8E] dark:text-[#5EEAD4] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] rounded"
-                            >
-                              <span>{itemCopy.actionLabel}</span>
-                            </button>
-                          ) : item.relatedRouteHref ? (
-                            <Link
-                              href={item.relatedRouteHref}
-                              className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-[#0E7C8E] dark:text-[#5EEAD4] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] rounded"
-                            >
-                              <span>{itemCopy.actionLabel}</span>
-                            </Link>
-                          ) : null}
-                        </div>
-                      )}
                     </div>
                   </div>
                 </div>
               </div>
             );
           })}
-        </div>
-
-        {/* Bottom Direct Inquiry Support Prompt */}
-        <div
-          className={`mt-10 flex flex-col sm:flex-row sm:items-center justify-between gap-5 rounded-2xl border p-6 ${
-            isLight
-              ? "bg-white border-[#E2D8C5] shadow-[0_10px_28px_rgba(8,28,46,0.05)]"
-              : "bg-[#081C2E] border-white/15"
-          }`}
-        >
-          <div className="flex items-start gap-3.5">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#0E7C8E]/15 text-[#0E7C8E] dark:bg-[#2DD4BF]/15 dark:text-[#2DD4BF]">
-              <HelpCircle className="h-5 w-5" />
-            </span>
-            <div>
-              <h3 className="font-serif text-lg font-semibold">
-                {copy.stillHaveQuestionsTitle}
-              </h3>
-              <p
-                className={`mt-1 text-xs sm:text-sm leading-relaxed ${
-                  isLight ? "text-[#546576]" : "text-slate-300"
-                }`}
-              >
-                {copy.stillHaveQuestionsText}
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={(e) => onOpenInquiry(e.currentTarget)}
-            data-faq-inquiry-cta=""
-            className="shrink-0 inline-flex items-center justify-center gap-2 rounded-full bg-[#0E7C8E] hover:bg-[#149BB0] px-6 py-3 text-xs sm:text-sm font-semibold text-white transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF]"
-          >
-            <MessageSquare className="h-4 w-4" />
-            <span>{copy.stillHaveQuestionsCta}</span>
-            <ArrowRight className="h-4 w-4" />
-          </button>
         </div>
       </div>
     </section>
