@@ -30,6 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${playfair.variable} ${jakarta.variable} light`} data-theme="light">
       <body className="font-sans antialiased bg-[#FAF8F4] dark:bg-[#051320] text-[#081C2E] dark:text-white overflow-x-hidden transition-colors duration-300">
+        <a href="#top" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-[#081C2E] focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-[#2DD4BF]">Skip to content</a>
         {children}
       </body>
     </html>

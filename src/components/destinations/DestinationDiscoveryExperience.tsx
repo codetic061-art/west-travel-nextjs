@@ -330,7 +330,9 @@ export function DestinationDiscoveryExperience({
                   src={dest.posterImageJpg}
                   alt={t.destinations[dest.id].imageAlt}
                   fill
-                  priority={dest.id === "egypt"}
+                  priority={isActive && dest.id === "egypt"}
+                  loading={isActive ? "eager" : "lazy"}
+                  fetchPriority={isActive ? "high" : "low"}
                   sizes="100vw"
                   className="object-cover transition-transform duration-[1100ms] ease-in-out"
                   style={{
@@ -623,7 +625,7 @@ export function DestinationDiscoveryExperience({
                   const slotTransform = isPrimaryActive
                     ? "translate3d(0px, 0px, 0) scale(1)"
                     : isSecondaryPeek
-                    ? "translate3d(324px, 24px, 0) scale(0.90)"
+                    ? "translate3d(336px, 24px, 0) scale(0.90)"
                     : "translate3d(640px, 42px, 0) scale(0.84)";
 
                   return (
@@ -643,7 +645,7 @@ export function DestinationDiscoveryExperience({
                           ? isPrimaryActive
                             ? "translate3d(0px, 0px, 0)"
                             : isSecondaryPeek
-                            ? "translate3d(324px, 24px, 0)"
+                            ? "translate3d(336px, 24px, 0)"
                             : "translate3d(640px, 42px, 0)"
                           : slotTransform,
                         opacity: isPrimaryActive

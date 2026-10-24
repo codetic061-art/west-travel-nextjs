@@ -55,7 +55,7 @@ export function BookingBar() {
     if (!hasEntered) return;
     const timer = window.setTimeout(() => {
       setExpansionFinished(true);
-    }, 2480);
+    }, 2160);
     return () => window.clearTimeout(timer);
   }, [hasEntered, reducedMotion]);
 
