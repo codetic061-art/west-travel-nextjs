@@ -15,9 +15,13 @@ type UseDestinationVideoSequenceOptions = {
   posterHoldDurationMs?: number;
 };
 
+export type VideoBackdropMode = "auto" | "poster";
+
 type UseDestinationVideoSequenceResult = {
   activeConfig: DestinationAssetConfig | null;
   videoRef: React.RefObject<HTMLVideoElement | null>;
+  backdropMode: VideoBackdropMode;
+  toggleBackdropMode: () => void;
   shouldLoadVideo: boolean;
   isPosterHoldActive: boolean;
   isPosterHoldElapsed: boolean;
@@ -58,6 +62,10 @@ export function useDestinationVideoSequence(
   const [videoPlayableFor, setVideoPlayableFor] = useState<DestinationId | null>(null);
   const [videoErroredFor, setVideoErroredFor] = useState<DestinationId | null>(null);
   const [isDataSaverFriendly, setIsDataSaverFriendly] = useState(false);
+  const [backdropMode, setBackdropMode] = useState<VideoBackdropMode>("auto");
+  const toggleBackdropMode = useCallback(() => {
+    setBackdropMode((mode) => (mode === "auto" ? "poster" : "auto"));
+  }, []);
   const [sequenceTick, setSequenceTick] = useState(0);
 
   useEffect(() => {
@@ -106,7 +114,10 @@ export function useDestinationVideoSequence(
   }, [activeDestinationId]);
 
   const shouldLoadVideo =
-    activeDestinationId !== null && !reducedMotion && !isDataSaverFriendly;
+    activeDestinationId !== null &&
+    backdropMode === "auto" &&
+    !reducedMotion &&
+    !isDataSaverFriendly;
 
   const isPosterHoldElapsed =
     activeDestinationId !== null && posterHoldCompletedFor === activeDestinationId;
@@ -170,6 +181,8 @@ export function useDestinationVideoSequence(
   return {
     activeConfig,
     videoRef,
+    backdropMode,
+    toggleBackdropMode,
     shouldLoadVideo,
     isPosterHoldActive,
     isPosterHoldElapsed,
