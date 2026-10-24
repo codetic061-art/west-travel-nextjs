@@ -2,9 +2,17 @@ import { DESTINATIONS_CONFIG } from "./destinations";
 import { FEATURED_TRIPS_CONFIG } from "./featured-trips";
 import { COMPANY_IDENTITY_CONFIG } from "./final-cta-footer";
 
-export type CompanyFactIconId = "destinations" | "journeys" | "languages" | "channels" | "travelers" | "experience";
+export type CompanyFactIconId =
+  | "destinations"
+  | "journeys"
+  | "languages"
+  | "channels"
+  | "travelers"
+  | "experience";
 
-export type FactVerificationStatus = "verified_company_record" | "unpopulated_pending_business_input";
+export type FactVerificationStatus =
+  | "verified_company_record"
+  | "unpopulated_pending_business_input";
 
 export interface CompanyStatOrFactRecord {
   id: string;
@@ -21,7 +29,7 @@ export interface CompanyStatOrFactRecord {
   valueSuffix?: string;
   /**
    * Display string derived strictly from confirmed records (e.g., "03", "05").
-   * Never set to "0" or fictional numbers like "30k+", "5480+", or "25+".
+   * Never set to zero or unverified placeholder figures.
    */
   displayValue: string | null;
   verificationStatus: FactVerificationStatus;
@@ -39,82 +47,90 @@ export interface CompanyStatOrFactRecord {
  * years of company experience). Kept `null` and `isConfirmedForDisplay: false` by default
  * so production never renders fictional counts or zeros.
  */
-export const HISTORICAL_COMPANY_STATISTICS_CONFIG: readonly CompanyStatOrFactRecord[] = [
-  {
-    id: "travelers_served",
-    iconId: "travelers",
-    numericValue: null,
-    valueSuffix: "+",
-    displayValue: null,
-    verificationStatus: "unpopulated_pending_business_input",
-    isConfirmedForDisplay: false,
-    sourceNote: "Set numericValue and isConfirmedForDisplay: true once verified traveler count is supplied by WEST GLOBAL TOURS.",
-  },
-  {
-    id: "journeys_organized",
-    iconId: "journeys",
-    numericValue: null,
-    valueSuffix: "+",
-    displayValue: null,
-    verificationStatus: "unpopulated_pending_business_input",
-    isConfirmedForDisplay: false,
-    sourceNote: "Set numericValue and isConfirmedForDisplay: true once historical organized trip count is supplied.",
-  },
-  {
-    id: "years_experience",
-    iconId: "experience",
-    numericValue: null,
-    valueSuffix: "+",
-    displayValue: null,
-    verificationStatus: "unpopulated_pending_business_input",
-    isConfirmedForDisplay: false,
-    sourceNote: "Set numericValue and isConfirmedForDisplay: true once founding year / years of operation is confirmed.",
-  },
-] as const;
+export const HISTORICAL_COMPANY_STATISTICS_CONFIG: readonly CompanyStatOrFactRecord[] =
+  [
+    {
+      id: "travelers_served",
+      iconId: "travelers",
+      numericValue: null,
+      valueSuffix: "+",
+      displayValue: null,
+      verificationStatus: "unpopulated_pending_business_input",
+      isConfirmedForDisplay: false,
+      sourceNote:
+        "Set numericValue and isConfirmedForDisplay: true once verified traveler count is supplied by WEST GLOBAL TOURS.",
+    },
+    {
+      id: "journeys_organized",
+      iconId: "journeys",
+      numericValue: null,
+      valueSuffix: "+",
+      displayValue: null,
+      verificationStatus: "unpopulated_pending_business_input",
+      isConfirmedForDisplay: false,
+      sourceNote:
+        "Set numericValue and isConfirmedForDisplay: true once historical organized trip count is supplied.",
+    },
+    {
+      id: "years_experience",
+      iconId: "experience",
+      numericValue: null,
+      valueSuffix: "+",
+      displayValue: null,
+      verificationStatus: "unpopulated_pending_business_input",
+      isConfirmedForDisplay: false,
+      sourceNote:
+        "Set numericValue and isConfirmedForDisplay: true once founding year / years of operation is confirmed.",
+    },
+  ] as const;
 
 /**
  * 2. Confirmed Catalog & Service Scope Facts (Part 3.2 & 3.4):
  * Derived 100% from the actual repository configuration (`DESTINATIONS_CONFIG`,
  * `FEATURED_TRIPS_CONFIG`, `HERO_DICTIONARY`, and `COMPANY_IDENTITY_CONFIG`).
  */
-export const VERIFIED_COMPANY_FACTS_CONFIG: readonly CompanyStatOrFactRecord[] = [
-  {
-    id: "verified_destinations",
-    iconId: "destinations",
-    numericValue: DESTINATIONS_CONFIG.length,
-    displayValue: `0${DESTINATIONS_CONFIG.length}`,
-    verificationStatus: "verified_company_record",
-    isConfirmedForDisplay: true,
-    sourceNote: "Confirmed in src/config/destinations.ts: Egypt (01), Türkiye (02), and Dubai (03).",
-  },
-  {
-    id: "curated_journey_routes",
-    iconId: "journeys",
-    numericValue: FEATURED_TRIPS_CONFIG.length,
-    displayValue: `0${FEATURED_TRIPS_CONFIG.length}`,
-    verificationStatus: "verified_company_record",
-    isConfirmedForDisplay: true,
-    sourceNote: "Confirmed in src/config/featured-trips.ts: 5 curated journey corridors across Egypt, Türkiye, and Dubai.",
-  },
-  {
-    id: "supported_languages",
-    iconId: "languages",
-    numericValue: 3,
-    displayValue: "03",
-    verificationStatus: "verified_company_record",
-    isConfirmedForDisplay: true,
-    sourceNote: "Confirmed in src/i18n/hero-dictionary.ts: English (EN), Turkish (TR), and Spanish (ES).",
-  },
-  {
-    id: "direct_inquiry_channels",
-    iconId: "channels",
-    numericValue: 2,
-    displayValue: "02",
-    verificationStatus: "verified_company_record",
-    isConfirmedForDisplay: true,
-    sourceNote: `Confirmed in src/config/final-cta-footer.ts: Direct WhatsApp (${COMPANY_IDENTITY_CONFIG.whatsappDisplay}) & Email (${COMPANY_IDENTITY_CONFIG.email}).`,
-  },
-] as const;
+export const VERIFIED_COMPANY_FACTS_CONFIG: readonly CompanyStatOrFactRecord[] =
+  [
+    {
+      id: "verified_destinations",
+      iconId: "destinations",
+      numericValue: DESTINATIONS_CONFIG.length,
+      displayValue: `0${DESTINATIONS_CONFIG.length}`,
+      verificationStatus: "verified_company_record",
+      isConfirmedForDisplay: true,
+      sourceNote:
+        "Confirmed in src/config/destinations.ts: Egypt (01), Türkiye (02), and Dubai (03).",
+    },
+    {
+      id: "curated_journey_routes",
+      iconId: "journeys",
+      numericValue: FEATURED_TRIPS_CONFIG.length,
+      displayValue: `0${FEATURED_TRIPS_CONFIG.length}`,
+      verificationStatus: "verified_company_record",
+      isConfirmedForDisplay: true,
+      sourceNote:
+        "Confirmed in src/config/featured-trips.ts: 5 curated journey corridors across Egypt, Türkiye, and Dubai.",
+    },
+    {
+      id: "supported_languages",
+      iconId: "languages",
+      numericValue: 3,
+      displayValue: "03",
+      verificationStatus: "verified_company_record",
+      isConfirmedForDisplay: true,
+      sourceNote:
+        "Confirmed in src/i18n/hero-dictionary.ts: English (EN), Turkish (TR), and Spanish (ES).",
+    },
+    {
+      id: "direct_inquiry_channels",
+      iconId: "channels",
+      numericValue: 2,
+      displayValue: "02",
+      verificationStatus: "verified_company_record",
+      isConfirmedForDisplay: true,
+      sourceNote: `Confirmed in src/config/final-cta-footer.ts: Direct WhatsApp (${COMPANY_IDENTITY_CONFIG.whatsappDisplay}) & Email (${COMPANY_IDENTITY_CONFIG.email}).`,
+    },
+  ] as const;
 
 /**
  * Returns only verified, non-null company facts/statistics for production rendering.
