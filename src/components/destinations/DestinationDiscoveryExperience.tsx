@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Compass,
+  Image as ImageIcon,
   Layers,
   MapPin,
   Play,
@@ -16,6 +17,7 @@ import {
 import {
   DESTINATIONS_CONFIG,
   resolveDestinationId,
+  resolveDiscoveryFilter,
   type DestinationId,
 } from "@/config/destinations";
 import {
@@ -43,52 +45,49 @@ export interface DestinationDiscoveryExperienceProps {
 }
 
 /**
- * Cinematic Destination Discovery Page Experience (`/destinations`):
- * 1. Shared 3-Second Poster-to-Video Sequence (`useDestinationVideoSequence`):
+ * Cinematic Destination Discovery Page Experience (`/destinations` & `/trips`):
+ * 1. Edge-Anchored Desktop Layout (`max-w-[1640px] 2xl:max-w-[1720px]`):
+ *    - Left progress rail (`28px / 32px`) and editorial copy (`max-w-[600px] xl:max-w-[640px]`)
+ *      sit cleanly at the far left edge of the main container.
+ *    - Wider layered 2-card destination carousel (`lg:w-[580px] xl:w-[660px] 2xl:w-[700px]`)
+ *      sits cleanly at the far right edge (`ml-auto justify-self-end`), eliminating central whitespace.
+ * 2. Shared 3-Second Poster-to-Video Sequence (`useDestinationVideoSequence`):
  *    - Selecting Egypt (`01`), Türkiye (`02`), or Dubai (`03`) immediately displays the
  *      corresponding poster (`hero-egypt-poster.jpg`, `hero-turkiye-poster.jpg`, `hero-dubai-poster.jpg`).
- *    - Holds the poster visible for **exactly 3 seconds (`3000ms`)**.
- *    - Loads ONLY the selected destination's `<video>` (`hero-egypt.mp4`, `hero-turkiye.mp4`, `hero-dubai.mp4`).
- *    - After the 3-second interval — and once the video has reached a playable state (`readyState >= 2`) —
- *      reveals the video with a smooth 880ms crossfade (`z-[2]`, `opacity-100`).
- *    - If the video is still loading after 3 seconds, keeps showing the poster until playback is ready.
- *    - Resets the 3-second timer and repeats the sequence whenever the destination changes.
- * 2. Layered 2-Card Destination Carousel (`1 prominent foreground card + 1 partially visible right-edge preview`):
- *    - Egypt (`01`) is the initial active destination.
- *    - Its foreground photograph card is 100% visible (`z-20`, `scale(1)`).
- *    - Only ONE secondary destination preview peeks in from the right edge (`z-10`, `scale(0.90)`, ~45% visible inside the carousel mask).
- *    - The third destination remains off-stage inside the carousel track (`opacity-0`, `pointer-events-none`).
- * 3. Slim `1px` Vertical Progress Indicator (`w-px`) on the Left Rail (`28px` column).
- * 4. Compact Journey Cards (`variant="discovery-compact"`) & Working "View All Trips" Action.
+ *    - Holds the poster visible for **exactly 3 seconds (`3000ms`)**, then crossfades (`880ms`)
+ *      into the active destination `<video>` once playable (`readyState >= 2`).
+ * 3. Single Prominent "View All Trips" Action (`data-view-all-trips-button`):
+ *    - Removed redundant duplicate "View All Trips" buttons so only one clear primary CTA
+ *      in the journey filter bar expands the collection to all 5 configured journeys across
+ *      Egypt, Türkiye, and Dubai.
  */
 export function DestinationDiscoveryExperience({
   initialDestination,
   customJourneys,
 }: DestinationDiscoveryExperienceProps) {
-  const {
-    locale,
-    t,
-    theme,
-    selectDestinationForBooking,
-    openInquiryDrawer,
-  } = useHero();
+  const { locale, t, theme, selectDestinationForBooking, openInquiryDrawer } =
+    useHero();
 
   const isLight = theme === "light";
   const discoveryCopy = DESTINATION_DISCOVERY_DICTIONARY[locale];
 
-  // Egypt is strictly the default initial destination unless a valid URL query param overrides it
+  // Egypt is the default active stage destination when initialDestination is omitted or "all"
   const [selectedId, setSelectedId] = useState<DestinationId>(() =>
     resolveDestinationId(initialDestination, "egypt")
   );
+  // Journey filter preserves "all" when opened via "All Trips" / "Explore All Trips" / `/trips`
   const [journeyFilter, setJourneyFilter] = useState<DestinationId | "all">(() =>
-    resolveDestinationId(initialDestination, "egypt")
+    resolveDiscoveryFilter(initialDestination, "egypt")
   );
   const [transitionTick, setTransitionTick] = useState(0);
 
-  const { ref: heroStageRef, hasEntered: heroEntered, reducedMotion } =
-    useSectionEntrance<HTMLElement>({
-      immediate: true,
-    });
+  const {
+    ref: heroStageRef,
+    hasEntered: heroEntered,
+    reducedMotion,
+  } = useSectionEntrance<HTMLElement>({
+    immediate: true,
+  });
 
   const { ref: journeysSectionRef, hasEntered: journeysEntered } =
     useSectionEntrance<HTMLElement>({
@@ -96,20 +95,39 @@ export function DestinationDiscoveryExperience({
       rootMargin: "0px 0px -8% 0px",
     });
 
-  // Sync URL query parameter `?destination=egypt|turkiye|dubai` on mount
+  // Sync URL query parameters (`?destination=egypt|turkiye|dubai|all` or `?filter=all`) on mount, prop change & popstate
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    const params = new URLSearchParams(window.location.search);
-    const destParam = params.get("destination");
-    if (destParam) {
-      const resolved = resolveDestinationId(destParam, "egypt");
-      setSelectedId(resolved);
-      setJourneyFilter(resolved);
-      selectDestinationForBooking(resolved);
-    } else {
-      selectDestinationForBooking("egypt");
+    const applyDestinationParam = (rawParam: string | null | undefined) => {
+      if (rawParam) {
+        const resolvedFilter = resolveDiscoveryFilter(rawParam, "egypt");
+        setJourneyFilter(resolvedFilter);
+        if (resolvedFilter !== "all") {
+          setSelectedId(resolvedFilter);
+          selectDestinationForBooking(resolvedFilter);
+        } else {
+          selectDestinationForBooking("egypt");
+        }
+      } else {
+        selectDestinationForBooking("egypt");
+      }
+    };
+
+    if (typeof window === "undefined") {
+      applyDestinationParam(initialDestination);
+      return;
     }
-  }, [selectDestinationForBooking]);
+
+    const syncFromUrl = () => {
+      const params = new URLSearchParams(window.location.search);
+      const destParam =
+        params.get("destination") ?? params.get("filter") ?? initialDestination;
+      applyDestinationParam(destParam);
+    };
+
+    syncFromUrl();
+    window.addEventListener("popstate", syncFromUrl);
+    return () => window.removeEventListener("popstate", syncFromUrl);
+  }, [initialDestination, selectDestinationForBooking]);
 
   const handleSelectDestination = useCallback(
     (id: DestinationId) => {
@@ -125,6 +143,7 @@ export function DestinationDiscoveryExperience({
       if (typeof window !== "undefined") {
         const url = new URL(window.location.href);
         url.searchParams.set("destination", id);
+        url.searchParams.delete("filter");
         window.history.replaceState({}, "", url.toString());
       }
     },
@@ -143,7 +162,7 @@ export function DestinationDiscoveryExperience({
   const handleStepDestination = useCallback(
     (delta: number) => {
       const total = DESTINATIONS_CONFIG.length;
-      const nextIdx = ((activeIndex + delta) % total + total) % total;
+      const nextIdx = (((activeIndex + delta) % total) + total) % total;
       handleSelectDestination(DESTINATIONS_CONFIG[nextIdx].id);
     },
     [activeIndex, handleSelectDestination]
@@ -152,6 +171,8 @@ export function DestinationDiscoveryExperience({
   // Shared 3-second poster hold + playable readiness video sequence
   const {
     videoRef,
+    backdropMode,
+    toggleBackdropMode,
     shouldLoadVideo,
     isPosterHoldActive,
     isPosterHoldElapsed,
@@ -183,6 +204,12 @@ export function DestinationDiscoveryExperience({
 
   const handleViewAllTrips = useCallback(() => {
     setJourneyFilter("all");
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("destination", "all");
+      url.searchParams.delete("filter");
+      window.history.replaceState({}, "", url.toString());
+    }
     const el = document.getElementById("destination-journeys");
     if (el) {
       el.scrollIntoView({
@@ -193,6 +220,12 @@ export function DestinationDiscoveryExperience({
   }, [reducedMotion]);
 
   const scrollToJourneysSection = () => {
+    setJourneyFilter(selectedId);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("destination", selectedId);
+      window.history.replaceState({}, "", url.toString());
+    }
     const el = document.getElementById("destination-journeys");
     if (el) {
       el.scrollIntoView({
@@ -288,6 +321,7 @@ export function DestinationDiscoveryExperience({
           data-active-poster-src={activeConfig.posterImageJpg}
           data-active-video-src={activeConfig.videoMp4}
           data-active-canva-design={activeConfig.canvaAsset.designId}
+          data-backdrop-mode={backdropMode}
           data-poster-hold-duration-ms={posterHoldDurationMs}
           data-poster-hold-active={isPosterHoldActive ? "true" : "false"}
           data-poster-hold-elapsed={isPosterHoldElapsed ? "true" : "false"}
@@ -299,51 +333,44 @@ export function DestinationDiscoveryExperience({
           data-sequence-tick={sequenceTick}
           className="pointer-events-none absolute inset-0 overflow-hidden select-none bg-[#04111D]"
         >
-          {/* Layer 0 (z-0): Softly Blurred Ambient Destination Atmosphere (Provides peripheral depth while keeping the stage clear) */}
-          <div
-            data-discovery-ambient-blur={selectedId}
-            className="absolute inset-0 z-0 opacity-35 blur-xl scale-105 transition-opacity duration-[880ms] ease-in-out"
-          >
+          {/* Layer 0: Softly Blurred Ambient Rim for Atmospheric Depth */}
+          <div className="absolute inset-0 z-0 overflow-hidden opacity-40">
             <Image
-              src={activeConfig.posterImageJpg}
+              src={activeConfig.posterImageWebp}
               alt=""
               fill
               sizes="100vw"
-              className="object-cover"
+              className="object-cover scale-110 blur-[26px] saturate-125 transition-all duration-[900ms] ease-in-out"
               style={{ objectPosition: activeConfig.objectPosition }}
             />
           </div>
 
-          {/* Layer 1 (z-[1]): Immediate High-Resolution Destination Poster (Visible immediately for 3 full seconds, and kept visible if video is still loading) */}
+          {/* Layer 1 (z-[1]): Synchronized Poster Layer — Stays at opacity-100 during the full 3000ms hold */}
           {DESTINATIONS_CONFIG.map((dest) => {
-            const isActive = dest.id === selectedId;
+            const isSelected = dest.id === selectedId;
             return (
               <div
-                key={`poster-stage-${dest.id}`}
-                data-discovery-poster={dest.id}
-                data-poster-src={dest.posterImageJpg}
-                className={`absolute inset-0 transition-opacity duration-[880ms] ease-in-out ${
-                  isActive ? "opacity-100 z-[1]" : "opacity-0 z-0"
+                key={`stage-poster-${dest.id}`}
+                data-discovery-poster-layer={dest.id}
+                className={`absolute inset-0 z-[1] transition-opacity duration-[880ms] ease-in-out ${
+                  isSelected ? "opacity-100" : "opacity-0"
                 }`}
               >
                 <Image
-                  src={dest.posterImageJpg}
+                  src={dest.posterImageWebp}
                   alt={t.destinations[dest.id].imageAlt}
                   fill
                   priority={dest.id === "egypt"}
+                  quality={90}
                   sizes="100vw"
-                  className="object-cover transition-transform duration-[1100ms] ease-in-out"
-                  style={{
-                    objectPosition: dest.objectPosition,
-                    transform:
-                      isActive && !reducedMotion ? "scale(1.02)" : "scale(1.06)",
-                  }}
+                  className="object-cover transition-transform duration-[1800ms] ease-out scale-[1.01]"
+                  style={{ objectPosition: dest.objectPosition }}
                 />
               </div>
             );
           })}
 
-          {/* Layer 2 (z-[2]): Single Lazy-Loaded Active Destination Video (Revealed with 880ms crossfade ONLY after 3-second poster hold + playable state) */}
+          {/* Layer 2 (z-[2]): Active Destination Canva MP4 Video — Revealed only after 3000ms hold + playable readiness */}
           {shouldLoadVideo && (
             <div
               data-discovery-video-layer={activeConfig.id}
@@ -381,14 +408,14 @@ export function DestinationDiscoveryExperience({
             className="absolute inset-0 z-[3] transition-opacity duration-[880ms] ease-in-out"
             style={{
               background:
-                "linear-gradient(90deg, rgba(4,15,26,0.72) 0%, rgba(4,15,26,0.42) 42%, rgba(4,15,26,0.12) 70%, rgba(4,15,26,0.28) 100%)",
+                "linear-gradient(90deg, rgba(4,15,26,0.76) 0%, rgba(4,15,26,0.44) 42%, rgba(4,15,26,0.12) 70%, rgba(4,15,26,0.28) 100%)",
             }}
           />
           <div
             className="absolute inset-x-0 top-0 z-[3] h-28"
             style={{
               background:
-                "linear-gradient(to bottom, rgba(4,15,26,0.48), transparent)",
+                "linear-gradient(to bottom, rgba(4,15,26,0.52), transparent)",
             }}
           />
           <div
@@ -400,21 +427,22 @@ export function DestinationDiscoveryExperience({
           />
         </div>
 
-        {/* 1B. Shared Floating Liquid-Glass Navbar (Includes Home link + Clickable Logo) */}
+        {/* 1B. Shared Fixed Floating Liquid-Glass Navbar */}
         <FloatingNavbar
           hasAccountRoute={false}
           onSelectDiscoveryDestination={handleSelectDestination}
+          onSelectAllTrips={handleViewAllTrips}
         />
 
-        {/* 1C. Main Interactive Stage: Left-Shifted 1px Rail + Left Editorial Copy + Right 1-Full / 1-Peeking Layered Carousel */}
-        <div className="relative z-20 mx-auto flex w-full max-w-[1440px] flex-1 flex-col justify-center pl-3 pr-4 sm:pl-5 sm:pr-8 lg:pl-6 lg:pr-10 py-6 lg:py-10">
-          {/* Mobile & Tablet Compact Top Step Rail (< 1024px) */}
+        {/* 1C. Full-Width Edge-Anchored Desktop Container (`max-w-[1640px] 2xl:max-w-[1720px]`) with Top Clearance for Fixed Navbar */}
+        <div className="relative z-20 mx-auto flex w-full max-w-[1640px] 2xl:max-w-[1720px] flex-1 flex-col justify-center px-4 sm:px-6 lg:px-8 xl:px-12 pt-24 sm:pt-28 lg:pt-28 pb-8 lg:pb-12">
+          {/* Mobile & Tablet Top Step Rail (< 1024px) */}
           <div
             role="tablist"
             aria-label={discoveryCopy.railAriaLabel}
-            className="mb-5 flex lg:hidden items-center justify-between gap-3 rounded-2xl bg-[#061A2C]/55 border border-white/25 px-3.5 py-2 backdrop-blur-md"
+            className="mb-5 flex lg:hidden flex-wrap items-center justify-between gap-2.5 rounded-2xl bg-[#061A2C]/65 border border-white/25 px-3.5 py-2.5 backdrop-blur-md"
           >
-            <div className="flex items-center gap-1.5">
+            <div className="flex flex-wrap items-center gap-1.5">
               {DESTINATIONS_CONFIG.map((dest) => {
                 const isCurrent = dest.id === selectedId;
                 return (
@@ -427,7 +455,7 @@ export function DestinationDiscoveryExperience({
                     className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4] ${
                       isCurrent
                         ? "bg-[#0E7C8E] text-white ring-1 ring-[#5EEAD4]"
-                        : "bg-white/10 text-white/75 hover:bg-white/20 hover:text-white"
+                        : "bg-white/10 text-white/80 hover:bg-white/20 hover:text-white"
                     }`}
                   >
                     <span className="font-mono text-[10.5px]">
@@ -438,30 +466,56 @@ export function DestinationDiscoveryExperience({
                 );
               })}
             </div>
-            <span className="font-mono text-[11px] font-semibold tracking-widest text-[#F4C266]">
-              {activeConfig.orderNumber} / 0{DESTINATIONS_CONFIG.length}
-            </span>
+
+            {/* Mobile Far-Right Edge: Counter + Interactive Poster/Video Switcher */}
+            <div className="ml-auto flex items-center gap-2">
+              <button
+                type="button"
+                onClick={toggleBackdropMode}
+                aria-pressed={backdropMode === "auto"}
+                data-video-mode-control="mobile"
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#061A2C]/75 border border-white/25 px-2.5 py-1 text-[10.5px] font-medium text-white/95 backdrop-blur-md transition-colors hover:border-[#5EEAD4]/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4]"
+              >
+                {backdropMode === "auto" ? (
+                  <Play className="h-2.5 w-2.5 fill-[#5EEAD4] text-[#5EEAD4]" />
+                ) : (
+                  <ImageIcon className="h-2.5 w-2.5 text-[#F4C266]" />
+                )}
+                <span>
+                  {backdropMode === "auto"
+                    ? discoveryCopy.videoAtmosphereLabel
+                    : t.hero.posterFallbackBadge}
+                </span>
+              </button>
+              <span className="font-mono text-[11px] font-semibold tracking-widest text-[#F4C266]">
+                {activeConfig.orderNumber}/0{DESTINATIONS_CONFIG.length}
+              </span>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[28px_minmax(0,1.05fr)_minmax(0,1fr)] xl:grid-cols-[32px_minmax(0,1.08fr)_minmax(0,1fr)] items-center gap-6 lg:gap-8 xl:gap-10">
-            {/* Column 1: Left-Shifted, Thinner 1px Vertical Progress Rail */}
+          {/* Edge-Anchored Desktop Stage Grid: Left Copy at Far Left, Destination Carousel at Far Right */}
+          <div
+            data-discovery-stage-grid="edge-anchored"
+            className="grid grid-cols-1 lg:grid-cols-[28px_minmax(0,560px)_minmax(0,620px)] xl:grid-cols-[32px_minmax(0,620px)_minmax(0,680px)] 2xl:grid-cols-[32px_minmax(0,650px)_minmax(0,720px)] lg:justify-between items-center gap-6 lg:gap-8 xl:gap-10 w-full"
+          >
+            {/* Column 1: Far-Left Slim 1px Vertical Progress Rail */}
             <div
               role="tablist"
               aria-orientation="vertical"
               aria-label={discoveryCopy.railAriaLabel}
               data-progress-rail="desktop"
-              className="hidden lg:flex flex-col items-center justify-between h-[390px] py-1 select-none -ml-1 xl:-ml-2"
+              className="hidden lg:flex flex-col items-center justify-between h-[420px] py-1 select-none justify-self-start"
             >
               <div className="relative flex flex-col items-center justify-between flex-1 w-full">
                 {/* 1px Hairline Track */}
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute inset-y-2 left-1/2 -translate-x-1/2 w-px bg-white/22"
+                  className="pointer-events-none absolute inset-y-2 left-1/2 -translate-x-1/2 w-px bg-white/24"
                 />
                 {/* 1px Active Progress Fill (960ms transition) */}
                 <span
                   aria-hidden="true"
-                  className="pointer-events-none absolute top-2 left-1/2 -translate-x-1/2 w-px bg-gradient-to-b from-[#F4C266]/85 to-[#5EEAD4]/85 transition-all duration-[960ms] ease-in-out"
+                  className="pointer-events-none absolute top-2 left-1/2 -translate-x-1/2 w-px bg-gradient-to-b from-[#F4C266]/90 to-[#5EEAD4]/90 transition-all duration-[960ms] ease-in-out"
                   style={{
                     height: `${
                       ((activeIndex + 1) / DESTINATIONS_CONFIG.length) * 86
@@ -485,8 +539,8 @@ export function DestinationDiscoveryExperience({
                       <span
                         className={`flex items-center justify-center rounded-full font-mono text-[10.5px] font-semibold transition-all duration-700 ease-in-out ${
                           isCurrent
-                            ? "h-6 w-6 bg-[#061A2C]/85 text-white border border-[#5EEAD4]/85 ring-2 ring-[#5EEAD4]/25 shadow-[0_0_14px_rgba(45,212,191,0.4)] backdrop-blur-md"
-                            : "h-2 w-2 bg-white/40 group-hover:h-2.5 group-hover:w-2.5 group-hover:bg-[#F4C266]"
+                            ? "h-6 w-6 bg-[#061A2C]/90 text-white border border-[#5EEAD4]/85 ring-2 ring-[#5EEAD4]/25 shadow-[0_0_14px_rgba(45,212,191,0.45)] backdrop-blur-md"
+                            : "h-2 w-2 bg-white/45 group-hover:h-2.5 group-hover:w-2.5 group-hover:bg-[#F4C266]"
                         }`}
                       >
                         {isCurrent ? idx + 1 : ""}
@@ -498,35 +552,28 @@ export function DestinationDiscoveryExperience({
 
               {/* Rotated Fractional Step Indicator at Bottom of Rail (01 / 03) */}
               <div className="mt-7 pt-3 flex flex-col items-center">
-                <span className="-rotate-90 font-mono text-[10px] font-medium tracking-[0.22em] text-white/75 whitespace-nowrap">
+                <span className="-rotate-90 font-mono text-[10px] font-medium tracking-[0.22em] text-white/80 whitespace-nowrap">
                   {activeConfig.orderNumber}/0{DESTINATIONS_CONFIG.length}
                 </span>
               </div>
             </div>
 
-            {/* Column 2: Coordinated Active Destination Title, Copy & CTAs */}
+            {/* Column 2: Far-Left Editorial Destination Title, Copy, Badges & Destination CTAs */}
             <div
               key={`copy-block-${selectedId}`}
-              className="flex flex-col items-start text-left min-w-0 lg:pl-2"
+              data-discovery-left-column={selectedId}
+              className="flex flex-col items-start text-left min-w-0 w-full max-w-[620px] xl:max-w-[650px] justify-self-start"
             >
-              {/* Step 0: Active Destination Badge + Live Video Indicator */}
+              {/* Step 0: Active Destination Location Pill */}
               <div
                 style={getCoordinatedCopyStyle(0)}
                 className="west-dest-copy-step-0 flex flex-wrap items-center gap-2.5"
               >
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#061A2C]/50 border border-white/25 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#A5F3FC] backdrop-blur-md">
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#061A2C]/65 border border-white/30 px-3.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#A5F3FC] shadow-[0_4px_14px_rgba(0,0,0,0.35)] backdrop-blur-md">
                   <Sparkles className="h-3 w-3 text-[#F4C266]" />
                   <span>
                     {activeConfig.orderNumber} · {activeHeroCopy.locationBadge}
                   </span>
-                </span>
-
-                <span
-                  data-video-stage-badge={isVideoRevealed ? "playing" : "poster-hold"}
-                  className="inline-flex items-center gap-1.5 rounded-full bg-white/12 border border-white/20 px-3 py-1 text-[10.5px] font-medium uppercase tracking-wider text-white/90 backdrop-blur-md"
-                >
-                  <Play className="h-2.5 w-2.5 fill-[#5EEAD4] text-[#5EEAD4]" />
-                  <span>{discoveryCopy.videoAtmosphereLabel}</span>
                 </span>
               </div>
 
@@ -534,7 +581,7 @@ export function DestinationDiscoveryExperience({
               <h1
                 style={getCoordinatedCopyStyle(1)}
                 data-discovery-heading={selectedId}
-                className="west-dest-copy-step-1 mt-4 sm:mt-5 font-serif text-5xl sm:text-6xl xl:text-[4.75rem] font-bold uppercase tracking-[0.04em] leading-[1.02] text-white drop-shadow-[0_10px_30px_rgba(0,0,0,0.65)]"
+                className="west-dest-copy-step-1 mt-4 sm:mt-5 font-serif text-5xl sm:text-6xl xl:text-[4.85rem] font-bold uppercase tracking-[0.04em] leading-[1.02] text-white [text-shadow:0_10px_30px_rgba(0,0,0,0.72)]"
               >
                 {activeCopy.displayTitle}
               </h1>
@@ -542,14 +589,14 @@ export function DestinationDiscoveryExperience({
               {/* Step 2: Subtitle & Editorial Introduction */}
               <div
                 style={getCoordinatedCopyStyle(2)}
-                className="west-dest-copy-step-2 mt-2.5"
+                className="west-dest-copy-step-2 mt-2.5 w-full"
               >
-                <p className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-[#F4C266] drop-shadow">
+                <p className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold uppercase tracking-[0.2em] text-[#F4C266] [text-shadow:0_2px_10px_rgba(0,0,0,0.65)]">
                   <MapPin className="h-3.5 w-3.5 text-[#2DD4BF] shrink-0" />
                   <span>{activeCopy.subtitle}</span>
                 </p>
 
-                <p className="mt-3.5 max-w-xl text-sm sm:text-base lg:text-[16px] font-normal leading-relaxed text-white/92 drop-shadow-[0_2px_12px_rgba(0,0,0,0.6)]">
+                <p className="mt-3.5 text-sm sm:text-base lg:text-[16.5px] font-normal leading-relaxed text-white/95 [text-shadow:0_2px_14px_rgba(0,0,0,0.68)]">
                   {activeCopy.editorialIntro}
                 </p>
               </div>
@@ -562,7 +609,7 @@ export function DestinationDiscoveryExperience({
                 {activeCopy.corridorBadges.map((badge) => (
                   <span
                     key={badge}
-                    className="inline-flex items-center gap-1.5 rounded-full bg-[#061A2C]/45 border border-white/22 px-3 py-1 text-xs font-medium text-white/92 backdrop-blur-md"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-[#061A2C]/65 border border-white/25 px-3 py-1 text-xs font-medium text-white/95 shadow-sm backdrop-blur-md"
                   >
                     <Compass className="h-3 w-3 text-[#2DD4BF]" />
                     <span>{badge}</span>
@@ -570,7 +617,7 @@ export function DestinationDiscoveryExperience({
                 ))}
               </div>
 
-              {/* Step 4: Prominent Compact CTA Row */}
+              {/* Step 4: Destination CTA Row (Explore Selected Destination Journeys + Inquire) */}
               <div
                 style={getCoordinatedCopyStyle(4)}
                 className="west-dest-copy-step-4 mt-7 sm:mt-8 flex flex-wrap items-center gap-3.5"
@@ -594,24 +641,84 @@ export function DestinationDiscoveryExperience({
                     )
                   }
                   data-discovery-inquire-cta={selectedId}
-                  className="inline-flex items-center gap-2.5 rounded-2xl bg-[#061A2C]/45 hover:bg-[#061A2C]/65 border border-white/35 px-6 py-3.5 sm:py-4 text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4]"
+                  className="inline-flex items-center gap-2.5 rounded-2xl bg-[#061A2C]/55 hover:bg-[#061A2C]/80 border border-white/35 px-6 py-3.5 sm:py-4 text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4]"
                 >
                   <span>{activeCopy.ctaInquireDestination}</span>
                 </button>
               </div>
             </div>
 
-            {/* Column 3: Layered 2-Card Destination Carousel (1 Full Foreground Card + 1 ~45% Peeking Side Preview) */}
-            <div className="flex flex-col items-end w-full min-w-0">
-              {/* Viewport Mask: Shows 100% of the active 310px card + ~45% (~138px) of the secondary 300px preview card */}
+            {/* Column 3: Far-Right Layered 2-Card Destination Carousel + Poster/Video Control */}
+            <div
+              data-discovery-right-column="carousel"
+              className="flex flex-col items-end justify-self-end ml-auto w-full min-w-0"
+            >
+              {/* Top-Right Far-Edge Stage Bar: Destination Quick Switcher + Poster/Video Toggle Control */}
+              <div className="mb-3 flex flex-wrap items-center justify-end gap-2 w-full max-w-[520px] sm:max-w-[580px] lg:max-w-[620px] xl:max-w-[680px] 2xl:max-w-[720px]">
+                <div
+                  role="group"
+                  aria-label={discoveryCopy.otherDestinationsHeading}
+                  className="inline-flex items-center gap-1 rounded-full bg-[#051525]/65 border border-white/20 p-1 backdrop-blur-md"
+                >
+                  {DESTINATIONS_CONFIG.map((dest) => {
+                    const isCurrent = dest.id === selectedId;
+                    return (
+                      <button
+                        key={`quick-pill-${dest.id}`}
+                        type="button"
+                        onClick={() => handleSelectDestination(dest.id)}
+                        data-carousel-pill={dest.id}
+                        aria-pressed={isCurrent}
+                        className={`rounded-full px-3 py-1 text-[11px] font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4] ${
+                          isCurrent
+                            ? "bg-[#0E7C8E] text-white shadow-sm"
+                            : "text-white/75 hover:text-white hover:bg-white/10"
+                        }`}
+                      >
+                        {t.destinations[dest.id].name}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Far-Right Edge Poster / Video Switching Control */}
+                <button
+                  type="button"
+                  onClick={toggleBackdropMode}
+                  aria-pressed={backdropMode === "auto"}
+                  data-video-mode-control="desktop"
+                  data-video-stage-badge={
+                    isVideoRevealed ? "playing" : "poster-hold"
+                  }
+                  title={
+                    backdropMode === "auto"
+                      ? discoveryCopy.videoAtmosphereLabel
+                      : t.hero.posterFallbackBadge
+                  }
+                  className="inline-flex items-center gap-1.5 rounded-full bg-[#051525]/72 hover:bg-[#092338]/85 border border-white/25 hover:border-[#5EEAD4]/60 px-3.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-white/95 shadow-[0_6px_18px_rgba(0,0,0,0.35)] backdrop-blur-md transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4]"
+                >
+                  {backdropMode === "auto" ? (
+                    <Play className="h-3 w-3 fill-[#5EEAD4] text-[#5EEAD4]" />
+                  ) : (
+                    <ImageIcon className="h-3 w-3 text-[#F4C266]" />
+                  )}
+                  <span>
+                    {backdropMode === "auto"
+                      ? discoveryCopy.videoAtmosphereLabel
+                      : t.hero.posterFallbackBadge}
+                  </span>
+                </button>
+              </div>
+
+              {/* Viewport Mask: Anchored to Far Right Edge — Shows 100% of active card + prominent secondary preview card */}
               <div
                 data-carousel-viewport="one-featured-one-peeking"
-                className="relative w-full max-w-[430px] sm:max-w-[462px] xl:max-w-[488px] h-[408px] sm:h-[448px] xl:h-[472px] overflow-hidden select-none"
+                className="relative w-full max-w-[520px] sm:max-w-[580px] lg:max-w-[620px] xl:max-w-[680px] 2xl:max-w-[720px] h-[428px] sm:h-[468px] xl:h-[504px] overflow-hidden select-none"
               >
                 {DESTINATIONS_CONFIG.map((dest, destIdx) => {
                   const total = DESTINATIONS_CONFIG.length;
                   const relSlot =
-                    ((destIdx - activeIndex) % total + total) % total;
+                    (((destIdx - activeIndex) % total) + total) % total;
                   const isPrimaryActive = relSlot === 0;
                   const isSecondaryPeek = relSlot === 1;
                   const isHiddenThird = relSlot === 2;
@@ -623,8 +730,8 @@ export function DestinationDiscoveryExperience({
                   const slotTransform = isPrimaryActive
                     ? "translate3d(0px, 0px, 0) scale(1)"
                     : isSecondaryPeek
-                    ? "translate3d(324px, 24px, 0) scale(0.90)"
-                    : "translate3d(640px, 42px, 0) scale(0.84)";
+                    ? "translate3d(382px, 20px, 0) scale(0.92)"
+                    : "translate3d(740px, 40px, 0) scale(0.84)";
 
                   return (
                     <div
@@ -643,13 +750,13 @@ export function DestinationDiscoveryExperience({
                           ? isPrimaryActive
                             ? "translate3d(0px, 0px, 0)"
                             : isSecondaryPeek
-                            ? "translate3d(324px, 24px, 0)"
-                            : "translate3d(640px, 42px, 0)"
+                            ? "translate3d(382px, 20px, 0)"
+                            : "translate3d(740px, 40px, 0)"
                           : slotTransform,
                         opacity: isPrimaryActive
                           ? 1
                           : isSecondaryPeek
-                          ? 0.92
+                          ? 0.94
                           : 0,
                         zIndex: isPrimaryActive
                           ? 20
@@ -661,15 +768,15 @@ export function DestinationDiscoveryExperience({
                         transitionTimingFunction:
                           "cubic-bezier(0.4, 0, 0.2, 1)",
                       }}
-                      className={`absolute top-0 left-0 w-[276px] sm:w-[304px] xl:w-[316px] ${
+                      className={`absolute top-0 left-0 w-[296px] sm:w-[338px] lg:w-[356px] xl:w-[368px] 2xl:w-[384px] ${
                         isHiddenThird
                           ? "pointer-events-none"
                           : "pointer-events-auto"
                       }`}
                     >
                       {/* Top Caption + 5-Dot Indicator Above Card */}
-                      <div className="mb-2.5 px-1">
-                        <p className="truncate text-xs sm:text-[13px] font-semibold text-white drop-shadow">
+                      <div className="mb-2.5 px-0.5">
+                        <p className="truncate text-xs sm:text-[13.5px] font-semibold text-white [text-shadow:0_2px_10px_rgba(0,0,0,0.75)]">
                           {isPrimaryActive
                             ? destEditorial.featuredLandmarkTitle
                             : destHero.name}
@@ -695,7 +802,7 @@ export function DestinationDiscoveryExperience({
                         </div>
                       </div>
 
-                      {/* Card Button */}
+                      {/* Card Button — Edge-to-Edge Image Framing Without Inner Gutters */}
                       <button
                         type="button"
                         tabIndex={isHiddenThird ? -1 : 0}
@@ -716,29 +823,30 @@ export function DestinationDiscoveryExperience({
                             handleSelectDestination(dest.id);
                           }
                         }}
-                        className={`group relative w-full h-[352px] sm:h-[388px] xl:h-[408px] overflow-hidden rounded-[22px] text-left transition-all duration-700 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4] ${
+                        className={`group relative block w-full h-[370px] sm:h-[408px] xl:h-[438px] p-0 m-0 overflow-hidden rounded-[22px] bg-[#061829] text-left transition-all duration-700 ease-in-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4] ${
                           isPrimaryActive
-                            ? "border border-white/45 ring-1 ring-[#5EEAD4]/70 shadow-[0_26px_60px_rgba(2,10,20,0.72)]"
-                            : "border border-white/25 shadow-[0_18px_42px_rgba(2,10,20,0.55)] hover:border-[#5EEAD4]/65"
+                            ? "ring-1 ring-[#5EEAD4]/80 shadow-[0_26px_60px_rgba(2,10,20,0.76)]"
+                            : "ring-1 ring-white/25 shadow-[0_18px_42px_rgba(2,10,20,0.58)] hover:ring-[#5EEAD4]/70"
                         }`}
                       >
-                        {/* Clear, Unblurred Destination Photograph */}
+                        {/* Edge-to-Edge High-Resolution Destination Photograph */}
                         <Image
                           src={dest.cardImageWebp}
                           alt={destHero.imageAlt}
                           fill
-                          sizes="(max-width: 640px) 280px, 320px"
+                          quality={90}
+                          sizes="(max-width: 640px) 88vw, (max-width: 1280px) 440px, 540px"
                           className="object-cover transition-transform duration-[900ms] ease-in-out group-hover:scale-105"
                           style={{ objectPosition: dest.objectPosition }}
                         />
 
-                        {/* Subtle Lower Scrim so top landmark scenery stays crisp and unobstructed */}
+                        {/* Multi-Stop Lower Scrim so top landmark scenery stays crisp while bottom text has high contrast */}
                         <div
                           aria-hidden="true"
                           className={`absolute inset-0 transition-opacity duration-700 ${
                             isPrimaryActive
-                              ? "bg-gradient-to-t from-[#03111F]/88 via-[#041526]/18 to-transparent"
-                              : "bg-gradient-to-t from-[#03111F]/90 via-[#041526]/35 to-[#041220]/25"
+                              ? "bg-[linear-gradient(to_top,rgba(2,10,19,0.92)_0%,rgba(4,18,32,0.48)_38%,transparent_68%)]"
+                              : "bg-[linear-gradient(to_top,rgba(2,10,19,0.94)_0%,rgba(4,18,32,0.55)_42%,rgba(4,16,28,0.22)_100%)]"
                           }`}
                         />
 
@@ -748,7 +856,7 @@ export function DestinationDiscoveryExperience({
                           className={`absolute right-3.5 top-3.5 flex h-9 w-9 items-center justify-center rounded-full shadow-md transition-transform duration-300 group-hover:scale-105 ${
                             isPrimaryActive
                               ? "bg-white text-[#081C2E]"
-                              : "bg-white/85 text-[#081C2E]"
+                              : "bg-white/90 text-[#081C2E]"
                           }`}
                         >
                           <Bookmark
@@ -761,22 +869,22 @@ export function DestinationDiscoveryExperience({
                         </span>
 
                         {/* Top-Left Order Pill */}
-                        <span className="absolute left-3.5 top-3.5 inline-flex items-center gap-1 rounded-full bg-[#051525]/55 border border-white/25 px-2.5 py-1 font-mono text-[11px] font-semibold text-white backdrop-blur-md">
+                        <span className="absolute left-3.5 top-3.5 inline-flex items-center gap-1 rounded-full bg-[#041322]/78 border border-white/30 px-2.5 py-1 font-mono text-[11px] font-semibold text-white shadow-sm backdrop-blur-md">
                           {dest.orderNumber}
                         </span>
 
-                        {/* Compact Liquid-Glass Bottom Caption */}
+                        {/* High-Contrast Bottom Caption Panel */}
                         <div className="absolute inset-x-3.5 bottom-3.5">
-                          <div className="rounded-2xl bg-[#061A2C]/58 border border-white/25 p-3 backdrop-blur-md">
+                          <div className="rounded-2xl bg-[#041423]/78 border border-white/25 p-3 shadow-[0_8px_24px_rgba(0,0,0,0.45)] backdrop-blur-md">
                             <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[#5EEAD4]">
                               {isPrimaryActive
                                 ? discoveryCopy.activeSelectionBadge
                                 : discoveryCopy.nextPreviewBadge}
                             </p>
-                            <p className="mt-0.5 truncate font-serif text-base sm:text-lg font-semibold text-white">
+                            <p className="mt-0.5 truncate font-serif text-base sm:text-lg font-semibold text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.65)]">
                               {destHero.name}
                             </p>
-                            <p className="mt-0.5 truncate text-[11px] text-white/85">
+                            <p className="mt-0.5 truncate text-[11.5px] font-medium text-white/92">
                               {destEditorial.featuredLandmarkSubtitle}
                             </p>
                           </div>
@@ -787,8 +895,8 @@ export function DestinationDiscoveryExperience({
                 })}
               </div>
 
-              {/* Bottom Carousel Controls Row: Prev/Next Circular Buttons + Quick Destination Pills + 01 / 03 Counter */}
-              <div className="mt-4 flex flex-wrap items-center justify-between gap-4 w-full max-w-[430px] sm:max-w-[462px] xl:max-w-[488px] px-1">
+              {/* Bottom Carousel Controls Row: Left Prev/Next Buttons + Far-Right 01 — 03 Counter */}
+              <div className="mt-4 flex items-center justify-between gap-4 w-full max-w-[520px] sm:max-w-[580px] lg:max-w-[620px] xl:max-w-[680px] 2xl:max-w-[720px] px-0.5">
                 <div className="flex items-center gap-2.5">
                   <button
                     type="button"
@@ -810,34 +918,11 @@ export function DestinationDiscoveryExperience({
                   </button>
                 </div>
 
-                {/* Direct 3-Destination Quick Switcher Pills */}
-                <div className="flex items-center gap-1.5">
-                  {DESTINATIONS_CONFIG.map((dest) => {
-                    const isCurrent = dest.id === selectedId;
-                    return (
-                      <button
-                        key={`quick-pill-${dest.id}`}
-                        type="button"
-                        onClick={() => handleSelectDestination(dest.id)}
-                        data-carousel-pill={dest.id}
-                        aria-pressed={isCurrent}
-                        className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4] ${
-                          isCurrent
-                            ? "bg-[#0E7C8E] text-white border border-[#5EEAD4]/60 shadow-sm"
-                            : "bg-[#061A2C]/45 text-white/75 border border-white/15 hover:text-white hover:bg-white/15 backdrop-blur-md"
-                        }`}
-                      >
-                        {t.destinations[dest.id].name}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <div className="flex items-center gap-2 font-mono text-xs font-semibold tracking-[0.2em] text-white/85">
+                <div className="ml-auto flex items-center gap-2 font-mono text-xs font-semibold tracking-[0.2em] text-white/90">
                   <span className="text-[#5EEAD4]">
                     {activeConfig.orderNumber}
                   </span>
-                  <span className="h-px w-6 bg-white/35" aria-hidden="true" />
+                  <span className="h-px w-8 bg-white/40" aria-hidden="true" />
                   <span>0{DESTINATIONS_CONFIG.length}</span>
                 </div>
               </div>
@@ -854,35 +939,34 @@ export function DestinationDiscoveryExperience({
           className="pointer-events-none relative z-20 h-[clamp(18px,3vw,44px)] w-full"
         >
           <path
+            d="M0,18 C360,44 1080,44 1440,18 L1440,44 L0,44 Z"
             className="west-hero-edge-fill"
-            d="M0 44V30C240 11 480 1 720 1S1200 11 1440 30V44Z"
           />
           <path
+            d="M0,18 C360,44 1080,44 1440,18"
             className="west-hero-edge-line"
-            d="M0 30C240 11 480 1 720 1S1200 11 1440 30"
             vectorEffect="non-scaling-stroke"
           />
         </svg>
       </section>
 
-      {/* SECTION 2 — COMPACT JOURNEY LISTING & WORKING "VIEW ALL TRIPS" */}
+      {/* SECTION 2 — CURATED JOURNEY COLLECTION & SINGLE WORKING "VIEW ALL TRIPS" FILTER */}
       <section
         ref={journeysSectionRef}
         id="destination-journeys"
         aria-labelledby="destination-journeys-heading"
-        data-theme-mode={theme}
-        className={`relative w-full py-14 sm:py-18 lg:py-20 transition-colors duration-500 [background:var(--west-surface-trips)] ${
-          isLight ? "text-[#081C2E]" : "text-white"
-        }`}
+        data-active-filter={journeyFilter}
+        data-entered={journeysEntered ? "true" : "false"}
+        className="relative w-full py-14 sm:py-18 lg:py-22 [background:var(--west-surface-trips)]"
       >
-        <div className="mx-auto w-full max-w-[1340px] px-4 sm:px-8 lg:px-12">
-          {/* Header & Interactive Destination Filter Pills + Prominent "View All Trips" Action */}
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-[#E2D8C5] dark:border-white/10 pb-7">
+        <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-8 lg:px-12">
+          {/* Header & Filter Bar */}
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 pb-8 border-b border-[#E2D8C5] dark:border-white/10">
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-3">
                 <span
                   aria-hidden="true"
-                  className="h-px w-8 bg-[#C89648] dark:bg-[#F4C266]"
+                  className="h-px w-10 bg-gradient-to-r from-transparent to-[#0E7C8E] dark:to-[#2DD4BF]"
                 />
                 <span className="text-xs font-semibold uppercase tracking-[0.24em] text-[#0E7C8E] dark:text-[#2DD4BF]">
                   {discoveryCopy.journeysSectionEyebrow}
@@ -907,61 +991,61 @@ export function DestinationDiscoveryExperience({
               </p>
             </div>
 
-            {/* Destination Filter Tabs + Working "View All Trips" Button */}
-            <div className="flex flex-wrap items-center gap-2">
-              <div
-                role="tablist"
-                aria-label="Filter journeys by destination"
-                className="flex flex-wrap items-center gap-2"
-              >
-                {DESTINATIONS_CONFIG.map((dest) => {
-                  const count = getJourneysByDestination(
-                    dest.id,
-                    customJourneys
-                  ).length;
-                  const isSelectedTab = journeyFilter === dest.id;
-                  return (
-                    <button
-                      key={`filter-tab-${dest.id}`}
-                      type="button"
-                      role="tab"
-                      aria-selected={isSelectedTab}
-                      data-journey-filter-tab={dest.id}
-                      onClick={() => handleSelectDestination(dest.id)}
-                      className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs sm:text-[13px] font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
+            {/* Destination Filter Tabs + Single Primary Working "View All Trips" Button */}
+            <div
+              role="tablist"
+              aria-label="Filter journeys by destination"
+              className="flex flex-wrap items-center gap-2"
+            >
+              {DESTINATIONS_CONFIG.map((dest) => {
+                const count = getJourneysByDestination(
+                  dest.id,
+                  customJourneys
+                ).length;
+                const isSelectedTab = journeyFilter === dest.id;
+                return (
+                  <button
+                    key={`filter-tab-${dest.id}`}
+                    type="button"
+                    role="tab"
+                    aria-selected={isSelectedTab}
+                    data-journey-filter-tab={dest.id}
+                    onClick={() => handleSelectDestination(dest.id)}
+                    className={`inline-flex cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-xs sm:text-[13px] font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
+                      isSelectedTab
+                        ? "bg-[#0E7C8E] text-white shadow-[0_8px_20px_rgba(14,124,142,0.30)]"
+                        : isLight
+                        ? "bg-white border border-[#DCD2C0] text-[#081C2E] hover:border-[#0E7C8E]"
+                        : "bg-[#092032] border border-white/15 text-white/85 hover:border-[#2DD4BF]"
+                    }`}
+                  >
+                    <span>{t.destinations[dest.id].name}</span>
+                    <span
+                      className={`rounded-full px-1.5 py-0.5 font-mono text-[10.5px] ${
                         isSelectedTab
-                          ? "bg-[#0E7C8E] text-white shadow-[0_8px_20px_rgba(14,124,142,0.30)]"
+                          ? "bg-white/20 text-white"
                           : isLight
-                          ? "bg-white border border-[#DCD2C0] text-[#081C2E] hover:border-[#0E7C8E]"
-                          : "bg-[#092032] border border-white/15 text-white/85 hover:border-[#2DD4BF]"
+                          ? "bg-slate-100 text-slate-600"
+                          : "bg-white/10 text-white/75"
                       }`}
                     >
-                      <span>{t.destinations[dest.id].name}</span>
-                      <span
-                        className={`rounded-full px-1.5 py-0.5 font-mono text-[10.5px] ${
-                          isSelectedTab
-                            ? "bg-white/20 text-white"
-                            : isLight
-                            ? "bg-slate-100 text-slate-600"
-                            : "bg-white/10 text-white/75"
-                        }`}
-                      >
-                        {count}
-                      </span>
-                    </button>
-                  );
-                })}
-              </div>
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
 
-              {/* Working "View All Trips" Button — Expands collection to show all 5 configured journeys */}
+              {/* Single Primary Working "View All Trips" Button — Expands collection to show all 5 configured journeys */}
               <button
                 type="button"
+                role="tab"
+                aria-selected={journeyFilter === "all"}
                 data-view-all-trips-button=""
-                aria-pressed={journeyFilter === "all"}
+                data-journey-filter-tab="all"
                 onClick={handleViewAllTrips}
-                className={`group inline-flex items-center gap-2 rounded-full px-5 py-2 text-xs sm:text-[13px] font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
+                className={`group inline-flex cursor-pointer items-center gap-2 rounded-full px-5 py-2 text-xs sm:text-[13px] font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
                   journeyFilter === "all"
-                    ? "bg-[#0B2B4B] dark:bg-[#2DD4BF] text-white dark:text-[#041421] shadow-md"
+                    ? "bg-[#0B2B4B] dark:bg-[#2DD4BF] text-white dark:text-[#041421] shadow-md ring-2 ring-[#2DD4BF]/50"
                     : "bg-gradient-to-r from-[#0C7486] via-[#0E869A] to-[#149BB0] text-white shadow-[0_8px_20px_rgba(14,124,142,0.28)] hover:brightness-105"
                 }`}
               >
@@ -974,7 +1058,7 @@ export function DestinationDiscoveryExperience({
             </div>
           </div>
 
-          {/* Active Destination Summary Bar */}
+          {/* Active Destination Summary Bar (Without Redundant "View All Trips" Duplicate) */}
           <div className="mt-5 flex flex-wrap items-center justify-between gap-4">
             <div className="inline-flex items-center gap-2 text-xs sm:text-[13px] font-medium">
               <span className="inline-flex h-2 w-2 rounded-full bg-[#0E7C8E] dark:bg-[#2DD4BF]" />
@@ -991,20 +1075,20 @@ export function DestinationDiscoveryExperience({
             </div>
 
             <div className="flex flex-wrap items-center gap-4">
-              {journeyFilter !== "all" && (
+              {journeyFilter === "all" && (
                 <button
                   type="button"
-                  onClick={handleViewAllTrips}
-                  className={`inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-semibold transition-colors ${
+                  onClick={() => handleSelectDestination(selectedId)}
+                  className={`inline-flex cursor-pointer items-center gap-1.5 text-xs sm:text-[13px] font-semibold transition-colors ${
                     isLight
                       ? "text-[#0B2B4B] hover:text-[#0E7C8E]"
                       : "text-white/90 hover:text-[#5EEAD4]"
                   }`}
                 >
                   <span>
-                    {discoveryCopy.viewAllTripsCta} ({allJourneys.length})
+                    {discoveryCopy.filterBySelectedDestinationCta} (
+                    {t.destinations[selectedId].name})
                   </span>
-                  <ArrowRight className="h-3.5 w-3.5" />
                 </button>
               )}
 
@@ -1019,7 +1103,7 @@ export function DestinationDiscoveryExperience({
                     e.currentTarget
                   )
                 }
-                className={`inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-semibold transition-colors ${
+                className={`inline-flex cursor-pointer items-center gap-1.5 text-xs sm:text-[13px] font-semibold transition-colors ${
                   isLight
                     ? "text-[#0E7C8E] hover:text-[#095E6D]"
                     : "text-[#5EEAD4] hover:text-white"
@@ -1033,49 +1117,25 @@ export function DestinationDiscoveryExperience({
 
           {/* Compact, Scalable 3-Column Journey Cards Grid */}
           {filteredJourneys.length > 0 ? (
-            <>
-              <div
-                key={`grid-${journeyFilter}`}
-                data-journey-results-grid={journeyFilter}
-                data-journey-results-count={filteredJourneys.length}
-                className="mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
-              >
-                {filteredJourneys.map((journey) => (
-                  <JourneyCard
-                    key={`discovery-card-${journey.id}`}
-                    journey={journey}
-                    copy={t.featuredTrips}
-                    locale={locale}
-                    isLight={isLight}
-                    hasEntered={journeysEntered || heroEntered}
-                    reducedMotion={reducedMotion}
-                    variant="discovery-compact"
-                  />
-                ))}
-              </div>
-
-              {/* Bottom Expand Bar when viewing a single destination's subset */}
-              {journeyFilter !== "all" &&
-                allJourneys.length > filteredJourneys.length && (
-                  <div className="mt-8 flex justify-center">
-                    <button
-                      type="button"
-                      onClick={handleViewAllTrips}
-                      data-expand-all-trips-cta=""
-                      className={`group inline-flex items-center gap-2.5 rounded-full px-7 py-3 text-xs sm:text-sm font-semibold text-white transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] ${
-                        isLight
-                          ? "bg-gradient-to-r from-[#0C7486] via-[#0E869A] to-[#149BB0] shadow-[0_10px_24px_rgba(14,124,142,0.24)] hover:brightness-105"
-                          : "bg-gradient-to-r from-[#0D7688] via-[#118CA1] to-[#16A3B8] border border-[#5EEAD4]/35 shadow-[0_12px_28px_rgba(2,10,18,0.6)] hover:brightness-110"
-                      }`}
-                    >
-                      <span>
-                        {discoveryCopy.viewAllTripsCta} ({allJourneys.length})
-                      </span>
-                      <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
-                    </button>
-                  </div>
-                )}
-            </>
+            <div
+              key={`grid-${journeyFilter}`}
+              data-journey-results-grid={journeyFilter}
+              data-journey-results-count={filteredJourneys.length}
+              className="mt-7 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {filteredJourneys.map((journey) => (
+                <JourneyCard
+                  key={`discovery-card-${journey.id}`}
+                  journey={journey}
+                  copy={t.featuredTrips}
+                  locale={locale}
+                  isLight={isLight}
+                  hasEntered={journeysEntered || heroEntered}
+                  reducedMotion={reducedMotion}
+                  variant="discovery-compact"
+                />
+              ))}
+            </div>
           ) : (
             <div
               data-empty-state="true"
