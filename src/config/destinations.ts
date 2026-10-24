@@ -169,3 +169,22 @@ export function resolveDestinationId(
   const found = getDestinationById(input);
   return found ? found.id : fallback;
 }
+
+export type DestinationDiscoveryFilter = DestinationId | "all";
+
+export function resolveDiscoveryFilter(
+  input: string | null | undefined,
+  fallback: DestinationId = "egypt"
+): DestinationDiscoveryFilter {
+  const normalized = input?.trim().toLowerCase();
+  if (
+    !normalized ||
+    normalized === "all" ||
+    normalized === "all-trips" ||
+    normalized === "trips"
+  ) {
+    return "all";
+  }
+  const found = getDestinationById(normalized);
+  return found ? found.id : fallback;
+}
