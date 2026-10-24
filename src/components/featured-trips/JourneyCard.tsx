@@ -3,9 +3,20 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Calendar, FileText, ArrowRight, Compass, Info } from "lucide-react";
+import { useRouter } from "next/navigation";
+import {
+  MapPin,
+  Calendar,
+  FileText,
+  ArrowRight,
+  Compass,
+  Info,
+} from "lucide-react";
 import type { FeaturedJourneyRecord } from "@/config/featured-trips";
-import type { FeaturedTripsTranslation, SupportedLocale } from "@/i18n/hero-dictionary";
+import type {
+  FeaturedTripsTranslation,
+  SupportedLocale,
+} from "@/i18n/hero-dictionary";
 import { DESTINATION_DISCOVERY_DICTIONARY } from "@/i18n/destination-discovery-dictionary";
 import {
   getDirectionalMaskStyle,
@@ -32,13 +43,13 @@ export interface JourneyCardProps {
 }
 
 /**
- * Individual bookable Journey Card for WEST GLOBAL TOURS (reused across Homepage Featured Trips
- * and the Destination Discovery page).
- * - Image Reveal from a Thin Line: The card's photograph starts masked as a narrow 2.5% horizontal strip
- *   (`top-to-bottom` or `bottom-to-top`) and progressively uncovers over `1320ms` (`1.32s`) with a subtle
- *   inner scale settle (`1.05` -> `1.0`).
- * - Supports `"discovery-compact"` for a slightly smaller, scalable footprint on the Destination Discovery page
- *   while keeping Homepage Featured Trips variants untouched.
+ * Individual bookable Journey Card for WEST GLOBAL TOURS (reused across Homepage Featured Trips,
+ * Destination Discovery, and Related Journeys).
+ * - Clicking either the card surface OR the Explore Journey CTA opens `/trips/[slug]` (`journey.href`).
+ * - High-contrast overlay engineering:
+ *   1. Top location badge sits inside a dark frosted pill (`bg-[#041322]/78`) with a warm-gold pin icon.
+ *   2. Multi-stop directional bottom gradient scrim (`h-[78%]` on compact/mobile, `h-[68%]` on hover-expand)
+ *      paired with crisp text shadows so titles, descriptions, durations, and prices remain 100% readable.
  */
 export function JourneyCard({
   journey,
@@ -51,9 +62,11 @@ export function JourneyCard({
   variant,
   onSelectCard,
 }: JourneyCardProps) {
+  const router = useRouter();
   const [touchExpanded, setTouchExpanded] = useState(false);
 
-  const isFeaturedSize = variant === "desktop-featured" || variant === "tablet-featured";
+  const isFeaturedSize =
+    variant === "desktop-featured" || variant === "tablet-featured";
   const isDiscoveryCompact = variant === "discovery-compact";
   const isMobile = variant === "mobile";
 
@@ -61,12 +74,15 @@ export function JourneyCard({
     DESTINATION_DISCOVERY_DICTIONARY[locale]?.journeys[journey.slug];
 
   const resolvedTitle = localizedJourney?.title ?? journey.title;
-  const resolvedLocation = localizedJourney?.locationLabel ?? journey.locationLabel;
-  const resolvedDescription = localizedJourney?.description ?? journey.description;
+  const resolvedLocation =
+    localizedJourney?.locationLabel ?? journey.locationLabel;
+  const resolvedDescription =
+    localizedJourney?.description ?? journey.description;
   const resolvedCorridor =
     localizedJourney?.corridorLabel ?? journey.itineraryMetadata.corridorLabel;
   const resolvedInquiryFormat =
-    localizedJourney?.inquiryFormatLabel ?? journey.itineraryMetadata.inquiryFormatLabel;
+    localizedJourney?.inquiryFormatLabel ??
+    journey.itineraryMetadata.inquiryFormatLabel;
 
   const getEntranceTiming = (): {
     cardDelayMs: number;
@@ -122,7 +138,9 @@ export function JourneyCard({
     ? { opacity: 1, transform: "none" }
     : {
         opacity: hasEntered ? 1 : 0,
-        transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 12px, 0)",
+        transform: hasEntered
+          ? "translate3d(0, 0, 0)"
+          : "translate3d(0, 12px, 0)",
         transitionProperty: "opacity, transform",
         transitionDuration: "880ms",
         transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
@@ -133,8 +151,11 @@ export function JourneyCard({
     ? { opacity: 1, transform: "none" }
     : {
         opacity: hasEntered ? 1 : 0,
-        transform: hasEntered ? "translate3d(0, 0, 0)" : "translate3d(0, 14px, 0)",
-        transitionProperty: "opacity, transform, background-color, border-color, box-shadow",
+        transform: hasEntered
+          ? "translate3d(0, 0, 0)"
+          : "translate3d(0, 14px, 0)",
+        transitionProperty:
+          "opacity, transform, background-color, border-color, box-shadow",
         transitionDuration: "860ms",
         transitionTimingFunction: "cubic-bezier(0.22, 1, 0.36, 1)",
         transitionDelay: `${ctaDelayMs}ms`,
@@ -150,7 +171,7 @@ export function JourneyCard({
       : variant === "tablet-compact"
       ? "h-[252px]"
       : variant === "discovery-compact"
-      ? "h-[256px] sm:h-[268px] lg:h-[278px]"
+      ? "h-[264px] sm:h-[274px] lg:h-[284px]"
       : "h-[396px] sm:h-[416px]";
 
   const cardSurfaceClasses =
@@ -173,20 +194,29 @@ export function JourneyCard({
   const durationText = journey.durationLabel ?? copy.durationPlaceholder;
   const priceOrQuoteText = journey.startingPriceLabel ?? copy.quotePlaceholder;
 
+  const handleCardSurfaceClick = () => {
+    onSelectCard?.(journey.carouselIndex);
+    router.push(journey.href);
+  };
+
   return (
     <article
       data-journey-card={journey.id}
+      data-journey-slug={journey.slug}
+      data-journey-href={journey.href}
       data-journey-destination={journey.destinationId}
       data-column-position={journey.columnPosition}
       data-featured-center={journey.isFeaturedCenter ? "true" : "false"}
       data-card-variant={variant}
       data-mask-direction={maskDirection}
       data-reveal-state={hasEntered ? "revealed" : "masked-thin-line"}
-      onClick={() => onSelectCard?.(journey.carouselIndex)}
-      className={`group relative w-full ${heightClasses} ${
+      onClick={handleCardSurfaceClick}
+      className={`group relative w-full cursor-pointer ${heightClasses} ${
         isDiscoveryCompact ? "rounded-[18px]" : "rounded-[20px]"
       } overflow-hidden select-none transition-all duration-500 ease-out focus-within:ring-2 focus-within:ring-[#2DD4BF] focus-within:ring-offset-2 ${
-        isLight ? "focus-within:ring-offset-[#FAF8F3]" : "focus-within:ring-offset-[#061523]"
+        isLight
+          ? "focus-within:ring-offset-[#FAF8F3]"
+          : "focus-within:ring-offset-[#061523]"
       } ${cardSurfaceClasses}`}
     >
       {/* Scenic Travel Photograph with 1.32s Thin-Line Progressive Mask Reveal */}
@@ -196,30 +226,35 @@ export function JourneyCard({
             src={journey.imageWebp}
             alt={journey.imageAlt}
             fill
+            quality={90}
             sizes={
               isFeaturedSize
-                ? "(max-width: 768px) 90vw, (max-width: 1200px) 45vw, 440px"
-                : "(max-width: 768px) 90vw, (max-width: 1200px) 32vw, 360px"
+                ? "(max-width: 768px) 92vw, (max-width: 1280px) 50vw, 560px"
+                : "(max-width: 768px) 92vw, (max-width: 1280px) 44vw, 480px"
             }
-            className="object-cover brightness-[1.06] saturate-[1.05] transition-transform duration-700 ease-out group-hover:scale-[1.06] group-focus-within:scale-[1.04]"
+            className="object-cover contrast-[1.03] saturate-[1.04] transition-transform duration-700 ease-out group-hover:scale-[1.05] group-focus-within:scale-[1.04]"
             style={{ objectPosition: journey.objectPosition }}
           />
         </div>
 
-        {/* Scrims live inside the progressive mask so they uncover together with the photograph */}
+        {/* Top Vignette Scrim */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-[#041322]/42 via-[#041322]/12 to-transparent"
+          className="pointer-events-none absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-[#03101D]/65 via-[#03101D]/24 to-transparent"
         />
 
+        {/* Multi-Stop Directional Bottom Scrim */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-[62%] bg-gradient-to-t from-[#03111F]/95 via-[#051B2E]/62 to-transparent transition-opacity duration-500"
+          className={`pointer-events-none absolute inset-x-0 bottom-0 ${
+            isDiscoveryCompact || isMobile ? "h-[78%]" : "h-[68%]"
+          } bg-[linear-gradient(to_top,rgba(2,10,19,0.96)_0%,rgba(4,17,30,0.88)_38%,rgba(5,22,38,0.52)_68%,transparent_100%)] transition-opacity duration-500`}
         />
 
+        {/* Hover / Focus / Expanded Readability Veil */}
         <div
           aria-hidden="true"
-          className={`pointer-events-none absolute inset-0 bg-gradient-to-t from-[#020D18]/98 via-[#051A2D]/78 to-[#041322]/25 transition-opacity duration-500 ${
+          className={`pointer-events-none absolute inset-0 bg-[linear-gradient(to_top,rgba(2,10,19,0.98)_0%,rgba(4,19,33,0.84)_56%,rgba(4,16,28,0.32)_100%)] transition-opacity duration-500 ${
             touchExpanded
               ? "opacity-100"
               : "opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
@@ -227,7 +262,7 @@ export function JourneyCard({
         />
       </div>
 
-      {/* Subtle warm-gold/teal thin starting line accent visible before/during reveal */}
+      {/* Subtle warm-gold/teal thin starting line accent */}
       <div
         aria-hidden="true"
         className={`pointer-events-none absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent to-transparent ${
@@ -239,21 +274,22 @@ export function JourneyCard({
         }`}
       />
 
-      {/* Top Row: Location Pin + Location Label */}
+      {/* Top Row: High-Contrast Frosted Location Pill + Details Toggle */}
       <div
         style={overlayContentStyle}
         className={`absolute inset-x-3.5 sm:inset-x-4 ${
           isDiscoveryCompact ? "top-3.5" : "top-4"
         } flex items-center justify-between gap-2 z-10`}
       >
-        <div className="inline-flex items-center gap-1.5 text-white drop-shadow-[0_1px_6px_rgba(0,0,0,0.65)]">
-          <span
+        <div
+          data-card-location-pill={journey.id}
+          className="inline-flex items-center gap-1.5 rounded-full bg-[#041322]/78 border border-white/25 px-3 py-1 text-white shadow-[0_4px_14px_rgba(0,0,0,0.45)] backdrop-blur-md"
+        >
+          <MapPin
             aria-hidden="true"
-            className="flex h-5 w-5 items-center justify-center rounded-full bg-white/15 backdrop-blur-sm border border-white/30"
-          >
-            <MapPin className="h-3 w-3 text-white stroke-[2.2]" />
-          </span>
-          <span className="text-xs font-medium tracking-wide text-white/95">
+            className="h-3 w-3 text-[#F4C266] shrink-0 stroke-[2.2]"
+          />
+          <span className="text-xs font-semibold tracking-wide text-white">
             {resolvedLocation}
           </span>
         </div>
@@ -268,7 +304,7 @@ export function JourneyCard({
           aria-label={`${
             touchExpanded ? copy.hideDetailsLabel : copy.moreDetailsLabel
           } — ${resolvedTitle}`}
-          className="md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 inline-flex items-center gap-1 rounded-full bg-[#061C2E]/75 hover:bg-[#0E7C8E]/85 border border-white/25 px-2.5 py-1 text-[11px] font-medium text-white/90 backdrop-blur-md transition-all duration-300 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4]"
+          className="md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 inline-flex items-center gap-1 rounded-full bg-[#041322]/82 hover:bg-[#0E7C8E]/90 border border-white/30 px-2.5 py-1 text-[11px] font-medium text-white backdrop-blur-md transition-all duration-300 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4]"
         >
           <Info className="h-3 w-3 text-[#5EEAD4]" />
           <span className="sr-only sm:not-sr-only">
@@ -285,7 +321,7 @@ export function JourneyCard({
         }`}
       >
         <h3
-          className={`font-serif font-medium tracking-[-0.01em] text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)] transition-transform duration-500 ease-out ${
+          className={`font-serif font-semibold tracking-[-0.01em] text-white [text-shadow:0_2px_12px_rgba(0,0,0,0.85)] transition-transform duration-500 ease-out ${
             isFeaturedSize
               ? "text-[1.65rem] sm:text-[1.85rem] xl:text-[2.05rem] leading-[1.15]"
               : isDiscoveryCompact
@@ -293,7 +329,13 @@ export function JourneyCard({
               : "text-[1.32rem] sm:text-[1.42rem] xl:text-[1.52rem] leading-[1.18]"
           }`}
         >
-          {resolvedTitle}
+          <Link
+            href={journey.href}
+            onClick={(e) => e.stopPropagation()}
+            className="hover:underline focus-visible:outline-none"
+          >
+            {resolvedTitle}
+          </Link>
         </h3>
 
         <div
@@ -306,7 +348,7 @@ export function JourneyCard({
           <div className="overflow-hidden">
             {resolvedDescription && (
               <p
-                className={`text-white/88 font-normal leading-relaxed ${
+                className={`text-white/95 font-normal leading-relaxed [text-shadow:0_1px_8px_rgba(0,0,0,0.8)] ${
                   isFeaturedSize
                     ? "text-xs sm:text-[13.5px] line-clamp-2"
                     : "text-[11.5px] sm:text-xs line-clamp-2"
@@ -317,11 +359,11 @@ export function JourneyCard({
             )}
 
             <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/12 border border-white/20 px-2 py-0.5 text-[10px] font-medium text-[#A5F3FC]">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#041423]/82 border border-white/25 px-2.5 py-0.5 text-[10px] font-semibold text-[#A5F3FC] shadow-sm">
                 <Compass className="h-2.5 w-2.5 text-[#2DD4BF] shrink-0" />
                 <span>{resolvedCorridor}</span>
               </span>
-              <span className="inline-flex items-center rounded-full bg-[#0E7C8E]/35 border border-[#2DD4BF]/35 px-2 py-0.5 text-[10px] font-medium text-white/90">
+              <span className="inline-flex items-center rounded-full bg-[#0C5969]/85 border border-[#5EEAD4]/45 px-2.5 py-0.5 text-[10px] font-semibold text-white shadow-sm">
                 {resolvedInquiryFormat}
               </span>
             </div>
@@ -329,22 +371,22 @@ export function JourneyCard({
         </div>
 
         <div className="mt-2.5 flex items-end justify-between gap-2.5 sm:gap-3 pt-1">
-          <dl className="flex flex-col gap-0.5 min-w-0 flex-1 text-[11px] sm:text-[11.5px] text-white/85">
+          <dl className="flex flex-col gap-0.5 min-w-0 flex-1 text-[11px] sm:text-[11.5px] text-white/95 [text-shadow:0_1px_6px_rgba(0,0,0,0.82)]">
             <div className="flex items-center gap-1.5">
               <dt className="sr-only">Duration</dt>
               <Calendar
                 aria-hidden="true"
-                className="h-3.5 w-3.5 shrink-0 text-[#5EEAD4]/90 stroke-[1.8]"
+                className="h-3.5 w-3.5 shrink-0 text-[#5EEAD4] stroke-[2]"
               />
-              <dd className="truncate font-normal">{durationText}</dd>
+              <dd className="truncate font-medium">{durationText}</dd>
             </div>
             <div className="flex items-center gap-1.5">
               <dt className="sr-only">Pricing</dt>
               <FileText
                 aria-hidden="true"
-                className="h-3.5 w-3.5 shrink-0 text-[#5EEAD4]/90 stroke-[1.8]"
+                className="h-3.5 w-3.5 shrink-0 text-[#F4C266] stroke-[2]"
               />
-              <dd className="truncate font-normal">{priceOrQuoteText}</dd>
+              <dd className="truncate font-medium">{priceOrQuoteText}</dd>
             </div>
           </dl>
 
@@ -355,17 +397,19 @@ export function JourneyCard({
               data-journey-cta={journey.slug}
               data-featured-size={isFeaturedSize ? "true" : "false"}
               aria-label={`${copy.cardCta}: ${resolvedTitle}`}
-              className={`west-journey-card-cta group/cta inline-flex items-center justify-center rounded-full border backdrop-blur-md font-medium text-white transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4] ${
+              className={`west-journey-card-cta group/cta inline-flex items-center justify-center rounded-full border backdrop-blur-md font-semibold text-white transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#5EEAD4] ${
                 journey.isFeaturedCenter && !isDiscoveryCompact
-                  ? "border-[#2DD4BF]/85 bg-[#082B3F]/75 shadow-[0_0_18px_rgba(45,212,191,0.28)] hover:bg-[#0E7C8E] hover:border-[#67E8F9] hover:shadow-[0_0_24px_rgba(45,212,191,0.5)]"
-                  : "border-[#2DD4BF]/70 bg-[#072235]/65 shadow-[0_0_14px_rgba(20,155,176,0.2)] hover:bg-[#0E7C8E]/90 hover:border-[#5EEAD4] hover:shadow-[0_0_20px_rgba(45,212,191,0.42)]"
+                  ? "border-[#2DD4BF]/90 bg-[#072B3F]/88 shadow-[0_6px_20px_rgba(2,10,20,0.65),0_0_18px_rgba(45,212,191,0.28)] hover:bg-[#0E7C8E] hover:border-[#67E8F9] hover:shadow-[0_0_24px_rgba(45,212,191,0.5)]"
+                  : "border-[#5EEAD4]/80 bg-[#062437]/86 shadow-[0_6px_18px_rgba(2,10,20,0.6)] hover:bg-[#0E7C8E] hover:border-[#5EEAD4] hover:shadow-[0_0_20px_rgba(45,212,191,0.42)]"
               }`}
             >
-              <span className="sm:hidden">{copy.cardCtaShort || "Explore"}</span>
+              <span className="sm:hidden">
+                {copy.cardCtaShort || "Explore"}
+              </span>
               <span className="hidden sm:inline">{copy.cardCta}</span>
               <ArrowRight
                 aria-hidden="true"
-                className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 text-[#2DD4BF] group-hover/cta:text-white transition-transform duration-300 group-hover/cta:translate-x-1"
+                className="h-3 w-3 sm:h-3.5 sm:w-3.5 shrink-0 text-[#5EEAD4] group-hover/cta:text-white transition-transform duration-300 group-hover/cta:translate-x-1"
               />
             </Link>
           </div>
