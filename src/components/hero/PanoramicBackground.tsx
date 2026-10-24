@@ -140,7 +140,7 @@ export function PanoramicBackground() {
             data-destination-poster={dest.id}
             data-poster-src={dest.posterImageJpg}
             className={`absolute inset-0 transition-opacity duration-700 ease-out ${
-              isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
+              isActive ? "opacity-100 z-[1]" : "opacity-0 z-0 pointer-events-none"
             } ${isLight ? "brightness-[1.05]" : "brightness-100"}`}
           >
             <Image
@@ -148,6 +148,9 @@ export function PanoramicBackground() {
               alt={t.destinations[dest.id].imageAlt}
               fill
               sizes="100vw"
+              loading={isActive ? "eager" : "lazy"}
+              fetchPriority={isActive ? "high" : "low"}
+              priority={isActive && dest.id === "egypt"}
               className="object-cover transition-transform duration-1000 ease-out"
               style={{
                 objectPosition: dest.objectPosition,
@@ -162,7 +165,7 @@ export function PanoramicBackground() {
       {activeConfig && shouldLoadVideo && (
         <div
           data-hero-video-layer={activeConfig.id}
-          className={`absolute inset-0 z-10 transition-opacity duration-[880ms] ease-in-out ${
+          className={`absolute inset-0 z-[2] transition-opacity duration-[880ms] ease-in-out ${
             isVideoRevealed ? "opacity-100" : "opacity-0"
           } ${isLight ? "brightness-[1.04]" : "brightness-100"}`}
         >
