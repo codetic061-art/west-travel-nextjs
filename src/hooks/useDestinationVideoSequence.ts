@@ -62,21 +62,6 @@ export function useDestinationVideoSequence(
 
   useEffect(() => {
     setIsDataSaverFriendly(isNetworkConstrained());
-    const nav = navigator as Navigator & {
-      connection?: {
-        saveData?: boolean;
-        effectiveType?: string;
-        addEventListener?: (type: string, listener: () => void) => void;
-        removeEventListener?: (type: string, listener: () => void) => void;
-      };
-    };
-    const connection = nav.connection;
-    const addChangeListener = connection?.addEventListener;
-    const removeChangeListener = connection?.removeEventListener;
-    if (!addChangeListener || !removeChangeListener) return;
-    const handleConnectionChange = () => setIsDataSaverFriendly(isNetworkConstrained());
-    addChangeListener.call(connection, "change", handleConnectionChange);
-    return () => removeChangeListener.call(connection, "change", handleConnectionChange);
   }, []);
 
   useEffect(() => {
