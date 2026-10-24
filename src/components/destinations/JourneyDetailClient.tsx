@@ -163,9 +163,8 @@ export function JourneyDetailClient({
     >
       {/* Shared Fixed Floating Navbar + Top Header Band Clearance */}
       <FloatingNavbar hasAccountRoute={false} />
-      <div aria-hidden="true" className="h-20 sm:h-24 w-full bg-[#051320]" />
 
-      <main className="mx-auto max-w-[1380px] px-4 sm:px-6 lg:px-10 xl:px-12 py-8 sm:py-12">
+      <main className="mx-auto max-w-[1380px] px-4 sm:px-6 lg:px-10 xl:px-12 pt-24 sm:pt-28 pb-10 sm:pb-14">
         {/* Top Breadcrumb & Navigation Row */}
         <div className="flex flex-wrap items-center justify-between gap-4 pb-6">
           <Link

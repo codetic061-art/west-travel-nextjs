@@ -43,13 +43,11 @@ export interface AboutUsExperienceProps {
 }
 
 /**
- * PART 4 & PART 5 — Dedicated About Us Page Experience:
- * - Replaces the previous cutout traveler overlay with a newly generated, single-scene coherent
- *   editorial travel photograph (`/images/west-travel/about-hero-nile-traveler.webp`) showing a
- *   traveler naturally standing on a sunlit stone terrace overlooking the Nile River and feluccas in Egypt.
- * - Preserves the 2x2 Verified Company Scope panel, Asymmetric Company Story collage, 4 outline-icon pillars,
- *   and existing buttons in their visual state without wiring new button actions or redirects on About Us.
- * - Enriches the FAQ section with refined 2D warm-gold & teal travel micrographics.
+ * Dedicated About Us Page Experience (`/about`):
+ * - Uses the fixed FloatingNavbar with top header band clearance so navigation stays visible while scrolling.
+ * - Renders the single coherent editorial travel photograph (`/images/west-travel/about-hero-nile-traveler.webp`)
+ *   with `quality={90}`, paired with the 2x2 Verified Company Scope panel and "Travel Is a Journey" callout.
+ * - Includes the Asymmetric Company Story collage, 4 outline-icon pillars, and accessible trilingual FAQ accordion.
  */
 export function AboutUsExperience({ customFacts }: AboutUsExperienceProps) {
   const { locale, theme } = useHero();
@@ -136,20 +134,18 @@ export function AboutUsExperience({ customFacts }: AboutUsExperienceProps) {
           : "bg-[#051320] text-[#F4F3EB]"
       }`}
     >
-      {/* Top Shared Liquid-Glass Navbar Shell */}
-      <div className="bg-[#051320] pb-5">
-        <FloatingNavbar hasAccountRoute={false} />
-      </div>
+      {/* Top Shared Fixed Liquid-Glass Navbar + Top Band Clearance */}
+      <FloatingNavbar hasAccountRoute={false} />
 
-      {/* SECTION 1 — ABOUT PAGE HERO: COHERENT TRAVEL PHOTOGRAPH & 2x2 FACTS PANEL (Part 4, Item 10) */}
+      {/* SECTION 1 — ABOUT PAGE HERO: COHERENT TRAVEL PHOTOGRAPH & 2x2 FACTS PANEL */}
       <section
         ref={heroRef}
         id="about-hero"
         aria-labelledby="about-hero-heading"
         data-entered={heroEntered ? "true" : "false"}
-        className="relative w-full pt-8 pb-12 sm:pt-12 sm:pb-16 lg:pt-14 lg:pb-20"
+        className="relative w-full pt-24 pb-12 sm:pt-28 sm:pb-16 lg:pt-32 lg:pb-20"
       >
-        <div className="mx-auto w-full max-w-[1380px] px-4 sm:px-8 lg:px-12">
+        <div className="mx-auto w-full max-w-[1440px] px-4 sm:px-8 lg:px-12">
           {/* Top Eyebrow Header */}
           <div
             style={getStaggerRevealStyle(heroEntered, 60, 14)}
@@ -205,7 +201,7 @@ export function AboutUsExperience({ customFacts }: AboutUsExperienceProps) {
             </p>
           </div>
 
-          {/* Panoramic Showcase Using Single Coherent Travel Photograph (No Cutout Sticker Layer) */}
+          {/* Panoramic Showcase Using Single Coherent Travel Photograph */}
           <div
             style={heroShowcaseMaskStyle}
             data-about-hero-showcase=""
@@ -216,7 +212,7 @@ export function AboutUsExperience({ customFacts }: AboutUsExperienceProps) {
                 : "border-white/15 shadow-[0_28px_68px_rgba(2,8,16,0.78)]"
             }`}
           >
-            {/* Single Complete Coherent Editorial Travel Photograph (Traveler naturally on Nile Terrace at Golden Hour) */}
+            {/* Single Complete Coherent Editorial Travel Photograph */}
             <div
               aria-hidden="true"
               className="pointer-events-none absolute inset-0 overflow-hidden bg-[#081F32]"
@@ -231,13 +227,14 @@ export function AboutUsExperience({ customFacts }: AboutUsExperienceProps) {
                 alt={copy.hero.mainImageAlt}
                 fill
                 priority
-                sizes="(max-width: 1380px) 100vw, 1380px"
+                quality={90}
+                sizes="(max-width: 1440px) 100vw, 1440px"
                 onError={() => {
                   if (!useJpgFallback) setUseJpgFallback(true);
                 }}
                 className="object-cover object-[66%_36%] sm:object-[62%_38%] lg:object-[58%_38%]"
               />
-              {/* Subtle left-side scrim behind the 2x2 Facts Card only, keeping the traveler and Nile scene natural and bright */}
+              {/* Subtle left-side scrim behind the 2x2 Facts Card */}
               <div
                 className="absolute inset-0"
                 style={{
@@ -325,7 +322,7 @@ export function AboutUsExperience({ customFacts }: AboutUsExperienceProps) {
                 </div>
               )}
 
-              {/* Right Column: Compact Editorial Callout Positioned at Bottom-Right Corner so Traveler Remains Unobstructed */}
+              {/* Right Column: Compact Editorial Callout Positioned at Bottom-Right Corner */}
               <div
                 style={getStaggerRevealStyle(heroEntered, 640, 22)}
                 className="lg:col-span-6 xl:col-span-7 flex justify-end items-end min-h-[220px] lg:min-h-[420px]"
@@ -360,7 +357,7 @@ export function AboutUsExperience({ customFacts }: AboutUsExperienceProps) {
         </div>
       </section>
 
-      {/* SECTION 2 — ASYMMETRIC EDITORIAL COMPANY STORY (Reference 3 `image_8b01ab.png`) */}
+      {/* SECTION 2 — ASYMMETRIC EDITORIAL COMPANY STORY */}
       <section
         ref={storyRef}
         id="about-company-story"
@@ -370,7 +367,7 @@ export function AboutUsExperience({ customFacts }: AboutUsExperienceProps) {
           isLight ? "text-[#081C2E]" : "text-white"
         }`}
       >
-        {/* Upper-Right 2D Airplane & Clouds Micrographic from Reference 3 */}
+        {/* Upper-Right 2D Airplane & Clouds Micrographic */}
         <div
           style={getStaggerRevealStyle(storyEntered, 380, 14)}
           className="pointer-events-none hidden lg:block absolute right-8 xl:right-16 top-8 z-10"
@@ -378,7 +375,7 @@ export function AboutUsExperience({ customFacts }: AboutUsExperienceProps) {
           <AboutAirplaneIllustration className="w-48 xl:w-56 h-auto" />
         </div>
 
-        <div className="relative z-10 mx-auto w-full max-w-[1380px] px-4 sm:px-8 lg:px-12">
+        <div className="relative z-10 mx-auto w-full max-w-[1440px] px-4 sm:px-8 lg:px-12">
           <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-10 lg:gap-12">
             {/* Left Column: Asymmetric 2-Column Travel Photo Collage + Teal Highlight Badge */}
             <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-5 items-stretch">
@@ -391,11 +388,12 @@ export function AboutUsExperience({ customFacts }: AboutUsExperienceProps) {
                     src="/images/west-travel/cairo-luxor-card.webp"
                     alt={copy.story.collagePrimaryAlt}
                     fill
-                    sizes="(max-width: 640px) 92vw, (max-width: 1024px) 45vw, 310px"
+                    quality={90}
+                    sizes="(max-width: 640px) 92vw, (max-width: 1024px) 45vw, 420px"
                     className="object-cover transition-transform duration-700 hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#041322]/65 via-transparent to-transparent" />
-                  <span className="absolute bottom-3.5 left-3.5 inline-flex items-center gap-1.5 rounded-full bg-[#061A2C]/75 border border-white/25 px-3 py-1 text-xs font-medium text-white backdrop-blur-md">
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#03111F]/80 via-transparent to-transparent" />
+                  <span className="absolute bottom-3.5 left-3.5 inline-flex items-center gap-1.5 rounded-full bg-[#041322]/82 border border-white/30 px-3 py-1 text-xs font-semibold text-white shadow-sm backdrop-blur-md">
                     <MapPin className="h-3 w-3 text-[#F4C266]" />
                     <span>Cairo & Luxor · Egypt</span>
                   </span>
@@ -431,19 +429,20 @@ export function AboutUsExperience({ customFacts }: AboutUsExperienceProps) {
                   src="/images/west-travel/turkiye-card.webp"
                   alt={copy.story.collageSecondaryAlt}
                   fill
-                  sizes="(max-width: 640px) 92vw, (max-width: 1024px) 45vw, 310px"
+                  quality={90}
+                  sizes="(max-width: 640px) 92vw, (max-width: 1024px) 45vw, 420px"
                   className="object-cover transition-transform duration-700 hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#041322]/75 via-transparent to-[#041322]/20" />
-                <span className="absolute top-3.5 right-3.5 inline-flex items-center gap-1.5 rounded-full bg-white/20 border border-white/35 px-3 py-1 text-xs font-medium text-white backdrop-blur-md">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#03111F]/85 via-transparent to-[#041322]/25" />
+                <span className="absolute top-3.5 right-3.5 inline-flex items-center gap-1.5 rounded-full bg-[#041322]/75 border border-white/35 px-3 py-1 text-xs font-semibold text-white shadow-sm backdrop-blur-md">
                   <Sparkles className="h-3 w-3 text-[#F4C266]" />
                   <span>Istanbul · Dubai · Cairo</span>
                 </span>
-                <div className="absolute inset-x-4 bottom-4 rounded-xl bg-[#061A2C]/80 border border-white/20 p-3.5 backdrop-blur-md text-white">
+                <div className="absolute inset-x-4 bottom-4 rounded-xl bg-[#041423]/84 border border-white/25 p-3.5 backdrop-blur-md text-white">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#5EEAD4]">
                     Bosphorus & Skyline Corridors
                   </p>
-                  <p className="mt-0.5 text-xs text-white/85">
+                  <p className="mt-0.5 text-xs text-white/92">
                     Istanbul Historic Peninsula · Downtown Dubai Waterfront
                   </p>
                 </div>
@@ -494,7 +493,11 @@ export function AboutUsExperience({ customFacts }: AboutUsExperienceProps) {
                     <div
                       key={pillar.id}
                       data-about-pillar={pillar.id}
-                      style={getStaggerRevealStyle(storyEntered, 440 + idx * 110, 18)}
+                      style={getStaggerRevealStyle(
+                        storyEntered,
+                        440 + idx * 110,
+                        18
+                      )}
                       className={`flex items-start gap-3.5 rounded-2xl p-4 border transition-colors ${
                         isLight
                           ? "bg-white/85 border-[#E6DEC8] shadow-sm"
@@ -524,7 +527,7 @@ export function AboutUsExperience({ customFacts }: AboutUsExperienceProps) {
                 })}
               </div>
 
-              {/* Bottom CTA Row — Visual Presentation Preserved Without Wiring New Button Actions (Part 5, Item 12) */}
+              {/* Bottom CTA Row */}
               <div
                 style={getStaggerRevealStyle(storyEntered, 820, 16)}
                 className="mt-8 flex flex-wrap items-center gap-6 pt-2"
@@ -568,7 +571,7 @@ export function AboutUsExperience({ customFacts }: AboutUsExperienceProps) {
         </div>
       </section>
 
-      {/* SECTION 3 — FAQ / QUESTIONS AND ANSWERS WITH REFINED TRAVEL MICROGRAPHICS (Part 5) */}
+      {/* SECTION 3 — FAQ / QUESTIONS AND ANSWERS WITH REFINED TRAVEL MICROGRAPHICS */}
       <AboutFaqAccordion copy={copy.faq} isLight={isLight} />
 
       {/* GLOBAL FOOTER */}

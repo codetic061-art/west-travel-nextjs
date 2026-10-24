@@ -11,26 +11,37 @@ interface BrandLogoProps {
    * When rendered on the floating Navbar over dark/cinematic Hero or Destination imagery,
    * `variant="navbar"` keeps the logo free of any opaque white background patch and keeps
    * the wordmark crisp and legible against varying imagery.
-   * When rendered in the Footer (`SiteFooter`), `isLight` adapts the wordmark color to the light footer surface.
+   * When `useDarkText` is true (e.g. Navbar over a plain light background on `/trips/[slug]`,
+   * `/about`, or scrolled light sections), the wordmark switches to high-contrast dark navy.
    */
   variant?: "navbar" | "footer";
+  useDarkText?: boolean;
+  onNavigateHome?: () => void;
 }
 
 /**
  * Official WEST GLOBAL TOURS crest emblem and wordmark.
  * Renders the supplied official Luxury Globe Travel Emblem asset with graceful fallback
- * and zero opaque white rectangle behind the logo in Light Mode.
+ * and adapts wordmark contrast cleanly across dark hero media and light page surfaces.
  */
-export function BrandLogo({ isLight = false, variant = "footer" }: BrandLogoProps) {
+export function BrandLogo({
+  isLight = false,
+  variant = "footer",
+  useDarkText = false,
+  onNavigateHome,
+}: BrandLogoProps) {
   const [imgError, setImgError] = useState(false);
   const [usePngFallback, setUsePngFallback] = useState(false);
 
   const isNavbar = variant === "navbar";
+  const renderDarkWordmark = isNavbar ? useDarkText : isLight;
 
   return (
     <Link
       href="/"
+      onClick={onNavigateHome}
       data-brand-logo-link="home"
+      data-brand-wordmark-tone={renderDarkWordmark ? "dark" : "light"}
       aria-label={`${COMPANY_IDENTITY_CONFIG.brandName} Home`}
       className="group inline-flex items-center gap-3 rounded-full py-1 pr-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2DD4BF] transition-all duration-300"
     >
@@ -66,7 +77,7 @@ export function BrandLogo({ isLight = false, variant = "footer" }: BrandLogoProp
               cx="32"
               cy="32"
               r="24"
-              stroke={!isNavbar && isLight ? "#071A2C" : "#F8FAFC"}
+              stroke={renderDarkWordmark ? "#071A2C" : "#F8FAFC"}
               strokeWidth="1.6"
               strokeOpacity="0.9"
             />
@@ -81,7 +92,7 @@ export function BrandLogo({ isLight = false, variant = "footer" }: BrandLogoProp
             />
             <path
               d="M8 44L23.5 22L33.5 35.5L41 25.5L56 44"
-              stroke={!isNavbar && isLight ? "#071A2C" : "#FFFFFF"}
+              stroke={renderDarkWordmark ? "#071A2C" : "#FFFFFF"}
               strokeWidth="2.4"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -98,22 +109,18 @@ export function BrandLogo({ isLight = false, variant = "footer" }: BrandLogoProp
       <span className="flex flex-col leading-none">
         <span
           className={`text-xs sm:text-[13.5px] font-bold uppercase tracking-[0.22em] transition-colors ${
-            isNavbar
-              ? "text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)]"
-              : isLight
-              ? "text-slate-900"
-              : "text-white"
+            renderDarkWordmark
+              ? "text-[#081C2E]"
+              : "text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.55)]"
           }`}
         >
           WEST GLOBAL
         </span>
         <span
-          className={`mt-1 text-[9.5px] sm:text-[10px] font-semibold uppercase tracking-[0.32em] ${
-            isNavbar
-              ? "text-[#F4C266] drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)]"
-              : isLight
+          className={`mt-1 text-[9.5px] sm:text-[10px] font-semibold uppercase tracking-[0.32em] transition-colors ${
+            renderDarkWordmark
               ? "text-[#0E7C8E]"
-              : "text-[#F4C266]"
+              : "text-[#F4C266] drop-shadow-[0_1px_8px_rgba(0,0,0,0.55)]"
           }`}
         >
           TOURS

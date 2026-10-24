@@ -16,11 +16,12 @@ html.dark {
   --west-section-divider: rgba(95, 196, 201, 0.28);
   --west-glass-bg: rgba(7, 25, 40, 0.54);
   --west-glass-bg-strong: rgba(6, 22, 36, 0.72);
-  --west-glass-popover: rgba(7, 26, 44, 0.90);
+  --west-glass-popover: rgba(7, 26, 44, 0.94);
   --west-glass-border: rgba(255, 255, 255, 0.18);
   --west-glass-shadow: 0 18px 44px rgba(2, 10, 18, 0.52), inset 0 1px 1px rgba(255, 255, 255, 0.18);
-  --west-navbar-glass-bg: rgba(7, 25, 40, 0.52);
-  --west-navbar-glass-border: rgba(255, 255, 255, 0.18);
+  --west-navbar-glass-bg: rgba(7, 25, 40, 0.58);
+  --west-navbar-glass-bg-scrolled: rgba(5, 19, 32, 0.86);
+  --west-navbar-glass-border: rgba(255, 255, 255, 0.20);
   --west-navbar-glass-shadow: 0 14px 36px rgba(2, 10, 18, 0.48), inset 0 1px 1px rgba(255, 255, 255, 0.18);
   --west-card-border: rgba(255, 255, 255, 0.28);
   --west-card-shadow: 0 22px 48px rgba(2, 9, 17, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.25);
@@ -39,12 +40,13 @@ html.light {
   --west-section-divider: rgba(205, 170, 110, 0.55);
   --west-glass-bg: rgba(255, 253, 249, 0.24);
   --west-glass-bg-strong: rgba(255, 252, 247, 0.56);
-  --west-glass-popover: rgba(255, 253, 250, 0.88);
+  --west-glass-popover: rgba(255, 253, 250, 0.94);
   --west-glass-border: rgba(255, 255, 255, 0.42);
   --west-glass-shadow: 0 12px 32px rgba(8, 28, 46, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.62);
-  --west-navbar-glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 252, 246, 0.14) 100%);
+  --west-navbar-glass-bg: linear-gradient(135deg, rgba(10, 30, 48, 0.42) 0%, rgba(7, 24, 40, 0.34) 100%);
+  --west-navbar-glass-bg-scrolled: linear-gradient(135deg, rgba(6, 22, 36, 0.84) 0%, rgba(8, 28, 46, 0.80) 100%);
   --west-navbar-glass-border: rgba(255, 255, 255, 0.36);
-  --west-navbar-glass-shadow: 0 10px 28px rgba(6, 20, 34, 0.14), inset 0 1px 1px rgba(255, 255, 255, 0.52);
+  --west-navbar-glass-shadow: 0 12px 30px rgba(6, 20, 34, 0.20), inset 0 1px 1px rgba(255, 255, 255, 0.48);
   --west-card-border: rgba(255, 255, 255, 0.78);
   --west-card-shadow: 0 20px 44px rgba(10, 28, 46, 0.28), inset 0 1px 1.5px rgba(255, 255, 255, 0.9);
 }
@@ -61,8 +63,57 @@ html.light {
   background: var(--west-navbar-glass-bg);
   border: 1px solid var(--west-navbar-glass-border);
   box-shadow: var(--west-navbar-glass-shadow);
-  backdrop-filter: blur(18px) saturate(140%);
-  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(155%);
+  -webkit-backdrop-filter: blur(20px) saturate(155%);
+}
+
+.west-navbar-liquid-glass[data-scrolled="true"] {
+  background: var(--west-navbar-glass-bg-scrolled);
+  border-color: rgba(255, 255, 255, 0.24);
+  box-shadow: 0 16px 38px rgba(4, 14, 24, 0.38), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+}
+
+/* Light-Mode Plain-Background Navbar Surface (used on /trips/[slug], /about, and light sections after scrolling past dark hero) */
+.west-navbar-light-surface,
+.west-navbar-liquid-glass[data-light-surface="true"] {
+  background: rgba(255, 253, 249, 0.90);
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  box-shadow: 0 12px 32px rgba(8, 28, 46, 0.10), inset 0 1px 1px rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px) saturate(165%);
+  -webkit-backdrop-filter: blur(20px) saturate(165%);
+}
+
+.west-navbar-light-surface[data-scrolled="true"],
+.west-navbar-liquid-glass[data-light-surface="true"][data-scrolled="true"] {
+  background: rgba(255, 253, 249, 0.95);
+  border-color: rgba(15, 23, 42, 0.18);
+  box-shadow: 0 14px 36px rgba(8, 28, 46, 0.13), inset 0 1px 1px rgba(255, 255, 255, 0.96);
+}
+
+.west-navbar-logo-pill {
+  transition: background-color 280ms ease, border-color 280ms ease, box-shadow 280ms ease, padding 280ms ease;
+}
+
+.west-navbar-logo-pill[data-scrolled="true"] {
+  background: var(--west-navbar-glass-bg-scrolled);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  box-shadow: 0 12px 30px rgba(4, 14, 24, 0.32), inset 0 1px 1px rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(20px) saturate(155%);
+  -webkit-backdrop-filter: blur(20px) saturate(155%);
+}
+
+.west-navbar-logo-pill[data-light-surface="true"] {
+  background: rgba(255, 253, 249, 0.90);
+  border: 1px solid rgba(15, 23, 42, 0.14);
+  box-shadow: 0 10px 26px rgba(8, 28, 46, 0.09), inset 0 1px 1px rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(20px) saturate(165%);
+  -webkit-backdrop-filter: blur(20px) saturate(165%);
+}
+
+.west-navbar-logo-pill[data-light-surface="true"][data-scrolled="true"] {
+  background: rgba(255, 253, 249, 0.95);
+  border-color: rgba(15, 23, 42, 0.18);
+  box-shadow: 0 12px 30px rgba(8, 28, 46, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.96);
 }
 
 .west-glass-panel {
@@ -105,7 +156,7 @@ html.light {
   white-space: nowrap;
   font-size: clamp(0.6875rem, 2.5vw, 0.75rem);
   line-height: 1.2;
-  padding: 0.375rem 0.6875rem;
+  padding: 0.375rem 0.75rem;
   gap: 0.3125rem;
   min-height: 2.125rem;
 }
@@ -113,12 +164,12 @@ html.light {
 @media (min-width: 768px) and (max-width: 1023px) {
   .west-journey-card-cta {
     font-size: clamp(0.7rem, 1.35vw, 0.78rem);
-    padding: 0.4rem 0.825rem;
+    padding: 0.425rem 0.875rem;
     gap: 0.35rem;
   }
   .west-journey-card-cta[data-featured-size="true"] {
     font-size: clamp(0.74rem, 1.45vw, 0.8125rem);
-    padding: 0.45rem 0.95rem;
+    padding: 0.475rem 0.975rem;
   }
 }
 
